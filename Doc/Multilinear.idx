@@ -1,0 +1,182 @@
+\indexentry{Tensor!black-box|hyperpage}{8}
+\indexentry{Tensor!black-box|hyperpage}{8}
+\indexentry{Tensor!structure constants|hyperpage}{9}
+\indexentry{StructureConstants|hyperpage}{9}
+\indexentry{Eltseq|hyperpage}{9}
+\indexentry{Tensor!bilinear|hyperpage}{10}
+\indexentry{Tensor!forms|hyperpage}{10}
+\indexentry{AsMatrices|hyperpage}{10}
+\indexentry{SystemOfForms|hyperpage}{10}
+\indexentry{Tensor!algebra|hyperpage}{11}
+\indexentry{CommutatorTensor|hyperpage}{11}
+\indexentry{AssociatorTensor|hyperpage}{11}
+\indexentry{pCentralTensor|hyperpage}{12}
+\indexentry{Polarisation|hyperpage}{13}
+\indexentry{Polarization|hyperpage}{13}
+\indexentry{AlternatingTensor|hyperpage}{13}
+\indexentry{AntisymmetricTensor|hyperpage}{13}
+\indexentry{SymmetricTensor|hyperpage}{13}
+\indexentry{Shuffle|hyperpage}{13}
+\indexentry{$+$|hyperpage}{14}
+\indexentry{$*$!as module|hyperpage}{14}
+\indexentry{TensorOnVectorSpaces|hyperpage}{14}
+\indexentry{AssociatedForm|hyperpage}{14}
+\indexentry{Compress|hyperpage}{14}
+\indexentry{Parent!tensor|hyperpage}{15}
+\indexentry{Domain!tensor|hyperpage}{15}
+\indexentry{Codomain!tensor|hyperpage}{15}
+\indexentry{Valence!tensor|hyperpage}{15}
+\indexentry{Frame!tensor|hyperpage}{15}
+\indexentry{TensorCategory!tensor|hyperpage}{16}
+\indexentry{ChangeTensorCategory!tensor|hyperpage}{16}
+\indexentry{IsCovariant!tensor|hyperpage}{16}
+\indexentry{IsContravariant!tensor|hyperpage}{16}
+\indexentry{Image!tensor|hyperpage}{17}
+\indexentry{BaseRing!tensor|hyperpage}{17}
+\indexentry{BaseField!tensor|hyperpage}{17}
+\indexentry{NondegenerateTensor|hyperpage}{17}
+\indexentry{IsNondegenerate|hyperpage}{17}
+\indexentry{FullyNondegenerateTensor|hyperpage}{17}
+\indexentry{IsFullyNondegenerate|hyperpage}{17}
+\indexentry{IsAlternating!tensor|hyperpage}{17}
+\indexentry{IsAntisymmetric!tensor|hyperpage}{17}
+\indexentry{IsAntisymmetric!tensor|hyperpage}{17}
+\indexentry{IsSymmetric!tensor|hyperpage}{17}
+\indexentry{AT|hyperpage}{19}
+\indexentry{$*$!as multilinear map|hyperpage}{19}
+\indexentry{eq!tensor|hyperpage}{19}
+\indexentry{$*$!bilinear (product)|hyperpage}{19}
+\indexentry{$*$!bilinear (infix)|hyperpage}{19}
+\indexentry{Parent!bilinear|hyperpage}{19}
+\indexentry{Parent!bilinear|hyperpage}{19}
+\indexentry{LeftDomain|hyperpage}{19}
+\indexentry{RightDomain|hyperpage}{19}
+\indexentry{IsCoercible!bilinear|hyperpage}{20}
+\indexentry{eq!bilinear|hyperpage}{20}
+\indexentry{Slice|hyperpage}{21}
+\indexentry{InducedTensor|hyperpage}{21}
+\indexentry{Foliation|hyperpage}{22}
+\indexentry{AsTensorSpace|hyperpage}{22}
+\indexentry{AsCotensorSpace|hyperpage}{22}
+\indexentry{AsTensor|hyperpage}{22}
+\indexentry{Induce|hyperpage}{24}
+\indexentry{Radical|hyperpage}{24}
+\indexentry{Radical|hyperpage}{24}
+\indexentry{Coradical|hyperpage}{24}
+\indexentry{AdjointAlgebra|hyperpage}{24}
+\indexentry{LeftNucleus!bilinear|hyperpage}{25}
+\indexentry{MidNucleus!bilinear|hyperpage}{25}
+\indexentry{RightNucleus!bilinear|hyperpage}{25}
+\indexentry{Centroid!tensor|hyperpage}{25}
+\indexentry{DerivationAlgebra!tensor|hyperpage}{25}
+\indexentry{Nucleus|hyperpage}{25}
+\indexentry{TensorOverCentroid|hyperpage}{26}
+\indexentry{Discriminant|hyperpage}{27}
+\indexentry{Pfaffian|hyperpage}{27}
+\indexentry{HeisenbergAlgebra|hyperpage}{28}
+\indexentry{HeisenbergLieAlgebra|hyperpage}{28}
+\indexentry{HeisenbergGroup|hyperpage}{28}
+\indexentry{Center|hyperpage}{29}
+\indexentry{Centre|hyperpage}{29}
+\indexentry{Centroid!algebra|hyperpage}{29}
+\indexentry{LeftNucleus!algebra|hyperpage}{29}
+\indexentry{RightNucleus!algebra|hyperpage}{29}
+\indexentry{MidNucleus!algebra|hyperpage}{29}
+\indexentry{DerivationAlgebra!algebra|hyperpage}{29}
+\indexentry{KTensorSpace|hyperpage}{31}
+\indexentry{RTensorSpace|hyperpage}{31}
+\indexentry{TensorSpace|hyperpage}{31}
+\indexentry{TensorSpace!signatured|hyperpage}{31}
+\indexentry{KCotensorSpace|hyperpage}{33}
+\indexentry{CotensorSpace|hyperpage}{33}
+\indexentry{AlternatingSpace|hyperpage}{34}
+\indexentry{AntisymmetricSpace|hyperpage}{34}
+\indexentry{SymmetricSpace|hyperpage}{34}
+\indexentry{ExteriorCotensorSpace|hyperpage}{34}
+\indexentry{SymmetricCotensorSpace|hyperpage}{34}
+\indexentry{DerivationClosure|hyperpage}{35}
+\indexentry{DerivationClosure|hyperpage}{35}
+\indexentry{NucleusClosure|hyperpage}{36}
+\indexentry{NucleusClosure|hyperpage}{36}
+\indexentry{in|hyperpage}{37}
+\indexentry{IsCoercible!tensor space|hyperpage}{37}
+\indexentry{IsCoercible!tensor space|hyperpage}{37}
+\indexentry{eq!tensor space|hyperpage}{38}
+\indexentry{subset|hyperpage}{38}
+\indexentry{Generators|hyperpage}{39}
+\indexentry{.|hyperpage}{39}
+\indexentry{NumberOfGenerators|hyperpage}{39}
+\indexentry{Ngens|hyperpage}{39}
+\indexentry{Dimension|hyperpage}{39}
+\indexentry{\#|hyperpage}{39}
+\indexentry{Random|hyperpage}{39}
+\indexentry{RandomTensor|hyperpage}{39}
+\indexentry{Valence!tensor space|hyperpage}{40}
+\indexentry{Frame!tensor space|hyperpage}{40}
+\indexentry{BaseRing!tensor space|hyperpage}{40}
+\indexentry{BaseField!tensor space|hyperpage}{40}
+\indexentry{TensorCategory!tensor space|hyperpage}{40}
+\indexentry{IsCovariant!tensor space|hyperpage}{40}
+\indexentry{IsContravariant!tensor space|hyperpage}{40}
+\indexentry{ChangeTensorCategory!tensor space|hyperpage}{40}
+\indexentry{IsAlternating!tensor space|hyperpage}{40}
+\indexentry{IsAntisymmetric!tensor space|hyperpage}{40}
+\indexentry{IsSymmetric!tensor space|hyperpage}{40}
+\indexentry{UniversalTensorSpace|hyperpage}{40}
+\indexentry{UniversalCotensorSpace|hyperpage}{40}
+\indexentry{Generic|hyperpage}{40}
+\indexentry{TensorCategory!constructor|hyperpage}{44}
+\indexentry{CotensorCategory!constructor|hyperpage}{44}
+\indexentry{HomotopismCategory|hyperpage}{44}
+\indexentry{CohomotopismCategory|hyperpage}{44}
+\indexentry{AdjointCategory|hyperpage}{44}
+\indexentry{LinearCategory|hyperpage}{44}
+\indexentry{eq!tensor category|hyperpage}{45}
+\indexentry{Valence!tensor category|hyperpage}{45}
+\indexentry{Arrows|hyperpage}{45}
+\indexentry{RepeatPartition|hyperpage}{45}
+\indexentry{IsCovariant!tensor category|hyperpage}{45}
+\indexentry{IsContravariant!tensor category|hyperpage}{45}
+\indexentry{Subtensor|hyperpage}{46}
+\indexentry{Subtensor|hyperpage}{46}
+\indexentry{IsSubtensor|hyperpage}{46}
+\indexentry{LocalIdeal|hyperpage}{46}
+\indexentry{LocalIdeal|hyperpage}{46}
+\indexentry{LocalIdeal|hyperpage}{46}
+\indexentry{IsLocalIdeal|hyperpage}{46}
+\indexentry{Ideal|hyperpage}{46}
+\indexentry{Ideal|hyperpage}{46}
+\indexentry{Ideal|hyperpage}{46}
+\indexentry{IsIdeal|hyperpage}{46}
+\indexentry{LocalQuotient|hyperpage}{46}
+\indexentry{Quotient!tensor|hyperpage}{46}
+\indexentry{/!tensor|hyperpage}{46}
+\indexentry{SubtensorSpace|hyperpage}{48}
+\indexentry{SubtensorSpace|hyperpage}{48}
+\indexentry{IsSubtensorSpace|hyperpage}{48}
+\indexentry{Quotient!tensor space|hyperpage}{48}
+\indexentry{/!tensor space|hyperpage}{48}
+\indexentry{Homotopism|hyperpage}{50}
+\indexentry{$*$!homotopism|hyperpage}{51}
+\indexentry{Domain!homotopism|hyperpage}{51}
+\indexentry{Codomain!homotopism|hyperpage}{51}
+\indexentry{Maps|hyperpage}{51}
+\indexentry{TensorCategory!homotopism|hyperpage}{51}
+\indexentry{ChangeTensorCategory!homotopism|hyperpage}{51}
+\indexentry{Kernel|hyperpage}{51}
+\indexentry{Image!homotopism|hyperpage}{51}
+\indexentry{IsStarAlgebra|hyperpage}{55}
+\indexentry{Star|hyperpage}{55}
+\indexentry{GenericMinimalPolynomial|hyperpage}{55}
+\indexentry{GenericMinimumPolynomial|hyperpage}{55}
+\indexentry{GenericNorm|hyperpage}{55}
+\indexentry{GenericTrace|hyperpage}{55}
+\indexentry{GenericTracelessSubspaceBasis|hyperpage}{55}
+\indexentry{CompositionAlgebra|hyperpage}{56}
+\indexentry{OctonionAlgebra|hyperpage}{56}
+\indexentry{SplitOctonionAlgebra|hyperpage}{56}
+\indexentry{JordanTripleProduct|hyperpage}{57}
+\indexentry{JordanSpinAlgebra|hyperpage}{57}
+\indexentry{ExceptionalJordanCSA|hyperpage}{58}
+\indexentry{IsCyclic|hyperpage}{65}
+\indexentry{IsSimilar|hyperpage}{65}

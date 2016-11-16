@@ -1,0 +1,1678 @@
+
+Tensors are required to have the following information.
+\begin{itemize}
+\item A commutative ring $K$ of coefficients.
+\item A valence $v$ indicating the number of variables to include in its 
+associated multilinear map.
+\item A list $[U_v,\dots, U_0]$ of $K$-modules called the {\em frame}.
+\item A function $U_v\times \cdots \times U_1\to U_0$ that is $K$-linear in 
+each $U_i$.
+\end{itemize}
+Tensors have type {\tt TenSpcElt} and are formally elements of a tensor space 
+(type {\tt TenSpc}).  By default a tensor's parent space is a universal tensor space:
+\begin{align*}
+	\hom_K(U_v,\dots,\hom_K(U_1,U_0)\cdots) \cong \hom_K(U_v\otimes_K\cdots \otimes_K U_1,U_0).
+\end{align*}
+The left hand module is used primarily as it avoids the need to work with 
+the equivalence classes of a tensor product.
+Operations such as linear combinations of tensors take place within a  
+tensor space.
+Attributes such as coefficients, valence, and frame  apply to the tensor space 
+as well.
+
+When necessary, the user may further direct the operations on tensors to 
+appropriate tensor categories 
+(type {\tt TenCat}).  For instance covariant and contravariant variables can 
+be specified
+as well as imposing symmetry conditions.  If no tensor category is prescribed
+then a default tensor category is used based on the method of creation.
+\medskip
+
+\minitoc
+
+\noindent{\bf Contents}
+
+\section{Creating tensors}
+
+\subsection{Black-box tensors}
+A user can specify a tensor by a black-box function that 
+evaluates the required
+multilinear map.
+
+\color{blue}
+\index{Tensor!black-box}
+{\small \begin{verbatim}
+Tensor(S, F) : SeqEnum, UserProgram -> TenSpcElt
+Tensor(S, F) : List, UserProgram -> TenSpcElt
+Tensor(S, F, Cat) : SeqEnum, UserProgram, TenCat -> TenSpcElt
+Tensor(S, F, Cat) : List, UserProgram, TenCat -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor with the frame specified by $S$ and tensor category $Cat$. 
+The last entry is assumed to be the codomain of the multilinear map. 
+The user-defined function $F$ should take as
+input a tuple of elements of the domain and return an element of the codomain.
+If no tensor category is provided, the Albert's homotopism category is used.
+
+
+\color{blue}
+\index{Tensor!black-box}
+{\small \begin{verbatim}
+Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt
+Tensor(D, C, F) : List, Any, UserProgram -> TenSpcElt
+Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt
+Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor with tensor category $Cat$ and frame specified by $D$ and $C$, where $D$ is a sequence 
+of spaces in the domain and $C$ the codomain. 
+The user-defined function $F$ should take as input a tuple of elements of $D$ and return an element of $C$.
+If no tensor category is provided, the Albert's homotopism category is used.
+
+\medskip
+%%Example{Name}
+\begin{framed}{\bf Example} {\tt Ten\_Triple\_Product}\\
+{\small
+Tensors make it easy to create algebras that do not fit into traditional
+categories, such as algebras with triple products.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> K := GF(541);
+> U := KMatrixSpace(K,2,3);
+> my_prod := func< x | x[1]*Transpose(x[2])*x[3] >;
+> T := Tensor([U,U,U,U], my_prod );
+> T;
+Tensor of valence 3, U3 x U2 x U1 >-> U0
+U3 : Full KMatrixSpace of 2 by 3 matrices over GF(541)
+U2 : Full KMatrixSpace of 2 by 3 matrices over GF(541)
+U1 : Full KMatrixSpace of 2 by 3 matrices over GF(541)
+U0 : Full KMatrixSpace of 2 by 3 matrices over GF(541)
+> A := U![1,0,0,0,0,0];
+> <A,A,A>@T;  // A is a generalized idempotent
+[  1   0   0]
+[  0   0   0]
+\end{lstlisting}
+We can experiment to see if this triple product is left associative.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> X := [Random(U) : i  in [1..5]];
+> <<X[1],X[2],X[3]>@T,X[4],X[5]>@T eq \
+>     <X[1],<X[4],X[3],X[2]>@T,X[5]>@T;
+true
+\end{lstlisting}
+To confirm this we can create a new tensor for the left 
+triple-associators and see that its image is $0$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> my_left_asct := func<X|<<X[1],X[2],X[3]>@T,X[4],X[5]>@T\
+>     - <X[1],<X[4],X[3],X[2]>@T,X[5]>@T >;
+> LT := Tensor([U: i in [0..5]], my_left_asct);
+> I := Image(LT);
+> Dimension(I);
+0
+\end{lstlisting}
+}
+\end{framed}
+
+
+\subsection{Tensors with structure constant sequences}
+Most computations with tensors $T$ will be carried out using structure constants
+$T_{j_v\cdots j_0}\in K$.  Here $T$ is framed by free $K$-modules $[U_v,\dots,U_0]$ 
+with each $U_i$ having an ordered bases $\mathcal{B}_i=[e_{i1},\dots,e_{id_i}]$.
+The interpretation of structure constants is that the associated multilinear function 
+$[x_v,\dots,x_1]$ from $U_v\times \cdots \times U_1$ into $U_0$ is determined on 
+bases as follows:
+\begin{align*}
+	[e_{vj_v},\dots,e_{1j_1} ]& = \sum_{k=1}^{d_0} T_{j_v \cdots j_0} e_{0k}.
+\end{align*}
+Structure constants are input and stored as sequences $S$ in $K$ according to the
+following assignment. Set $f:\mathbb{Z}^{v+1}\to \mathbb{Z}$ to be:
+\begin{align*}
+		 f(j_v,\dots,j_0) & = 1+\sum_{s=0}^v (j_s-1)\prod_{t=0}^{s-1} d_t.
+\end{align*}
+So $S[f(j_v,\dots,j_0)]=T_{j_v\cdots j_0}$ specifies the structure constants as a sequence.  
+\smallskip
+
+\noindent{\bf Notes.}
+\begin{itemize}
+\item Magma does not presently support the notion of a sparse sequence of structure constants.
+A user can provide this functionality by specifying a tensor with a user program rather
+than structure constants. 
+
+\item Some routines in Magma require structure constant sequences.  If they 
+are not provided, Magma may compute and store a structure constant representation
+inside the tensor.
+
+\item Magma does not separate structure constant indices that are contravariant.  Instead contravariant variables are signaled by tensor categories.  So Ricci styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as $T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor
+category changed to mark $\{q..1\}$ as contravariant. Intrinsics are provided to facilitate this approach.
+\end{itemize}
+\medskip
+
+\color{blue}
+\index{Tensor!structure constants}
+{\small \begin{verbatim}
+Tensor(D, S) : [RngElt], SeqEnum -> TenSpcElt
+Tensor(R, D, S) : Rng, [RngElt], SeqEnum -> TenSpcElt
+Tensor(D, S, Cat) : [RngElt], SeqEnum, TenCat -> TenSpcElt
+Tensor(R, D, S, Cat) : Rng, [RngElt], SeqEnum, TenCat -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Given dimensions $D=[d_v,\dots,d_0]$, returns the tensor
+in $R^{d_v\cdots d_0}$ identified by structure constant sequence $S$.
+If $R$ is not provided then the parent ring of the first element of $S$ is used.  
+$R$ must be a commutative unital ring.
+The default tensor category $Cat$ is the homotopism category.
+
+\color{blue}
+\index{StructureConstants}\index{Eltseq}
+{\small \begin{verbatim}
+StructureConstants(T) : TenSpcElt -> SeqEnum
+Eltseq(T) : TenSpcElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns the sequence of structure constants of the given tensor $T$. 
+
+
+\subsection{Bilinear tensors}
+A special case of structure constants for bilinear maps $U_2\times U_1\rightarrowtail U_0$
+is to format the data as lists $[M_1,\dots, M_a]$ of matrices.
+This can be considered as a left (resp. right) representation
+$U_2\to \hom_K(U_1,U_0)$, (resp.$U_1\to \hom_K(U_2,U_0)$).  
+Or it can be treated as {\em systems of bilinear forms} 
+$[M_1,\dots,M_a]$ where the matrices are the Gram matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$.
+Here the associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is 
+specified by
+\begin{align*}
+	(u_2,u_1) & \mapsto ( \phi_1(u_2,u_1),\dots, \phi_a(u_2,u_1)).
+\end{align*}
+
+\color{blue}
+\index{Tensor!bilinear}\index{Tensor!forms}
+{\small \begin{verbatim}
+Tensor(M, s, t) : Mtrx, RngIntElt, RngIntElt -> TenSpcElt 
+Tensor(M, s, t, C) : Mtrx, RngIntElt, RngIntElt, TenCat -> TenSpcElt
+Tensor(M, s, t) : [Mtrx], RngIntElt, RngIntElt -> TenSpcElt 
+Tensor(M, s, t, C) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bilinear tensor given by the list of matrices.  The interpretation
+of the matrices as structure constants is specified by the coordinates $s$ and $t$
+which must be positions in $\{2,1,0\}$.  Optionally a tensor category $C$ can be assigned.
+
+\color{blue}
+\index{AsMatrices}\index{SystemOfForms}
+{\small \begin{verbatim}
+AsMatrices(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> SeqEnum
+SystemOfForms(T) : TenSpcElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+For a tensor $T$ with frame $[K^{d_v},\dots,K^{d_0}]$, 
+returns a list $[M_1,\dots,M_d]$, $d=(d_v\cdots d_0)/d_s d_t$, 
+of $(d_s\times d_t)$-matrices in $K$ representing the tensor
+as an element of $\hom_K(K^{d_s}\otimes_K K^{d_t},K^d)$.
+For {\tt SystemOfForms}, $T$ must have valence $2$ and the implied values
+are $s=2$ and $t=1$.
+
+\medskip
+%%Example{Name}
+\begin{framed}{\bf Example} {\tt Ten\_StrConst}\\
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> T := Tensor(GF(3), [2,2,2], [1,0,0,1,0,1,-1,0]);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(3)
+U1 : Full Vector space of degree 2 over GF(3)
+U0 : Full Vector space of degree 2 over GF(3)
+> StructureConstants(T);
+[ 1, 0, 0, 1, 0, 1, 2, 0 ]
+\end{lstlisting}
+Systems of forms offer some visually useful information such as
+symmetry.
+The choice of coordinates influences the resulting list of matrices.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> AsMatrices(T,1,0);
+[
+    [1 0]
+    [0 1],
+
+    [0 1]
+    [2 0]
+]
+> SystemOfForms (T);
+[
+    [1 0]
+    [0 2],
+
+    [0 1]
+    [1 0]
+]
+> IsSymmetric (T);
+true
+\end{lstlisting}
+}
+\end{framed}
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_SysForms}\\
+{\small
+Systems of forms will always produce tensors of valance 2.  In particular
+two tensors with a common structure constant sequence can be treated differently by
+changing the dimensions that frame the data.  Thus a tensor is more than a list of coefficients.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> F := [ RandomMatrix(GF(2),2,3) : i in [1..4] ];
+> T := Tensor(F,2,1);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(2)
+U1 : Full Vector space of degree 3 over GF(2)
+U0 : Full Vector space of degree 4 over GF(2)
+> T2 := Tensor([2,2,2,2],[1..16]);
+> F2 := AsMatrices(T2,3,2);
+> T3 := Tensor(F2,2,1);
+> Eltseq(T2) eq Eltseq(T3);
+true
+> T2 eq T3 ;
+false
+> Valence(T2);
+3
+> Valence(T3);
+2
+\end{lstlisting}
+}
+\end{framed}
+%%END EX
+
+
+\subsection{Tensors from algebraic objects}
+A natural source of tensors is an algebraic object with a distributive 
+property.
+Each tensor is assigned a category relevant to its origin. 
+
+
+\color{blue}
+\index{Tensor!algebra}
+{\small \begin{verbatim}
+Tensor(A): Alg -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bilinear tensor given by the product in $A$.
+
+\color{blue}
+\index{CommutatorTensor}
+{\small \begin{verbatim}
+CommutatorTensor(A) : Alg -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bilinear commutator map $[a,b]=ab-ba$ of the algebra $A$.
+
+\color{blue}
+\index{AssociatorTensor}
+{\small \begin{verbatim}
+AssociatorTensor(A) : Alg -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the trilinear associator map $[a,b,c]=(ab)c-a(bc)$ of the algebra $A$.
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_Alg}\\
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> A := MatrixAlgebra(Rationals(),5);
+> AC := CommutatorTensor(A);
+> IsAlternating(AC); // [X, X] = 0?
+true
+\end{lstlisting}
+Do three random octonions associate? Hardly ever.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> O := OctonionAlgebra(GF(541),-1,-1,-1);
+> T := AssociatorTensor(O);
+> <Random(O),Random(O),Random(O)> @ T eq 0;
+false
+\end{lstlisting}
+But $(aa)b=a(ab)$ always, as octonions are alternative algebras.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> a := Random(O); 
+> b := Random(O); 
+> <a,a,b> @ T eq 0;
+true
+> IsAlternating(T);
+true
+\end{lstlisting}
+}
+\end{framed}
+%% END EX
+
+
+\color{blue}
+\index{pCentralTensor}
+{\small \begin{verbatim}
+pCentralTensor(G, s, t) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt
+pCentralTensor(G, p, s, t) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bilinear map of commutation from the associated graded Lie \
+algebra of the lower exponent-$p$ central
+series $\eta$ of $G$.  The bilinear map pairs $\eta_s/\eta_{s+1}$ with $
+\eta_{t}/\eta_{t+1}$ into $\eta_{s+t}/\eta_{s+t+1}$.  If $s=t$ the tensor 
+category is set to force $U_2=U_1$; 
+otherwise it is the general homotopism category.
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_Grp}\\
+{\small
+Groups have a single binary operation. So even when groups are built from
+rings it can be difficult to recover the ring from the group operations.  Tensors
+supply one approach for that task.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> P := ClassicalSylow(SL(3,125),5);
+> Q := PCGroup(P); // Loose track of GF (125).
+> Q;
+GrpPC : Q of order 1953125 = 5^9
+PC-Relations:
+    Q.4^Q.1 = Q.4 * Q.7^4, 
+    Q.4^Q.2 = Q.4 * Q.8^4, 
+    Q.4^Q.3 = Q.4 * Q.9^4, 
+    Q.5^Q.1 = Q.5 * Q.8^4, 
+    Q.5^Q.2 = Q.5 * Q.9^4, 
+    Q.5^Q.3 = Q.5 * Q.7^3 * Q.8^3, 
+    Q.6^Q.1 = Q.6 * Q.9^4, 
+    Q.6^Q.2 = Q.6 * Q.7^3 * Q.8^3, 
+    Q.6^Q.3 = Q.6 * Q.8^3 * Q.9^3
+> T := pCentralTensor(Q,1,1);
+> F := Centroid(T); // Recover GF (125)
+> Dimension(F);
+3
+> IsSimple(F);
+true
+> IsCommutative(F);
+true
+\end{lstlisting}
+}
+\end{framed}
+%% END EX
+
+
+\color{blue}
+\index{Polarisation}\index{Polarization}
+{\small \begin{verbatim}
+Polarisation(f) : MPolElt -> TenSpcElt, MPolElt
+Polarization(f) : MPolElt -> TenSpcElt, MPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the polarization of the homogeneous multivariate polynomial 
+$f$ as a tensor and as a multivariate polynomial.  Polarization does not
+normalize by $1/d!$, where $d$ is the degree of $f$.  
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_Polar}\\
+{\small We polarize the polynomial $f(x,y)=x^2y$. 
+Because $f$ is homogeneous of degree 3 with 2 variables, we expect that the polarization will have 6 variables and that the corresponding mulilinear form will be $K^2\times K^2\times K^2\rightarrowtail K$.
+The polarization of $f$ is given by $P(x_1,x_2,y_1,y_2,z_1,z_2 ) = 2 (x_1y_1z_2 + x_1y_2z_1 + x_2y_1z_1)$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> K<x,y> := PolynomialRing(Rationals(),2);
+> T, p := Polarization(x^2*y);
+> p;
+2*$.1*$.3*$.6 + 2*$.1*$.4*$.5 + 2*$.2*$.3*$.5
+> T;
+Tensor of valence 3, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 2 over Rational Field
+U2 : Full Vector space of degree 2 over Rational Field
+U1 : Full Vector space of degree 2 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+> <[1,0],[1,0],[1,0]> @ T;
+(0)
+> <[1,0],[1,0],[0,1]> @ T;
+(2)
+\end{lstlisting}
+}
+\end{framed}
+%% END EX
+
+
+\subsection{New tensors from old}
+We can construct new tensors from old.
+
+\color{blue}
+\index{AlternatingTensor}
+{\small \begin{verbatim}
+AlternatingTensor(T) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the alternating tensor induced by the given tensor. If 
+the tensor is already alternating, then the given tensor is returned.
+
+\color{blue}
+\index{AntisymmetricTensor}
+{\small \begin{verbatim}
+AntisymmetricTensor(T) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the antisymmetric tensor induced by the given tensor. If 
+the tensor is already antisymmetric, then the given tensor is returned.
+
+\color{blue}
+\index{SymmetricTensor}
+{\small \begin{verbatim}
+SymmetricTensor(T) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the symmetric tensor induced by the given tensor. If the tensor is 
+already symmetric, then the given tensor is returned.
+
+\color{blue}
+\index{Shuffle}
+{\small \begin{verbatim}
+Shuffle(T, g) : TenSpcElt, GrpPermElt -> TenSpcElt
+Shuffle(T, g) : TenSpcElt, SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+For a tensor $T$ in $\hom(U_v,\dots,\hom(U_1,U_0)\cdots)$, 
+generates a the representation of $T$ in $\hom(U_{v^g},\dots,\hom(U_{1^g},U_{0^g})\dots)$.
+In order to be defined, $g$ must permute $\{0..v\}$ and both the image and 
+pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
+For cotensors, $g$ must permute $\{1..v\}$.
+
+
+\section{Operations with Tensors}
+
+Magma takes two perspectives for operations with tensors. 
+First, tensors determine multilinear maps and so behave as
+functions.  Second, tensors are elements of a tensor space and 
+so behave as elements in a module.  
+
+\subsection{Elementary operations}
+Treating the tensor space as a $K$-module, we have the standard operations.
+
+\color{blue}
+\index{$+$}\index{$*$!as module}
+{\small \begin{verbatim}
+S + T : TenSpcElt, TenSpcElt -> TenSpcElt
+k * T : RngElt, TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the sum or scalar multiple of tensors as module elements of the tensor 
+space. The corresponding multilinear maps are the sum or scalar multiple of the 
+multilinear maps.
+
+\color{blue}
+\index{TensorOnVectorSpaces}
+{\small \begin{verbatim}
+TensorOnVectorSpaces(T) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the tensor on vector spaces and an isotopism from the given tensor. 
+This is a forgetful functor that forces all domain and codomain terms to be 
+vector spaces.
+
+\color{blue}
+\index{AssociatedForm}
+{\small \begin{verbatim}
+AssociatedForm(T) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+For a tensor $T$ with multilinear maps $U_v\times \cdots \times U_1\rightarrowtail U_0$,
+creates the associated multilinear form
+$U_v\times\cdots\times U_1\times U_0^*\rightarrowtail K$.  The valence is increased
+by $1$.
+
+\color{blue}
+\index{Compress}
+{\small \begin{verbatim}
+Compress(T) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the compression of the tensor. This removes all 1-dimensional spaces 
+in the domain.
+
+\begin{framed} {\bf Example} {\tt Ten\_VS\_Cmp}\\
+{\small We construct the tensor of a Lie algebra given by multiplication. 
+We apply the forgetful functor to forget the algebra structure and and just leave vector spaces.
+However, we can still evaluate Lie algebra elements with this new tensor on vector spaces.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> L := LieAlgebra("D4",GF(5));
+> T := Tensor(L); 
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Lie Algebra of dimension 28 with base ring GF(5)
+U1 : Lie Algebra of dimension 28 with base ring GF(5)
+U0 : Lie Algebra of dimension 28 with base ring GF(5)
+> <L.2,L.11> @ T;
+(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+> 
+> S := TensorOnVectorSpaces(T);
+> S;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 28 over GF(5)
+U1 : Full Vector space of degree 28 over GF(5)
+U0 : Full Vector space of degree 28 over GF(5)
+> V := Domain(S)[1];
+> <L.2,L.11> @ S eq <V.2,V.11> @ S;
+true
+\end{lstlisting}
+Now we compute the associated form to $S$ to get a trilinear map. 
+We shuffle it by the permutation $(0,3)$ and compress it.
+The result is just the shuffle of the original bilinear map $S$ by $(0,2,1)$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> AF := AssociatedForm(S);
+> AF;
+Tensor of valence 3, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 28 over GF(5)
+U2 : Full Vector space of degree 28 over GF(5)
+U1 : Full Vector space of degree 28 over GF(5)
+U0 : Full Vector space of degree 1 over GF(5)
+> Eltseq(AF) eq Eltseq(S);
+true
+> 
+> <L.2,L.11,L.1> @ AF;
+(1)
+> <L.2,L.11,L.2 > @ AF;
+(0)
+> 
+> U := Shuffle(AF,[3,1,2,0]);
+> U;
+Tensor of valence 3, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 1 over GF(5)
+U2 : Full Vector space of degree 28 over GF(5)
+U1 : Full Vector space of degree 28 over GF(5)
+U0 : Full Vector space of degree 28 over GF(5)
+> 
+> Cmp := Compress(U);
+> Shf := Shuffle(S,[2,0,1]);
+> Cmp eq Shf;
+true
+\end{lstlisting}
+}
+\end{framed}
+
+\subsection{General properties}~
+
+\color{blue}
+\index{Parent!tensor}
+{\small \begin{verbatim}
+Parent(T) : TenSpcElt -> TenSpc
+\end{verbatim} }
+\color{black}
+
+Returns the tensor space that contains $T$. The default space is the universal 
+tensor space.
+
+\color{blue}
+\index{Domain!tensor}
+{\small \begin{verbatim}
+Domain(T) : TenSpcElt -> List
+\end{verbatim} }
+\color{black}
+
+Returns the domain of the tensor as a list of modules.
+
+\color{blue}
+\index{Codomain!tensor}
+{\small \begin{verbatim}
+Codomain(T) : TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the codomain of the tensor.
+
+\color{blue}
+\index{Valence!tensor}
+{\small \begin{verbatim}
+Valence(T) : TenSpcElt -> RngIntElt
+\end{verbatim} }
+\color{black}
+
+Returns the valence of the tensor.
+
+\color{blue}
+\index{Frame!tensor}
+{\small \begin{verbatim}
+Frame(T) : TenSpcElt -> List
+\end{verbatim} }
+\color{black}
+
+Returns the modules in the frame of $T$; this is the concatenation of
+the domain modules and the codomain.
+
+\color{blue}
+\index{TensorCategory!tensor}
+{\small \begin{verbatim}
+TensorCategory(T) : TenSpcElt -> TenCat
+\end{verbatim} }
+\color{black}
+
+Returns the underlying tensor category of $T$.
+
+\color{blue}
+\index{ChangeTensorCategory!tensor}
+{\small \begin{verbatim}
+ChangeTensorCategory(T, C) : TenSpcElt, TenCat -> TenSpcElt
+ChangeTensorCategory(~T, C) : TenSpcElt, TenCat
+\end{verbatim} }
+\color{black}
+
+Returns the tensor with the given category.
+
+\color{blue}
+\index{IsCovariant!tensor}\index{IsContravariant!tensor}
+{\small \begin{verbatim}
+IsCovariant(T) : TenSpcElt -> BoolElt
+IsContravariant(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if the underlying category of $T$ is covariant or contravariant.
+
+\begin{framed} {\bf Example} {\tt Ten\_Prop1}\\
+{\small We demonstrate how to extract basic properties of a tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> T := RandomTensor(GF(3),[3,4,5,6]);
+> T;
+Tensor of valence 3, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 3 over GF(3)
+U2 : Full Vector space of degree 4 over GF(3)
+U1 : Full Vector space of degree 5 over GF(3)
+U0 : Full Vector space of degree 6 over GF(3)
+> Valence(T);
+3
+> 
+> BaseRing(T);
+Finite field of size 3
+> 
+> Frame(T);
+[*
+    Full Vector space of degree 3 over GF(3),
+
+    Full Vector space of degree 4 over GF(3),
+
+    Full Vector space of degree 5 over GF(3),
+
+    Full Vector space of degree 6 over GF(3)
+*]
+> 
+> Domain(T);
+[*
+    Full Vector space of degree 3 over GF(3),
+
+    Full Vector space of degree 4 over GF(3),
+
+    Full Vector space of degree 5 over GF(3)
+*]
+> 
+> Codomain(T);
+Full Vector space of degree 6 over GF(3)
+> 
+> Parent(T); // Universal tensor space
+Tensor space of dimension 360 over GF(3) with valence 3
+U3 : Full Vector space of degree 3 over GF(3)
+U2 : Full Vector space of degree 4 over GF(3)
+U1 : Full Vector space of degree 5 over GF(3)
+U0 : Full Vector space of degree 6 over GF(3)
+> 
+> TensorCategory(T);
+Tensor category of Valence 3 (->,->,->,->) ({ 1 },{ 2 },{ 0 },{ 3 })
+> 
+> Cat := TensorCategory([-1,-1,1,1],{{i} : i in [0..3]});
+> ChangeTensorCategory(~T, Cat);
+> TensorCategory(T);
+Tensor category of Valence 3 (<-,<-,->,->) ({ 1 },{ 2 },{ 0 },{ 3 })
+\end{lstlisting} }
+\end{framed}
+
+\color{blue}
+\index{Image!tensor}
+{\small \begin{verbatim}
+Image(T) : TenSpcElt -> ModTupRng, Map
+\end{verbatim} }
+\color{black}
+
+Returns the (categorical) image of the tensor along with a map to the vector space.
+Thus, if the type of the codomain of $T$ is not {\tt ModTupRng}, the returned map
+is an isomorphism from the codomain of $T$ to the free $R$-module $R^{d_0}$. 
+
+\color{blue}
+\index{BaseRing!tensor}\index{BaseField!tensor}
+{\small \begin{verbatim}
+BaseRing(T) : TenSpcElt -> Rng
+BaseField(T) : TenSpcElt -> Fld
+\end{verbatim} }
+\color{black}
+
+Returns the base ring or field of the tensor.
+
+\color{blue}
+\index{NondegenerateTensor}
+{\small \begin{verbatim}
+NondegenerateTensor(T) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the nondegenerate multilinear map associated to $T$ along with a homotopism 
+from the given tensor to the returned nondegenerate tensor.
+
+\color{blue}
+\index{IsNondegenerate}
+{\small \begin{verbatim}
+IsNondegenerate(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $T$ is a nondegenerate multilinear map.
+
+\color{blue}
+\index{FullyNondegenerateTensor}
+{\small \begin{verbatim}
+FullyNondegenerateTensor(T) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the fully nondegenerate multilinear map associated to $T$ along with a
+cohomotopism from the given tensor to the returned tensor.
+
+\color{blue}
+\index{IsFullyNondegenerate}
+{\small \begin{verbatim}
+IsFullyNondegenerate(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $T$ is a fully nondegenerate multilinear map.
+
+\color{blue}
+\index{IsAlternating!tensor}\index{IsAntisymmetric!tensor}
+{\small \begin{verbatim}
+IsAlternating(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $T$ is an alternating tensor.
+
+\color{blue}
+\index{IsAntisymmetric!tensor}
+{\small \begin{verbatim}
+IsAntisymmetric(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $T$ is an antisymmetric tensor.
+
+\color{blue}
+\index{IsSymmetric!tensor}
+{\small \begin{verbatim}
+IsSymmetric(T) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $T$ is a symmetric tensor.
+
+\begin{framed} {\bf Example} {\tt Ten\_Prop2}\\
+{\small We demonstrate how to extract basic properties of a tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> J := Matrix(GF(9),[[0,1,-1],[1,-1,-1],[-1,-1,1]]);
+> M := DiagonalJoin(J,ZeroMatrix(GF(9),3,3));
+> M;
+[    0     1     2     0     0     0]
+[    1     2     2     0     0     0]
+[    2     2     1     0     0     0]
+[    0     0     0     0     0     0]
+[    0     0     0     0     0     0]
+[    0     0     0     0     0     0]
+> 
+> T := Tensor([M,-M],2,1);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 6 over GF(3^2)
+U1 : Full Vector space of degree 6 over GF(3^2)
+U0 : Full Vector space of degree 2 over GF(3^2)
+> 
+> Image(T);
+Vector space of degree 2, dimension 1 over GF(3^2)
+Generators:
+(    1     2)
+Echelonized basis:
+(    1     2)
+Mapping from: Full Vector space of degree 2 over GF(3^2) to 
+Full Vector space of degree 2 over GF(3^2) given by a rule
+> 
+> Radical(T);
+<
+    Vector space of degree 6, dimension 3 over GF(3^2)
+    Echelonized basis:
+    (    0     0     0     1     0     0)
+    (    0     0     0     0     1     0)
+    (    0     0     0     0     0     1),
+
+    Vector space of degree 6, dimension 3 over GF(3^2)
+    Echelonized basis:
+    (    0     0     0     1     0     0)
+    (    0     0     0     0     1     0)
+    (    0     0     0     0     0     1)
+>
+\end{lstlisting}
+The tensor we built above is degenerate because it has a nontrivial radical. 
+We will construct the nondegenerate tensor as well as the fully nondegenerate tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> ND := NondegenerateTensor(T);
+> ND;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 3 over GF(3^2)
+U1 : Full Vector space of degree 3 over GF(3^2)
+U0 : Full Vector space of degree 2 over GF(3^2)
+> 
+> FN := FullyNondegenerateTensor(T);
+> FN;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 3 over GF(3^2)
+U1 : Full Vector space of degree 3 over GF(3^2)
+U0 : Vector space of degree 2, dimension 1 over GF(3^2)
+Generators:
+(    1     2)
+Echelonized basis:
+(    1     2)
+\end{lstlisting} }
+\end{framed}
+
+\subsection{As multilinear maps}
+Regarding tensors as multilinear maps, we allow for composition and evaluation.
+
+\color{blue}
+\index{AT}
+{\small \begin{verbatim}
+x @ T : Tup, TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Evaluates the tensor $T$ at $x\in U_v\times \cdots \times U_1$.
+
+\color{blue}
+\index{$*$!as multilinear map}
+{\small \begin{verbatim}
+T * f : TenSpcElt, Map -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor which is the composition of $T$ with the given map $f$.
+
+\color{blue}
+\index{eq!tensor}
+{\small \begin{verbatim}
+S eq T : TenSpcElt, TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if the tensors are the same multilinear map.
+
+\subsection{Operations with Bilinear maps}
+Tensors of valence $2$, also known as bilinear tensors, or
+as bilinear maps,  are commonly described as distributive products.
+For instance as the product of an algebra, the product of a ring on 
+a module, or an inner product.  Magma supports this interpretation 
+by permitting an infix $x*y$ notation for the evaluation of bilinear
+tensors.  Magma supports this by creating special types 
+{\tt BmpU[Elt]}, {\tt BmpV[Elt]}, and {\tt BmpW[Elt]} for the frame
+of a bilinear tensor.
+
+
+\color{blue}
+\index{$*$!bilinear (product)}
+{\small \begin{verbatim}
+x * y : BmpUElt, BmpVElt -> Any
+x * y : BmpU, BmpV -> Any
+x * y : BmpUElt, BmpV -> Any
+x * y : BmpU, BmpVElt -> Any
+\end{verbatim} }
+\color{black}
+
+If $x$ and $y$ are associated to the bilinear map $B$, these operations return 
+{\tt <x,y> @ B}.
+
+\color{blue}
+\index{$*$!bilinear (infix)}
+{\small \begin{verbatim}
+x * B : Any, TenSpcElt -> TenSpcElt
+B * y : Any, TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Given a bilinear tensor $B$ framed by $[U_2,U_1,U_0]$,
+$x*B$ returns the action on the right as a 
+linear map $L : U_1\rightarrow U_0$ given 
+by $vL = x* v$ if $x$ is an element of $U_2$. 
+If $x$ is a subspace of $U_2$, then this returns a sequence of 
+maps one for each element in the basis for $x$.
+For the land-hand action use $B*y$ instead.
+If $B$ is valence 1, then the image of either $x$ or $y$ is returned.
+
+\color{blue}
+\index{Parent!bilinear}
+{\small \begin{verbatim}
+Parent(x) : BmpUElt -> BmpU
+Parent(x) : BmpVElt -> BmpV
+\end{verbatim} }
+\color{black}
+
+Returns the parent space of the bilinear map element.
+
+\color{blue}
+\index{Parent!bilinear}
+{\small \begin{verbatim}
+Parent(X) : BmpU -> TenSpcElt
+Parent(X) : BmpV -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the original bilinear map where these spaces came from.
+
+\color{blue}
+\index{LeftDomain}
+{\small \begin{verbatim}
+LeftDomain(B) : TenSpcElt -> BmpU
+\end{verbatim} }
+\color{black}
+
+Returns the left domain, $U_2$, of $B$ framed by $[U_2,U_1,U_0]$, 
+setup for use with infix notation.
+
+\color{blue}
+\index{RightDomain}
+{\small \begin{verbatim}
+RightDomain(B) : TenSpcElt -> BmpV
+\end{verbatim} }
+\color{black}
+
+Returns the right domain, $U_1$, of $B$  framed by $[U_2,U_1,U_0]$. 
+setup for use with infix notation.
+
+\color{blue}
+\index{IsCoercible!bilinear}
+{\small \begin{verbatim}
+IsCoercible(S,x) : BmpU, Any -> BoolElt, BmpUElt
+IsCoercible(S,x) : BmpV, Any -> BoolElt, BmpVElt
+\end{verbatim} }
+\color{black}
+
+Decides if $x$ can be coerced into $S$, and if it can, it returns the coerced 
+element.
+
+\color{blue}
+\index{eq!bilinear}
+{\small \begin{verbatim}
+u1 eq u2 : BmpUElt, BmpUElt -> BoolElt
+v1 eq v2 : BmpUElt, BmpUElt -> BoolElt
+U1 eq U2 : BmpU, BmpU -> BoolElt
+V1 eq V2 : BmpV, BmpV -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if the elements or spaces are equal.
+
+\begin{framed} {\bf Example} {\tt Bimap\_Infix}\\
+{\small We demonstrate the infix product using tensors of valence 2. 
+If $B : U_2\times U_1\rightarrowtail U_0$ is a tensor, then for $x\in U_2$, we get a valence 1 tensor $x*B : U_1\rightarrow U_0$.
+Similarly, for $y\in U_1$, we get $B*y : U_2\rightarrow U_0$. Furthermore, one can write $x*B*y$ to get $<x,y> @B$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> B := RandomTensor(GF(5),[4,3,5]);
+> B;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over GF(5)
+U1 : Full Vector space of degree 3 over GF(5)
+U0 : Full Vector space of degree 5 over GF(5)
+> [3,2,0,1]*B*[1,1,2];
+(2 1 1 3 4)
+> [1,0,0,0]*B;
+Tensor of valence 1, U1 >-> U0
+U1 : Full Vector space of degree 3 over GF(5)
+U0 : Full Vector space of degree 5 over GF(5)
+> B*[0,2,0];
+Tensor of valence 1, U1 >-> U0
+U1 : Full Vector space of degree 4 over GF(5)
+U0 : Full Vector space of degree 5 over GF(5)
+\end{lstlisting} }
+\end{framed}
+
+\begin{framed} {\bf Example} {\tt Bimap\_Product}\\
+{\small We demonstrate the product notation for tensors of valence 2 using a tensor derived from a group. 
+Suppose $G$ is a $p$-group and $B : U_2\times U_1\rightarrowtail U_0$ is the tensor given by commutation where $U_2=U_1=G/\Phi(G)$ and $U_0$ is the next factor of the exponent-$p$ central series of $G$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> G := SmallGroup(512,10^6);
+> B := pCentralTensor(G,2,1,1);
+> B;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 5 over GF(2)
+U1 : Full Vector space of degree 5 over GF(2)
+U0 : Full Vector space of degree 4 over GF(2)
+> U := LeftDomain(B);   //U2
+> V := RightDomain(B);  //U1
+> U![0,1,0,1,0] * V![1,0,0,0,0];
+(1 0 0 1)
+> U!(G.2*G.4) * V!G.1;
+(1 0 0 1)
+\end{lstlisting} 
+This notation can be used to evaluate subspaces.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> H := sub< G | G.2,G.4 >;
+> U!H * V!G.1;
+Vector space of degree 4, dimension 2 over GF(2)
+Generators:
+(0 0 0 1)
+(1 0 0 0)
+Echelonized basis:
+(1 0 0 0)
+(0 0 0 1)
+> U!H * V!G;
+Vector space of degree 4, dimension 3 over GF(2)
+Generators:
+(1 0 0 0)
+(0 0 1 0)
+(0 0 0 1)
+(1 0 0 0)
+(1 0 0 0)
+Echelonized basis:
+(1 0 0 0)
+(0 0 1 0)
+(0 0 0 1)
+\end{lstlisting}
+}
+\end{framed}
+
+\subsection{Manipulating tensor data}
+The data from a tensor is accessible in multiple ways.   For 
+tensors given by structure constants this can be described as the 
+multidimensional analog of choosing a row or column of a matrix.
+Other operations are generalization of the transpose of a matrix.
+Magma does these operations with some care towards efficiency,
+e.g. it may not physically move the values in a structure constant
+sequence but instead permute the lookup of the values.
+
+
+\color{blue}
+\index{Slice}\index{InducedTensor}
+{\small \begin{verbatim}
+Slice(T, grid) : TenSpcElt, [SetEnum] -> SeqEnum
+InducedTensor(T, grid) : TenSpcElt, [SetEnum] -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the slice of the structure constants running through the given grid. 
+For a tensor framed by free modules $[U_v,\dots,U_0]$ with $d_i=\dim U_i$, 
+a grid is a sequence $[G_v,\dots,G_0]$ of subsets $G_i\subseteq \{1..d_i\}$.
+The slice is the list of entries in the structure constants of the tensor
+indexed by $G_v\times \cdots \times G_0$. {\tt Slice} returns the structure
+constants whereas {\tt InducedTensor} produces a tensor with these
+structure constants. 
+
+\begin{framed} {\bf Example} {\tt Ten\_Slice}\\
+{\small We demonstrate slicing. If every $G_i=\{1..d_i\}$, then the result is the same as {\tt Eltseq}.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> U := VectorSpace(Rationals(),4);
+> V := VectorSpace(Rationals(),3);
+> W := VectorSpace(Rationals(),2);
+> TS := TensorSpace([U,V,W]);
+> T := TS![ i : i in [1..24] ];
+> Slice(T,[{1..4},{1..3},{1..2}]);  // structure constants
+[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+18, 19, 20, 21, 22, 23, 24 ]
+\end{lstlisting}
+We obtain the slice data as structure constants of a tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> Slice(T,[{1..4},{2},{1}]); 
+[ 3, 9, 15, 21 ]
+> 
+> W1 := VectorSpace(Rationals(),1);
+> pi := hom< W -> W1 | <W.1,W1.1>, <W.2,W1!0> >; // project
+> Eltseq( (T*V.2)*pi );
+[ 3, 9, 15, 21 ]
+\end{lstlisting}
+However, in this example, the tensors are not the same. 
+When we compress the induced tensor, then they become equal.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> T_ind := InducedTensor(T,[{1..4},{2},{1}]);
+> T_ind;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over Rational Field
+U1 : Full Vector space of degree 1 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+> S := (T*V.2)*pi;
+> S;
+Tensor of valence 1, U1 >-> U0
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+> 
+> Compress(T_ind) eq S;
+true
+\end{lstlisting} }
+\end{framed}
+
+\color{blue}
+\index{Foliation}
+{\small \begin{verbatim}
+Foliation(T, i) : TenSpcElt, RngIntElt -> Mtrx
+\end{verbatim} }
+\color{black}
+
+For a tensor $T$ contained in $\hom(U_v\otimes \cdots \otimes U_1,U_0)$,
+return the matrix representing the linear map 
+$U_i\rightarrow \hom(\bigotimes_{j\ne i}U_i,U_0)$ using the bases of each $U_j$.
+If $i=0$, then the returned matrix is given by the represention 
+$U_0^*\rightarrow \hom(\bigotimes U_i,K)$.
+
+\color{blue}
+\index{AsTensorSpace}
+{\small \begin{verbatim}
+AsTensorSpace(T, i) : TenSpcElt, RngIntElt -> TenSpc, Mtrx
+\end{verbatim} }
+\color{black}
+
+Returns the associated tensor space of $T$ at $i>0$ along with a matrix given by
+the foliation of $T$ at $i$. 
+The returned tensor space is framed by 
+$U_v\times \cdots \times U_{i+1}\times U_{i-1}\times \cdots \times U_1\rightarrowtail U_0$
+and is generated by the tensors $T_u$ for each $u$ in the basis of $U_i$.
+
+\color{blue}
+\index{AsCotensorSpace}
+{\small \begin{verbatim}
+AsCotensorSpace(T) : TenSpcElt -> TenSpc, Mtrx
+\end{verbatim} }
+\color{black}
+
+Returns the associated cotensor space of $T$ along with a matrix given by
+the foliation of $T$ at $0$. 
+The returned cotensor space is framed by 
+$U_v\times \cdots \times U_1\rightarrowtail K$
+and is generated by the tensors $Tf$ for each $f$ in the basis of $U_0^*$.
+
+\color{blue}
+\index{AsTensor}
+{\small \begin{verbatim}
+AsTensor(T) : TenSpc -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns a tensor corresponding to the given tensor space. 
+If the given tensor space is contravariant, then the returned tensor has the frame $U_v\times \cdots \times U_1\rightarrowtail T$.
+If the given tensor space is covariant, then the returned tensor has the frame $T\times U_v\times \cdots \times U_1\rightarrowtail U_0$.
+Note that {\tt AsTensor} is ``inverse'' to {\tt AsCotensorSpace} and {\tt AsTensorSpace} when $i=v$.
+
+\begin{framed} {\bf Example} {\tt Ten\_Foliation}\\
+{\small We demonstrate foliation.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> T := RandomTensor( GF(7), [2,3,4] );
+> Foliation(T,0);
+[3 4 3 3 6 4]
+[0 6 4 3 3 4]
+[0 0 6 2 3 3]
+[4 6 4 0 0 3]
+> 
+> Slice(T,[{1,2},{1..3},{3}]); // row 3
+[ 0, 0, 6, 2, 3, 3 ]
+> 
+> Slice(T,[{2},{1},{1..4}]); // col 4
+[ 3, 3, 2, 0 ]
+\end{lstlisting} 
+The cotensor space associated to a tensor is the subcotensor space spanned by multilinear forms obtained from $T$.
+For a fixed basis of $U_0$, we get a basis for the cotensor space by projecting onto various basis vectors of $U_0$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> CT := AsCotensorSpace(T);
+> CT;
+Cotensor space of dimension 4 over GF(7) with valence 1
+U2 : Full Vector space of degree 2 over GF(7)
+U1 : Full Vector space of degree 3 over GF(7)
+> 
+> S := Random(CT);
+> MS := KMatrixSpace(GF(7),2,3);
+> SystemOfForms(S) subset sub<MS|SystemOfForms(T)>;
+true
+\end{lstlisting}
+The same applies for the associated tensor space to a tensor. 
+We obtain a basis by projecting onto the basis vectors of $U_i$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> TS := AsTensorSpace(T,1);
+> TS;
+Tensor space of dimension 3 over GF(7) with valence 1
+U1 : Full Vector space of degree 2 over GF(7)
+U0 : Full Vector space of degree 4 over GF(7)
+> 
+> S := Random(TS);
+> MS := KMatrixSpace(GF(7),2,4);
+> AsMatrices(S,1,0) subset sub<MS|AsMatrices(T,2,0)>;
+true
+\end{lstlisting}
+}
+\end{framed}
+
+\section{Invariants of tensors}
+
+To access the projections or the objects acting on a specific factor, the 
+following should be used.
+
+\color{blue}
+\index{Induce}
+{\small \begin{verbatim}
+Induce(X, i) : AlgMat, RngIntElt -> AlgMat, Map
+Induce(X, i) : AlgMatLie, RngIntElt -> AlgMatLie, Map
+Induce(X, i) : GrpMat, RngIntElt -> GrpMat, Map
+\end{verbatim} }
+\color{black}
+
+Returns the induced sub-object associated to the $i$th factor of the 
+associated 
+tensor and a projection from the given object to the returned sub-object.
+
+\subsection{Standard invariants}
+
+We integrate the invariant theory associated to bilinear and multilinear maps
+into the realm of tensors. 
+
+\color{blue}
+\index{Radical}
+{\small \begin{verbatim}
+Radical(T, s) : TenSpcElt, RngIntElt -> ModTupRng, Map
+\end{verbatim} }
+\color{black}
+
+Returns the $s$th (categorical) radical as a subspace of $U_s$ along with an isomorphism from $U_s$ to $K^{d_s}$.
+If $U_s$ is already a vector space, then the returned map is the identity.
+
+\color{blue}
+\index{Radical}
+{\small \begin{verbatim}
+Radical(T) : TenSpcElt -> Tup
+\end{verbatim} }
+\color{black}
+
+Returns the tuple of all the $s$-radicals for each $s\in \{1,...,v\}$.
+
+\color{blue}
+\index{Coradical}
+{\small \begin{verbatim}
+Coradical(T) : TenSpcElt -> ModTupRng, Map
+\end{verbatim} }
+\color{black}
+
+Returns the (categorical) coradical of $T$ and a vector space surjection from 
+the codomain to the coradical.
+
+\subsection{Invariants for bilinear tensors}
+
+The following are used only for tensors of valence 2.
+
+\color{blue}
+\index{AdjointAlgebra}
+{\small \begin{verbatim}
+AdjointAlgebra(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the adjoint $*$-algebra of the given bilinear map. 
+
+\begin{framed} {\bf Example} {\tt Ten\_Adj\_Alg}\\
+{\small We get a pair of random cotensors from the exterior square of $V=\mathbb{F}_5^{10}$ and compute its adjoint $*$-algebra as a tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> V := VectorSpace(GF(5),10);
+> E := ExteriorCotensorSpace(V,2);
+> E;
+Cotensor space of dimension 45 over GF(5) with valence 1
+U2 : Full Vector space of degree 10 over GF(5)
+U1 : Full Vector space of degree 10 over GF(5)
+> 
+> T := Random(E);
+> S := Random(E);
+> CT := SubTensorSpace(E,[T,S]);
+> T2 := AsTensor(CT);
+> T2;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(5)
+U1 : Full Vector space of degree 10 over GF(5)
+U0 : Full Vector space of degree 2 over GF(5)
+> 
+> A := AdjointAlgebra(T2);
+> RecognizeStarAlgebra(A);
+true
+> Star(A);
+Mapping from: AlgMat: A to AlgMat: A given by a rule [no 
+inverse]
+\end{lstlisting} }
+\end{framed}
+
+\color{blue}
+\index{LeftNucleus!bilinear} 
+{\small \begin{verbatim}
+LeftNucleus(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the left nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_2)\times \text{End}_K(U_0)$.
+
+\color{blue}
+\index{MidNucleus!bilinear} 
+{\small \begin{verbatim}
+MidNucleus(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the mid nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_2)\times \text{End}_K(U_1)$.
+
+\color{blue}
+\index{RightNucleus!bilinear}
+{\small \begin{verbatim}
+RightNucleus(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the right nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_1)\times \text{End}_K(U_0)$.
+
+\subsection{Invariants of general multilinear maps}
+
+The following functions can be used for general multilinear maps.
+
+\color{blue}
+\index{Centroid!tensor}
+{\small \begin{verbatim}
+Centroid(T) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the centroid of the tensor as a subalgebra of $\prod_{i=0}^v\text{End}_K(U_i)$.
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_Centroid}\\
+{\small We will compute the centroid of the tensor given by field multiplication in $\mathbb{F}_{3^{25}}$ as a subalgebra of $M_{25}(\mathbb{F}_3)$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> A := MatrixAlgebra(GF(3),25);
+> f := RandomIrreduciblePolynomial(GF(3),25);
+> S := sub< A | CompanionMatrix(f) >; // GF(3^25) inside A
+> T := Tensor(S);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Matrix Algebra of degree 25 with 1 generator over GF(3)
+U1 : Matrix Algebra of degree 25 with 1 generator over GF(3)
+U0 : Matrix Algebra of degree 25 with 1 generator over GF(3)
+> C := Centroid(T);
+> Dimension(C);
+25
+> Ngens(C);
+1
+\end{lstlisting} }
+\end{framed}
+
+\color{blue}
+\index{DerivationAlgebra!tensor}
+{\small \begin{verbatim}
+DerivationAlgebra(T) : TenSpcElt -> AlgMatLie
+\end{verbatim} }
+\color{black}
+
+Returns the derivation Lie algebra of the tensor as a Lie subalgebra of $\prod_{i=0}^v\text{End}_K(U_i)$.
+
+\color{blue}
+\index{Nucleus}
+{\small \begin{verbatim}
+Nucleus(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the $st$-nucleus ($s\ne t$) of the tensor as a subalgebra of $\text{End}_K(U_i)\times \text{End}_K(U_j)$, 
+where $i=\max(s,t)$ and $j=\min(s,t)$.
+
+%%Example{Name}
+\begin{framed} {\bf Example} {\tt Ten\_Der\_Nuc}\\
+{\small We first construct the derivation of the quaternion algebra over $\mathbb{Q}$ and verify that it is of type $A_1$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> H := QuaternionAlgebra(Rationals(),-1,-1);
+> T := Tensor(H);                           
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Quaternion Algebra with base ring Rational Field, 
+defined by i^2 = -1, j^2 = -1
+U1 : Quaternion Algebra with base ring Rational Field, 
+defined by i^2 = -1, j^2 = -1
+U0 : Quaternion Algebra with base ring Rational Field, 
+defined by i^2 = -1, j^2 = -1
+> D := DerivationAlgebra(T);
+> SemisimpleType(D);
+A1
+\end{lstlisting}
+Now we verify that the mid nucleus of $T$ is the quaternion algebra.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> ChangeTensorCategory(~T,HomotopismCategory(2));
+> N := Nucleus(T,2,1);
+> Dimension(N);
+4
+> N.1^2 eq N!-1;
+true
+> N.2^2 eq N!-1;
+true
+> N.1*N.2 eq -N.2*N.1;
+true
+\end{lstlisting}
+ }
+\end{framed}
+
+If the centroid of a tensor is a commutative local ring, we can rewrite a tensor over its centroid.
+We employ the algorithms developed by Brooksbank and Wilson \cite{BW:Module-iso} to efficiently determine if a matrix algebra is cyclic.
+
+\color{blue}
+\index{TensorOverCentroid}
+{\small \begin{verbatim}
+TensorOverCentroid(T) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+If the given tensor $T$ is framed by $K$-vector spaces, then the returned tensor is framed by $E$-vector spaces where $E$ is the residue field of the centroid. 
+The returned homotopism is an isotopism of the $K$-tensors.
+
+%%Example{Name}
+\medskip
+\begin{framed} {\bf Example} {\tt Ten\_Over\_Cen}\\
+{\small We construct a pc presentation of the upper unitriangular matrices over $\mathbb{F}_{1024}$. 
+This will ``forget'' the field structure of our group, so that the tensor given by the commutator will be over $\mathbb{F}_2$.
+We will use the centroid to rewrite our tensor as an alternating form over $\mathbb{F}_{1024}$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> G := ClassicalSylow( GL(3,1024), 2 );
+> P := PCPresentation( UnipotentMatrixGroup(G) );
+> T := pCentralTensor(P,1,1);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 20 over GF(2)
+U1 : Full Vector space of degree 20 over GF(2)
+U0 : Full Vector space of degree 10 over GF(2)
+> TC := TensorOverCentroid(T);
+> TC;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(2^10)
+U1 : Full Vector space of degree 2 over GF(2^10)
+U0 : Full Vector space of degree 1 over GF(2^10)
+> IsAlternating(TC);
+true
+\end{lstlisting} }
+\end{framed}
+
+
+We include some well-known polynomial invariants for bilinear maps.
+\color{blue}
+\index{Discriminant}
+{\small \begin{verbatim}
+Discriminant(B) : TenSpcElt -> RngMPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the discriminant of the bilinear map.
+
+\color{blue}
+\index{Pfaffian}
+{\small \begin{verbatim}
+Pfaffian(B) : TenSpcElt -> RngMPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the Pfaffian of the antisymmetric bilinear map.
+
+\begin{framed} {\bf Example} {\tt Ten\_Disc\_Pfaff}\\
+{\small We construct the discriminant and the Pfaffian of an antisymmetric 2-tensor.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> J := Matrix(GF(7),[[0,1],[-1,0]]);
+> J;
+[0 1]
+[6 0]
+> M := [ InsertBlock(ZeroMatrix(GF(7),4,4),J,i,i) 
+      : i in [1..3] ]; 
+> M;
+[
+    [0 1 0 0]
+    [6 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0],
+
+    [0 0 0 0]
+    [0 0 1 0]
+    [0 6 0 0]
+    [0 0 0 0],
+
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 1]
+    [0 0 6 0]
+]
+> T := Tensor(M,2,1);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over GF(7)
+U1 : Full Vector space of degree 4 over GF(7)
+U0 : Full Vector space of degree 3 over GF(7)
+> Discriminant(T);
+$.1^2*$.3^2
+> Pfaffian(T);
+$.1*$.3
+\end{lstlisting} }
+\end{framed}
+
+
+\section{Exporting tensors}
+Tensors can be used define algebraic structures such as groups and algebras.
+
+\color{blue}
+\index{HeisenbergAlgebra}
+{\small \begin{verbatim}
+HeisenbergAlgebra(B) : TenSpcElt -> AlgGen
+\end{verbatim} }
+\color{black}
+
+Returns the Heisenberg algebra $A$ induced by the bilinear tesnor $B$. If $B=\circ : 
+U\times V\rightarrowtail W$ is a bilinear map of $K$-vector spaces, and $U$, $V$, and 
+$W$ are isomorphic, then $A$ is the algebra over $U$ with the given product. 
+If 
+$U$ and $V$ are isomorphic but not with $W$, then $A$ is the algebra over 
+$U\oplus W$ with the given product. If $U$ is not isomorphic to $V$, then it 
+creates a new bilinear map $\bullet:(U\oplus V) \times (U\oplus V)\rightarrowtail W$, 
+where 
+\[ (u,v)\bullet (u',v') = u\circ v'. \]
+
+\color{blue}
+\index{HeisenbergLieAlgebra}
+{\small \begin{verbatim}
+HeisenbergLieAlgebra(B) : TenSpcElt -> AlgLie
+\end{verbatim} }
+\color{black}
+
+Returns the Heisenberg Lie algebra with Lie bracket given by the alternating 
+bilinear tensor induced by $B$.
+
+\color{blue}
+\index{HeisenbergGroup}
+{\small \begin{verbatim}
+HeisenbergGroup(B) : TenSpcElt -> GrpPC
+\end{verbatim} }
+\color{black}
+
+Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given 
+by the alternating bilinear tensor induced by $B$. 
+This uses the {\tt pQuotient} functions to convert a finitely presented group into a polycyclic group.
+
+\begin{framed} {\bf Example} {\tt Ten\_Heisenberg}\\
+{\small From a single 2-tensor we construct an algebra, a Lie algebra, and a $p$-group.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> T := RandomTensor(GF(3),[10,10,4]);
+> V := Domain(T)[1];
+> V.1*T*V.2;
+(0 0 1 0)
+> A := HeisenbergAlgebra(T);
+> A;
+Algebra of dimension 14 with base ring GF(3)
+> A.1*A.2;
+(0 0 0 0 0 0 0 0 0 0 0 0 1 0)
+\end{lstlisting}
+Now we create the Lie algebra. 
+The tensor $T$ is not alternating, so it will induce an alternating tensor form which to create the Lie algebra.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> L := HeisenbergLieAlgebra(T);
+> L.1*L.2;
+(0 0 0 0 0 0 0 0 0 0 2 0 1 0)
+> T2 := AlternatingTensor(T);
+> V.1*T2*V.2;
+(2 0 1 0)
+\end{lstlisting}
+Now we create the Heisenberg $3$-group $G$ from $T$.
+Because this algorithm uses the $p$-quotient algorithms, the commutator on $G$ will not be identical to the induced alternating tensor $T_2$. 
+Instead, it will be pseudo-isometric to the $T_2$.
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
+teal},backgroundcolor=\color{white!70!gray}]
+> G := HeisenbergGroup(T);  
+> (G.2,G.1);  // Defining word for 1st gen in Frattini
+G.11
+\end{lstlisting} }
+\end{framed}

@@ -1,0 +1,266 @@
+\begin{theindex}
+
+  \item $*$
+    \subitem as module, \hyperpage{14}
+    \subitem as multilinear map, \hyperpage{19}
+    \subitem bilinear (infix), \hyperpage{19}
+    \subitem bilinear (product), \hyperpage{19}
+    \subitem homotopism, \hyperpage{51}
+  \item $+$, \hyperpage{14}
+  \item ., \hyperpage{38}
+  \item /
+    \subitem tensor, \hyperpage{46}
+    \subitem tensor space, \hyperpage{48}
+  \item \#, \hyperpage{38}
+
+  \indexspace
+
+  \item AdjointAlgebra, \hyperpage{24}
+  \item AdjointCategory, \hyperpage{44}
+  \item AlternatingSpace, \hyperpage{34}
+  \item AlternatingTensor, \hyperpage{13}
+  \item AntisymmetricSpace, \hyperpage{34}
+  \item AntisymmetricTensor, \hyperpage{13}
+  \item Arrows, \hyperpage{45}
+  \item AsCotensorSpace, \hyperpage{22}
+  \item AsMatrices, \hyperpage{10}
+  \item AssociatedForm, \hyperpage{14}
+  \item AssociatorTensor, \hyperpage{11}
+  \item AsTensor, \hyperpage{22}
+  \item AsTensorSpace, \hyperpage{22}
+  \item AT, \hyperpage{19}
+
+  \indexspace
+
+  \item BaseField
+    \subitem tensor, \hyperpage{17}
+    \subitem tensor space, \hyperpage{39}
+  \item BaseRing
+    \subitem tensor, \hyperpage{17}
+    \subitem tensor space, \hyperpage{39}
+
+  \indexspace
+
+  \item Center, \hyperpage{29}
+  \item Centre, \hyperpage{29}
+  \item Centroid
+    \subitem algebra, \hyperpage{29}
+    \subitem tensor, \hyperpage{25}
+  \item ChangeTensorCategory
+    \subitem homotopism, \hyperpage{51}
+    \subitem tensor, \hyperpage{15}
+    \subitem tensor space, \hyperpage{40}
+  \item Codomain
+    \subitem homotopism, \hyperpage{51}
+    \subitem tensor, \hyperpage{15}
+  \item CohomotopismCategory, \hyperpage{44}
+  \item CommutatorTensor, \hyperpage{11}
+  \item CompositionAlgebra, \hyperpage{56}
+  \item Compress, \hyperpage{14}
+  \item Coradical, \hyperpage{24}
+  \item CotensorCategory
+    \subitem constructor, \hyperpage{44}
+  \item CotensorSpace, \hyperpage{33}
+
+  \indexspace
+
+  \item DerivationAlgebra
+    \subitem algebra, \hyperpage{29}
+    \subitem tensor, \hyperpage{25}
+  \item DerivationClosure, \hyperpage{35}
+  \item Dimension, \hyperpage{38}
+  \item Discriminant, \hyperpage{27}
+  \item Domain
+    \subitem homotopism, \hyperpage{51}
+    \subitem tensor, \hyperpage{15}
+
+  \indexspace
+
+  \item Eltseq, \hyperpage{9}
+  \item eq
+    \subitem bilinear, \hyperpage{20}
+    \subitem tensor, \hyperpage{19}
+    \subitem tensor category, \hyperpage{45}
+    \subitem tensor space, \hyperpage{38}
+  \item ExceptionalJordanCSA, \hyperpage{58}
+  \item ExteriorCotensorSpace, \hyperpage{34}
+
+  \indexspace
+
+  \item Foliation, \hyperpage{22}
+  \item Frame
+    \subitem tensor, \hyperpage{15}
+    \subitem tensor space, \hyperpage{39}
+  \item FullyNondegenerateTensor, \hyperpage{17}
+
+  \indexspace
+
+  \item Generators, \hyperpage{38}
+  \item Generic, \hyperpage{40}
+  \item GenericMinimalPolynomial, \hyperpage{55}
+  \item GenericMinimumPolynomial, \hyperpage{55}
+  \item GenericNorm, \hyperpage{55}
+  \item GenericTrace, \hyperpage{55}
+  \item GenericTracelessSubspaceBasis, \hyperpage{55}
+
+  \indexspace
+
+  \item HeisenbergAlgebra, \hyperpage{28}
+  \item HeisenbergGroup, \hyperpage{28}
+  \item HeisenbergLieAlgebra, \hyperpage{28}
+  \item Homotopism, \hyperpage{50}
+  \item HomotopismCategory, \hyperpage{44}
+
+  \indexspace
+
+  \item Ideal, \hyperpage{46}
+  \item Image
+    \subitem homotopism, \hyperpage{51}
+    \subitem tensor, \hyperpage{17}
+  \item in, \hyperpage{37}
+  \item Induce, \hyperpage{23}
+  \item InducedTensor, \hyperpage{21}
+  \item IsAlternating
+    \subitem tensor, \hyperpage{17}
+    \subitem tensor space, \hyperpage{40}
+  \item IsAntisymmetric
+    \subitem tensor, \hyperpage{17}
+    \subitem tensor space, \hyperpage{40}
+  \item IsCoercible
+    \subitem bilinear, \hyperpage{19}
+    \subitem tensor space, \hyperpage{37}
+  \item IsContravariant
+    \subitem tensor, \hyperpage{16}
+    \subitem tensor category, \hyperpage{45}
+    \subitem tensor space, \hyperpage{40}
+  \item IsCovariant
+    \subitem tensor, \hyperpage{16}
+    \subitem tensor category, \hyperpage{45}
+    \subitem tensor space, \hyperpage{40}
+  \item IsCyclic, \hyperpage{65}
+  \item IsFullyNondegenerate, \hyperpage{17}
+  \item IsIdeal, \hyperpage{46}
+  \item IsLocalIdeal, \hyperpage{46}
+  \item IsNondegenerate, \hyperpage{17}
+  \item IsSimilar, \hyperpage{65}
+  \item IsStarAlgebra, \hyperpage{55}
+  \item IsSubtensor, \hyperpage{46}
+  \item IsSubtensorSpace, \hyperpage{48}
+  \item IsSymmetric
+    \subitem tensor, \hyperpage{17}
+    \subitem tensor space, \hyperpage{40}
+
+  \indexspace
+
+  \item JordanSpinAlgebra, \hyperpage{57}
+  \item JordanTripleProduct, \hyperpage{57}
+
+  \indexspace
+
+  \item KCotensorSpace, \hyperpage{33}
+  \item Kernel, \hyperpage{51}
+  \item KTensorSpace, \hyperpage{31}
+
+  \indexspace
+
+  \item LeftDomain, \hyperpage{19}
+  \item LeftNucleus
+    \subitem algebra, \hyperpage{29}
+    \subitem bilinear, \hyperpage{24}
+  \item LinearCategory, \hyperpage{44}
+  \item LocalIdeal, \hyperpage{46}
+  \item LocalQuotient, \hyperpage{46}
+
+  \indexspace
+
+  \item Maps, \hyperpage{51}
+  \item MidNucleus
+    \subitem algebra, \hyperpage{29}
+    \subitem bilinear, \hyperpage{25}
+
+  \indexspace
+
+  \item Ngens, \hyperpage{38}
+  \item NondegenerateTensor, \hyperpage{17}
+  \item Nucleus, \hyperpage{25}
+  \item NucleusClosure, \hyperpage{36}
+  \item NumberOfGenerators, \hyperpage{38}
+
+  \indexspace
+
+  \item OctonionAlgebra, \hyperpage{56}
+
+  \indexspace
+
+  \item Parent
+    \subitem bilinear, \hyperpage{19}
+    \subitem tensor, \hyperpage{15}
+  \item pCentralTensor, \hyperpage{12}
+  \item Pfaffian, \hyperpage{27}
+  \item Polarisation, \hyperpage{13}
+  \item Polarization, \hyperpage{13}
+
+  \indexspace
+
+  \item Quotient
+    \subitem tensor, \hyperpage{46}
+    \subitem tensor space, \hyperpage{48}
+
+  \indexspace
+
+  \item Radical, \hyperpage{24}
+  \item Random, \hyperpage{38}
+  \item RandomTensor, \hyperpage{38}
+  \item RepeatPartition, \hyperpage{45}
+  \item RightDomain, \hyperpage{19}
+  \item RightNucleus
+    \subitem algebra, \hyperpage{29}
+    \subitem bilinear, \hyperpage{25}
+  \item RTensorSpace, \hyperpage{31}
+
+  \indexspace
+
+  \item Shuffle, \hyperpage{13}
+  \item Slice, \hyperpage{21}
+  \item SplitOctonionAlgebra, \hyperpage{56}
+  \item Star, \hyperpage{55}
+  \item StructureConstants, \hyperpage{9}
+  \item subset, \hyperpage{38}
+  \item Subtensor, \hyperpage{46}
+  \item SubtensorSpace, \hyperpage{48}
+  \item SymmetricCotensorSpace, \hyperpage{34}
+  \item SymmetricSpace, \hyperpage{34}
+  \item SymmetricTensor, \hyperpage{13}
+  \item SystemOfForms, \hyperpage{10}
+
+  \indexspace
+
+  \item Tensor
+    \subitem algebra, \hyperpage{11}
+    \subitem bilinear, \hyperpage{10}
+    \subitem black-box, \hyperpage{8}
+    \subitem forms, \hyperpage{10}
+    \subitem structure constants, \hyperpage{9}
+  \item TensorCategory
+    \subitem constructor, \hyperpage{44}
+    \subitem homotopism, \hyperpage{51}
+    \subitem tensor, \hyperpage{15}
+    \subitem tensor space, \hyperpage{39}
+  \item TensorOnVectorSpaces, \hyperpage{14}
+  \item TensorOverCentroid, \hyperpage{26}
+  \item TensorSpace, \hyperpage{31}
+    \subitem signatured, \hyperpage{31}
+
+  \indexspace
+
+  \item UniversalCotensorSpace, \hyperpage{40}
+  \item UniversalTensorSpace, \hyperpage{40}
+
+  \indexspace
+
+  \item Valence
+    \subitem tensor, \hyperpage{15}
+    \subitem tensor category, \hyperpage{45}
+    \subitem tensor space, \hyperpage{39}
+
+\end{theindex}

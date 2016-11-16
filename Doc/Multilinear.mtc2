@@ -1,0 +1,18 @@
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \tocsection {}{1}{Creating tensors}}{\reset@font\mtcSfont 8}{section.2.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{1.1}{Black-box tensors}}{\reset@font\mtcSSfont 8}{subsection.2.1.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{1.2}{Tensors with structure constant sequences}}{\reset@font\mtcSSfont 9}{subsection.2.1.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{1.3}{Bilinear tensors}}{\reset@font\mtcSSfont 10}{subsection.2.1.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{1.4}{Tensors from algebraic objects}}{\reset@font\mtcSSfont 11}{subsection.2.1.4}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{1.5}{New tensors from old}}{\reset@font\mtcSSfont 13}{subsection.2.1.5}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \tocsection {}{2}{Operations with Tensors}}{\reset@font\mtcSfont 14}{section.2.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{2.1}{Elementary operations}}{\reset@font\mtcSSfont 14}{subsection.2.2.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{2.2}{General properties}}{\reset@font\mtcSSfont 15}{subsection.2.2.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{2.3}{As multilinear maps}}{\reset@font\mtcSSfont 19}{subsection.2.2.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{2.4}{Operations with Bilinear maps}}{\reset@font\mtcSSfont 19}{subsection.2.2.4}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{2.5}{Manipulating tensor data}}{\reset@font\mtcSSfont 21}{subsection.2.2.5}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \tocsection {}{3}{Invariants of tensors}}{\reset@font\mtcSfont 24}{section.2.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{3.1}{Standard invariants}}{\reset@font\mtcSSfont 24}{subsection.2.3.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{3.2}{Invariants for bilinear tensors}}{\reset@font\mtcSSfont 24}{subsection.2.3.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \tocsubsection {}{3.3}{Invariants of general multilinear maps}}{\reset@font\mtcSSfont 25}{subsection.2.3.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \tocsection {}{4}{Exporting tensors}}{\reset@font\mtcSfont 28}{section.2.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \tocsection {}{5}{Invariants of nonassociative algebras}}{\reset@font\mtcSfont 29}{section.2.5}}

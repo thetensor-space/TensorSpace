@@ -1,0 +1,377 @@
+Contains a list of bugs and either a print out of the bug or code to reproduce it.
+To quickly get to a specific bug, ctrl+f 'BUG<k>' where <k> is the ID of the bug.
+
+
+==========================================================================================
+ BUG1: Heisenberg functions
+==========================================================================================
+
+E := IdentityMatrix(GF(3),2);
+F := Matrix(GF(3),2,2,[0,1,0,0]);
+T := Tensor([E,F],2,1);
+H := HeisenberGroup(T);
+// fails with a bug about 2-arguments, unclear what.
+
+H := HeisenbergAlgebra(T);
+Dimension(H);
+2  
+<--- seems wrong, Heisenberg groups are only upper triangular, so you expect 6.
+
+H := HeisenbergLieAlgebra(T);
+// fails, because this tensor has U2=U1=U0 it skips the assignment of d,e.
+// once more, this should not have a special case.
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------ 
+
+FIXED TO NO LONGER CRASH.  Still, should not be different for equal dimensions.
+Main issue was over-writing by another function.  Changing names solved it.
+
+==========================================================================================
+ BUG2: Catching errors
+==========================================================================================
+
+within the code there are still uses of 
+
+try
+	foo
+catch err
+	error err`Object'
+end try;
+
+These should removed with foo called directly, this way the trace of the error goes back 
+to wherever it started.  Only catch if you can fix the error.
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+Replaced all 'err`Object' with a suitable error message.
+
+==========================================================================================
+ BUG3: Black-box tensors
+==========================================================================================
+
+> U := KMatrixSpace(GF(3),2,1);
+> T := Tensor([*U,U,GF(3)*], func<u | u[1]*Transpose(u[2])>);
+> <U.1,U.1>@T;  
+
+@(
+    x: < [1] [0],  [1] [0] >,
+    t: Tensor of valence 2, U2 x U1 >-> U0 U2 : Full KMatrixSpace o...
+)
+In file "/Users/James/Dropbox/MagmaPackages/Multilinear/Tensor/TensorDef.m", 
+line 74, column 12:
+>>   return x @ t`Map;
+              ^
+Runtime error in map application: Element is not in the codomain of the map
+
+This bug was caused when changing to lists.  Because lists allow mix and match
+it no longer forced you to make GF(3) the same type of space as U.
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+Main issue is that the given func is not valid for the frame given.
+The user program is expected to input and output correctly, therefore this is not a bug.
+It may at some state suggest better error catching during the creation of the tensor.
+
+Added checks to the constructor. This will give an error if the function does not evaluate
+to an element inside the given codomain.
+
+==========================================================================================
+ BUG4: Heisenberg group as GrpMat
+==========================================================================================
+
+HeisenbergGroup
+
+this is internally limited to p^256 which is only so that pQuotient can be called.
+This isn't necessary.  You can always, and perhaps should, give this group as a matrix
+group.  The pc-group version is unnatural for the name "Heisenberg"
+
+==========================================================================================
+ BUG5: Nucleus as AlgMat
+==========================================================================================-
+
+> T := pCentralTensor(SmallGroup(27,4),1,1);
+> N := Nucleus(T,2,1);
+> Dimension(N);
+1
+> A := AdjointAlgebra(T);
+> Dimension(A);
+4
+> ChangeTensorCategory(~T,HomotopismCategory(2));
+> N2 := Nucleus(T,2,1);
+> Dimension(N2);
+4
+> Type(N);
+AlgMat
+> Type(N2);
+AlgMat
+
+This is a bug.  Nucleus for the given alternating type seems to be using the fusion
+of the category.  That is making it into a JORDAN ALGEBRA!  Yet the type it is making is 
+an AlgMat -- and ASSOCIATIVE ALGEBRA.  On this example it is going unnoticed because
+the Jordan algebra is 1-dimensional, making it coincide with an associative algebra.
+However, you cannot make this work in general.
+
+Two solutions: (1) make the type on nucleus when fused an AlgGen, or
+(2) don't use fusion in nucleus computation.
+
+Honestly, fusion isn't ever used in nuclei but we of course have generalized so we
+can decide.  It is nice to have the jordan version, but if so we have to make it jordan.
+Talk it over with James.
+
+==========================================================================================
+ BUG6: Ext over adj
+==========================================================================================
+
+__GetExtOverAdj := function(T)
+  // Get adj info
+  A := AdjointAlgebra(T);
+  star := Star(A);
+
+  // Get ext over adj
+  V := Domain(T)[1];
+  Ext := ExteriorCotensorSpace(V,2);
+  gens := {};
+  for E in Generators(Ext) do
+    for X in Basis(A) do
+      Y := X @ star;
+      ten := Ext![ Eltseq(<u*X,v>@E - <u,v*Y>@E)[1] : v in Basis(V), u in Basis(V) ];
+      Include(~gens, ten);
+    end for;
+  end for;
+  CT := SubtensorSpace(Ext, SetToSequence(gens));
+  Ext_Adj := Ext/CT;
+
+  return Ext_Adj;
+end function;
+
+This should correctly construct the exterior square over the adjoint of the 
+(alternating) tensor. In runs with genus 2 groups, this returns a 0-dimensional
+cotensor space. It should be at least 2 dimensional. Problem is likely inside
+ExteriorCotensorSpace.
+
+==========================================================================================
+ BUG7: Radical to fuse
+==========================================================================================
+
+> T := pCentralTensor(SmallGroup(3^4,5));
+> IsNondegenerate(T);
+false
+> R := Radical(T);
+> R;
+<
+    Full Vector space of degree 2 over GF(3),
+
+    Full Vector space of degree 2 over GF(3)
+>
+
+This should use the fusing of the homotopism category and return a single radical for 
+each fused part.
+
+==========================================================================================
+ BUG8: TensorSpace data structure
+==========================================================================================
+
+> TensorSpace(Rationals(),2,2,3);
+
+TensorSpace(
+     K: Rational Field,
+     d: 2,
+     p: 2,
+     q: 3
+)
+In file
+"/usr/local/math/Magma/magma2.22-1/package/Module/Multilinear/TensorSpa\
+ce/TensorSpc.m", line 160, column 68:
+ >>   return __GetTensorSpace( K, [* KSpace( K, d ) : i in [1..p+q] *]
+cat [KSp
+^
+Runtime error in 'cat': Bad argument types
+Argument types given: List, SeqEnum[ModTupFld]
+
+This is an artifact from when we switched the data structure of Frame to be List.
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+Updated the data structure.
+
+==========================================================================================
+ BUG9: quo and sub constructors
+==========================================================================================
+
+> TS := KTensorSpace(GF(3),[4,4,4]);
+> quo< TS | sub< TS | TS.1 > >;
+
+QuoConstructor(
+    T: Tensor space of dimension 64 over GF(3) with valence 2 U2 : ...,
+    X: <Tensor space of dimension 1 over GF(3) with valence 2 U2 : ...
+)
+SubConstructor(
+    T: Tensor space of dimension 64 over GF(3) with valence 2 U2 : ...,
+    L: <<Tensor space of dimension 1 over GF(3) with valence 2 U2 :...
+)
+In file "/usr/local/magma/package/Module/Multilinear/TensorSpace/TensorSpcBasic\
+.m", line 265, column 43:
+>>   require forall{ t : t in L | IsCoercible(T,t) } : "Tensors are not contai
+                                             ^
+Runtime error in 'IsCoercible': Bad argument types
+Argument types given: TenSpc, Tup
+
+John Cannon added these constructors. He is unfamiliar with our code, so it's not
+surprising to find a bug. Make sure all sub and quo work as intended.
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+==========================================================================================
+ BUG10: Contravariant homotopism cat
+==========================================================================================
+
+> Cat := HomotopismCategory(2 : Contravariant:=true);
+> Cat;
+Cotensor category of valence 1 (->,->) ({ 1 },{ 2 })
+
+Obvious disconnect here with valence. 
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+==========================================================================================
+ BUG11: Cotensor from seq of mats
+==========================================================================================
+
+> Cat;
+Cotensor category of valence 1 (->,->) ({ 1 },{ 2 })
+> T := Tensor( RandomMatrix(GF(11),d,d), 2, 1, Cat );
+
+Tensor(
+    M: [ 6 10  8  1] [ 0  2  4  1] [ 1 10  2  1] [ 9  2  0  6],
+    s: 2,
+    t: 1,
+    Cat: Cotensor category of valence 1 (->,->) ({ 1 },{ 2 })
+)
+In file "/home/josh/Dropbox/MagmaPackages/Multilinear/Tensor/Tensor.m", line 
+568, column 16:
+>>   return Tensor( [M], s, t, Cat );
+                  ^
+Runtime error in 'Tensor': Tensor category incompatible.
+
+This is possibly related to BUG#10. 
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+==========================================================================================
+ BUG12: Tensor over centroid
+==========================================================================================
+
+> G := sl2Derivation(5, 7^4); // contained in Lie subfolder
+> T := pCentralTensor(G);
+> T;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 32 over GF(7)
+U1 : Full Vector space of degree 32 over GF(7)
+U0 : Full Vector space of degree 20 over GF(7)
+> D := DerivationAlgebra(T);
+> R := SolvableRadical(D);
+> SemisimpleType(D/R);
+A1 A1 A1 A1
+> C := Centroid(T);
+> C;
+Matrix Algebra of degree 84 and dimension 4 with 1 generator over GF(7)
+> 
+> S := TensorOverCentroid(T);
+> S;
+Tensor of valence 2, U2 x U1 >-> U0
+U2 : Full Vector space of degree 8 over GF(7^4)
+U1 : Full Vector space of degree 8 over GF(7^4)
+U0 : Full Vector space of degree 5 over GF(7^4)
+> D1 := DerivationAlgebra(S);
+> Dimension(D1);
+1
+
+This doesn't seem correct. I suspect the problem lies in TensorOverCentroid; however,
+sl2Derivation could also be at fault. 
+
+==========================================================================================
+ BUG13: IsCyclic
+==========================================================================================
+
+> G := PCGroup(\[ 8, -5, 5, 5, 5, 5, -5, 5, 5, 50081, 375602, 25228 ]);
+> T := pCentralTensor(G, 1, 1);
+> C := Centroid(T);
+> IsCyclic(C);
+true 
+[1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 1 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 1 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+
+The centroid is actually K x K (as G is direct product of flat genus 2 with Heisenberg), 
+but it reports true and gives me a "generator."
+
+------------------------------------------------------------------------------------------
+ Not a bug
+------------------------------------------------------------------------------------------
+
+Magma requires the 1 as a generator.
+
+==========================================================================================
+ BUG14: Generators of Ext
+==========================================================================================
+
+> V := VectorSpace(GF(5),4);
+> Ext := ExteriorCotensorSpace(V,2);
+> Ext;
+Cotensor space of dimension 6 over GF(5) with valence 1
+U2 : Full Vector space of degree 4 over GF(5)
+U1 : Full Vector space of degree 4 over GF(5)
+> 
+> gens := Generators(Ext);
+
+Generators(
+    T: Cotensor space of dimension 6 over GF(5) with valence 1 U2 :...
+)
+.(
+    T: Cotensor space of dimension 6 over GF(5) with valence 1 U2 :...,
+    i: 1
+)
+IsCoercible(
+    T: Cotensor space of dimension 6 over GF(5) with valence 1 U2 :...,
+    S: [ 0, 0, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ]
+)
+In file "/home/josh/Dropbox/MagmaPackages/Multilinear/TensorSpace/TensorSpcDef.\
+m", line 120, column 16:
+>>     s := Tensor(R,D,Eltseq(e@T`UniMap),T`Cat);
+                  ^
+Runtime error in 'Tensor': Number of implied modules does not match category 
+valence.
+
+
+There is a problem accessing the generators of the exterior cotensor space. 
+
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+There was an issue wtih the error in Tensor when given a sequence of a cotensor.
+
