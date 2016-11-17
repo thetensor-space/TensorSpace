@@ -1,0 +1,1508 @@
+\documentclass{amsart}
+
+\usepackage{hyperref}
+\usepackage[shortalphabetic]{amsrefs}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\title{Multilinear Algebra Package}
+
+\author{Uriya First}
+\address{
+	University of British Columbia\\
+	Department of Mathematics\\
+	1984 Mathematics Road\\
+	Vancouver, BC, V6T1Z2\\
+	Canada
+}
+\email{ufirst@math.ubc.ca}
+
+\author{Joshua Maglione}
+\address{
+	Department of Mathematics\\
+	Colorado State University\\
+	Fort Collins, CO 80523\\
+	USA
+}
+\email{maglione@math.colostate.edu}
+
+\author{James B. Wilson}
+\address{
+	Department of Mathematics\\
+	Colorado State University\\
+	Fort Collins, CO 80523\\
+	USA
+}
+\email{James.Wilson@ColoState.Edu}
+\date{\today}
+
+\makeindex
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+This chapter discuss operations with multilinear algebra through tensors 
+and tensor spaces.  Wherever possible we follow the conventions
+of Ricci tensor calculus and Whitney's tensor products.  Refer to 
+\cite{Malcev}, \cite{Landsberg:tensors}.  Necessary categorical formalism are largely drawn from
+\cite{Wilson:division}.
+\medskip
+
+Tensors $T$ can be encoded in numerous ways, e.g. by structure constants (in Ricci notation
+ $T_{a_1\cdots a_p}^{b_1\cdots b_q}$) or by explicit
+multilinear functions $[x_v,\dots,x_1]$.  The only requirement is that there be
+some explicit interpretation as an element of a universal tensor space 
+$\hom_K(U_v\otimes_K\cdots \otimes_K U_1,U_0)$.
+Most intrinsics are implemented regardless of the encoding, though the structure constants model
+is preferred for efficiency reasons.  Several standard tensors are included as well as functors
+to extract tensors from such objects as groups, rings, algebras, and modules.
+
+\section{Creating tensors}
+
+Tensors are required to have the following information.
+\begin{itemize}
+\item A commutative ring $K$ of coefficients.
+\item A valence $v$ indicating the number of variables to include in its associated multilinear map.
+\item A list $\{U_v,\dots, U_0\}$ of $K$-modules called the {\em frame}.
+\item A function $U_v\times \cdots \times U_1\to U_0$ that is $K$-linear in each $U_i$.
+\end{itemize}
+All tensor are formally elements of a tensor space (type {\tt TenSpc}), for example
+$\hom_K(U_v\otimes_K\cdots \otimes_K U_1,U_0)$.  So tensors have type {\tt TenSpcElt}.
+Operations such as linear combinations of tensors take place within this tensor space.
+Attributes such as coefficients, valence, and frame  apply to the tensor space as well.
+
+When necessary, the user may further direct the operations on tensors to appropriate tensor categories 
+(type {\tt TenCat}).  For instance covariant and contravariant variables can be specified
+as well as imposing symmetry conditions.
+
+
+Tensors are described by the following type and its attributes.
+
+\color{blue}
+\index{TenSpcElt}
+{\small \begin{verbatim} %%Type
+TenSpcElt:
+  Adjoint          CoordImages      Map              Radicals
+  Bimap            Derivations      Nondegenerate    Reflexive
+  Centroids        Domain           Nuclei           Valence
+  Codomain         FullyNondeg      Parent
+  Coerce           Image            Permutation
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Adjoint}] the adjoint $*$-algebra, specifically reserved for 
+{\tt AdjointAlgebra}. 
+\item[{\tt Bimap}] a record of information for the bimap, also known as a bilinear map; this only 
+applies for tensors of valence 2.
+\item[{\tt Centroids}] a list of two lists. The first is a list of all subsets 
+of $\{1,...,v\}$ of size two or more, and the second a corresponding list of the
+$S$-centroids.
+\item[{\tt Codomain}] the codomain of the tensor as a multimap.
+\item[{\tt Coerce}] a list of functions into the domain of the tensor. 
+\item[{\tt CoordImages}] a sequence of the coordinate images of the tensor.
+\item[{\tt Derivations}] the derivation algebra of the tensor.
+\item[{\tt Domain}] a sequence of the modules in the domain of the tensor.
+\item[{\tt FullyNondeg}] the associated fully nondegenerate tensor.
+\item[{\tt Image}] the image as a subspace of the codomain.
+\item[{\tt Map}] the black-box map used for evaluation.
+\item[{\tt Nondegenerate}] the associated nondegenerate tensor.
+\item[{\tt Nuclei}] a list of two lists. The first is a list of all subsets of 
+$\{0,...,v\}$ of size two, and the second is a list of the associated nuclei.
+\item[{\tt Parent}] the parent tensor space. 
+\item[{\tt Permutation}] a permutation that allows for on the fly computations.
+\item[{\tt Radicals}] a list of the radicals as subspaces of the modules in the
+domain. The last entry is reserved for the coradical which is stored as a tuple:
+the coradical and a homomorphism onto the coradical.
+\item[{\tt Reflexive}] a record of information on whether the tensor is 
+alternating or symmetric.
+\item[{\tt Valence}] the valence of the tensor.
+\end{description}
+
+
+\subsection{Black-box tensors}
+First, we detail some black-box constructors of tensors where the user specifies 
+a function used for evaluation.
+
+\color{blue}
+\index{Multimap}\index{Tensor}\index{Bimap}
+{\small \begin{verbatim}
+Tensor(S, F) : SeqEnum, UserProgram -> TenSpcElt
+Multimap(S, F) : SeqEnum, UserProgram -> TenSpcElt
+Bimap(S, F) : SeqEnum, UserProgram -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor with the frame specified by $S$. The last entry is assumed to
+be the codomain of the multimap. The user-defined function $F$ should take as
+input a tuple of elements of the domain and return an element of the codomain.
+
+\color{blue}
+\index{Multimap}\index{Tensor}\index{Bimap}
+{\small \begin{verbatim}
+Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt
+Multimap(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt
+Bimap(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor with frame specified by $D$ and $C$, where $D$ is a sequence 
+of spaces in the domain and $C$ the codomain. The user-defined function $F$ 
+should take as input a tuple of elements of $D$ and return an element of $C$.
+
+\subsection{Tensors from sequences}
+Another way to create tensors is by a sequence.
+
+\color{blue}
+\index{Multimap}\index{Bimap}\index{SequenceToMultimap}\index{SequenceToBimap}
+{\small \begin{verbatim}
+SequenceToMultimap(d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+SequenceToBimap(d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+Multimap(d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+Bimap(d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor given by the sequence $S$ of elements of a ring $R$, whose 
+frame consists of the free $R$-modules of the prescribed dimensions. 
+
+\color{blue}
+\index{Multimap}\index{Bimap}\index{SequenceToMultimap}\index{SequenceToBimap}
+{\small \begin{verbatim}
+SequenceToMultimap(R, d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+SequenceToBimap(R, d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+Multimap(R, d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+Bimap(R, d, S) : [RngIntElt], SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor given by the sequence $S$, whose frame consists of the free 
+$R$-modules of the prescribed dimensions.
+
+\color{blue}
+\index{Bimap}\index{FormsToBimap}
+{\small \begin{verbatim}
+FormsToBimap(F) : [Mtrx] -> TenSpcElt
+FormsToBimap(F) : Mtrx -> TenSpcElt
+Bimap(F) : [Mtrx] -> TenSpcElt
+Bimap(F) : Mtrx -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bimap given by the system of forms.
+
+\subsection{Tensors from algebraic objects}
+We extract multimaps from algebraic objects.
+
+\color{blue}
+\index{Bimap}\index{AlgebraToBimap}
+{\small \begin{verbatim}
+AlgebraToBimap(A) : Alg, TenSpcElt
+Bimap(A) : Alg, TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bimap given by the product in $A$.
+
+\color{blue}
+\index{Commutator}
+{\small \begin{verbatim}
+Commutator(A) : Alg -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the commutator of the algebra $A$.
+
+\color{blue}
+\index{Associator}
+{\small \begin{verbatim}
+Associator(A) : Alg -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the associator of the algebra $A$.
+
+\color{blue}
+\index{Bimap}\index{ModuleToBimap}
+{\small \begin{verbatim}
+ModuleToBimap(M) : Mod -> TenSpcElt
+Bimap(M) : Mod -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bimap given by the action of $R$ on the $R$-module $M$.
+
+\color{blue}
+\index{LModuleToBimap}
+{\small \begin{verbatim}
+LModuleToBimap(N, K) : MonStgElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the bimap given by the action of $L$, obtained from 
+{\tt L:=LieAlgebra(N,K)}, on its natural module.
+
+\color{blue}
+\index{pCentralBimap}
+{\small \begin{verbatim}
+pCentralBimap(G, s, t) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt
+pCentralBimap(G, p, s, t) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the commutator from the associated Lie algebra from the $s$ and $t$
+components into the $s+t$ component. 
+
+\color{blue}
+\index{RBimap}\index{RMultimap}
+{\small \begin{verbatim}
+RBimap(R, a, b, c) : Rng, RngIntElt, RngIngElt, RngIntElt -> TenSpcElt
+RMultimap(R, S) : Rng, [RngIntElt] -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the $R$-bimap or $R$-multimap given by matrix multiplication: 
+\[ \circ: M_{a\times b}(R)\times M_{b\times c}(R)\rightarrowtail 
+M_{a\times c}(R),\]
+\[ \langle \,\rangle : M_{s_1\times s_2}(R) \times \cdots \times 
+M_{s_{k-1}\times s_k}(R) \rightarrowtail M_{s_1\times s_k}(R).\]
+
+\color{blue}
+\index{Polarisation}\index{Polarization}
+{\small \begin{verbatim}
+Polarisation(f) : MPolElt -> TenSpcElt, MPolElt
+Polarization(f) : MPolElt -> TenSpcElt, MPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the polarization of the homogeneous mulivariate polynomial $f$ as a
+tensor and as a multivariate polynomial.
+
+\subsection{New tensors from old}
+We can construct new tensors from old.
+
+\color{blue}
+\index{AlternatingTensor}\index{AntisymmetricTensor}
+\index{AlternatingMultimap}\index{AntisymmetricMultimap}
+\index{AlternatingBimap}\index{AntisymmetricBimap}
+{\small \begin{verbatim}
+AlternatingTensor(t) : TenSpcElt -> TenSpcElt
+AlternatingMultimap(t) : TenSpcElt -> TenSpcElt
+AlternatingBimap(t) : TenSpcElt -> TenSpcElt
+AntisymmetricTensor(t) : TenSpcElt -> TenSpcElt
+AntisymmetricMultimap(t) : TenSpcElt -> TenSpcElt
+AntisymmetricBimap(t) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the alternating (antisymmetric) tensor induced by the given tensor. If 
+the tensor is already alternating, then the given tensor is returned.
+
+\color{blue}
+\index{SymmetricTensor}\index{SymmetricBimap}\index{SymmetricMultimap}
+{\small \begin{verbatim}
+SymmetricTensor(t) : TenSpcElt -> TenSpcElt
+SymmetricBimap(t) : TenSpcElt -> TenSpcElt
+SymmetricMultimap(t) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the symmetric tensor induced by the given tensor. If the tensor is 
+already symmetric, then the given tensor is returned.
+
+\color{blue}
+\index{Shuffle}
+{\small \begin{verbatim}
+Shuffle(t, g) : TenSpcElt, GrpPermElt -> TenSpcElt
+Shuffle(t, g) : TenSpcElt, SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the Knuth-Liebler shuffle of the multimap. Note that $g$ must be a 
+permutation on $\{0,...,v\}$, where $v$ is the valence of $M$.
+
+\color{blue}
+\index{BimapOnVectorSpaces}\index{MultimapOnVectorSpaces}
+{\small \begin{verbatim}
+MultimapOnVectorSpaces(t) : TenSpcElt -> TenSpcElt
+BimapOnVectorSpaces(t) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor on vector spaces. This is a forgetful functor. 
+
+\color{blue}
+\index{AssociatedForm}
+{\small \begin{verbatim}
+AssociatedForm(t) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the multilinear form $\mathcal{U}\times U_0^*\rightarrowtail K$.
+
+\color{blue}
+\index{Compress}
+{\small \begin{verbatim}
+Compress(t) : TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the compression of the tensor. This removes all 1-dimensional spaces in
+the domain.
+
+
+\section{Elementary operations with Tensors}
+
+We take two perspectives for operations with tensors. Tensors are elements of a
+module, and they are multimaps.
+
+\subsubsection{As module elements}
+Treating the tensor space as a $K$-module, we have the standard operations.
+
+\color{blue}
+\index{$+$}\index{$*$}
+{\small \begin{verbatim}
+s + t : TenSpcElt, TenSpcElt -> TenSpcElt
+k * t : RngElt, TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor $s+t$ or $kt$.
+
+\subsubsection{As multimaps}
+Regarding tensors as multimaps, we allow for composition and evaluation.
+
+\color{blue}
+\index{AT}
+{\small \begin{verbatim}
+x @ t : Tup, TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Evaluates the tensor at $x\in \mathcal{U}=U_\alpha\times \cdots \times U_1$.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+t * f : TenSpcElt, Map -> TenSpcElt
+t * M : TenSpcElt, Mtrx -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the tensor which is the composition with the given map.
+
+\color{blue}
+\index{eq}
+{\small \begin{verbatim}
+s eq t : TenSpcElt, TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if the tensors are the same multimap.
+
+\subsection{Operations with Bimaps}
+
+We add stuff for bimaps. Throughout, we assume that $B=\circ:U\times V
+\rightarrowtail W$. %TODO: fix this.
+
+\subsubsection{Infix notation}
+With bimaps, we allow for an infix evaluation of elements in the domain.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+x * B : Any, TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the map $f : V\rightarrow W$ given by $vf = x\circ v$ if $x$ is an 
+element of $U$. If $x$ is a subspace of $U$, then this returns a sequence of 
+maps one for each element in the basis for $x$.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+B * y : Any, TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the map $f : U\rightarrow W$ given by $uf = u\circ y$ if $y$ is an 
+element of $V$. If $y$ is a subspace of $V$, then this returns a sequence of 
+maps one for each element in the basis for $y$.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+M * y : Map, Any -> Any
+M * y : [Map], Any -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the element $yM$ or the subspace of $W$ generated by each $yM_i$. If $y$
+is a subspace of $V$ then it returns the subspace generated by $vM$ or by each
+$vM_i$ for each $v$ in the basis of $y$.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+x * M : Any, Map -> Any
+x * M : Any, [Map] -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the element $xM$ or the subspace of $W$ generated by each $xM_i$. If $x$
+is a subspace of $U$ then it returns the subspace generated by $uM$ or by each
+$uM_i$ for each $u$ in the basis of $x$.
+
+\subsubsection{Product notation} %TODO: Call it something else?
+We define new types to give bimaps a more intuitive evaluation.
+
+\color{blue}
+\index{BmpU}\index{BmpV}
+{\small \begin{verbatim} %%Type
+BmpU, BmpV:
+  Parent    Space
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Parent}] the original bimap.
+\item[{\tt Space}] the module in the $U$ or $V$ position.
+\end{description}
+
+\color{blue}
+\index{BmpUElt}\index{BmpVElt}
+{\small \begin{verbatim} %%Type
+BmpUElt, BmpVElt:
+  Element    Parent
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Element}] the element of the module $U$ or $V$.
+\item[{\tt Parent}] the space {\tt BmpU} or {\tt BmpV}.
+\end{description}
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+x * y : BmpUElt, BmpVElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the element $x\circ y$.
+
+\color{blue}
+\index{$*$}
+{\small \begin{verbatim}
+x * y : BmpU, BmpV -> Any
+x * y : BmpUElt, BmpV -> Any
+x * y : BmpU, BmpVElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the subspace $x\circ y$.
+
+\color{blue}
+\index{Parent}
+{\small \begin{verbatim}
+Parent(X) : BmpU -> TenSpcElt
+Parent(X) : BmpV -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the original bimap where these spaces came from.
+
+\color{blue}
+\index{LeftDomain}
+{\small \begin{verbatim}
+LeftDomain(B) : TenSpcElt -> BmpU
+\end{verbatim} }
+\color{black}
+
+Returns the left domain, $U$, of $B$. 
+
+\color{blue}
+\index{RightDomain}
+{\small \begin{verbatim}
+RightDomain(B) : TenSpcElt -> BmpV
+\end{verbatim} }
+\color{black}
+
+Returns the right domain, $V$, of $B$. 
+
+\color{blue}
+\index{IsCoercible}
+{\small \begin{verbatim}
+IsCoercible(S,x) : BmpU, Any -> BoolElt, BmpUElt
+IsCoercible(S,x) : BmpV, Any -> BoolElt, BmpVElt
+\end{verbatim} }
+\color{black}
+
+Decides if $x$ can be coerced into $S$, and if it can, it returns the element.
+
+\subsection{Properties of Tensors}
+
+Some intrinsics.%TODO: add something here?
+
+\color{blue}
+\index{Parent}
+{\small \begin{verbatim}
+Parent(t) : TenSpcElt -> TenSpc
+\end{verbatim} }
+\color{black}
+
+Returns the tensor space that contains $t$. 
+
+\color{blue}
+\index{Domain}
+{\small \begin{verbatim}
+Domain(t) : TenSpcElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns the domain of the tensor.
+
+\color{blue}
+\index{Codomain}
+{\small \begin{verbatim}
+Codomain(t) : TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the codomain of the tensor.
+
+\color{blue}
+\index{Valence}
+{\small \begin{verbatim}
+Valence(t) : TenSpcElt -> RngIntElt
+\end{verbatim} }
+\color{black}
+
+Returns the valence of the tensor.
+
+\color{blue}
+\index{Modules}
+{\small \begin{verbatim}
+Modules(t) : TenSpcElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns the modules in the frame of $t$.
+
+\color{blue}
+\index{Image}
+{\small \begin{verbatim}
+Image(t) : TenSpcElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the image of the tensor.
+
+\color{blue}
+\index{BaseRing}\index{BaseField}
+{\small \begin{verbatim}
+BaseRing(t) : TenSpcElt -> Rng
+BaseField(t) : TenSpcElt -> Fld
+\end{verbatim} }
+\color{black}
+
+Returns the base ring or field.
+
+\subsubsection{Structure constants and related data}
+
+We allow for manipulation of the tensor data.
+
+\color{blue}
+\index{StructureConstants}\index{Eltseq}
+{\small \begin{verbatim}
+StructureConstants(t) : TenSpcElt -> SeqEnum
+Eltseq(t) : TenSpcElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns the sequence of structure constants of the tensor. 
+
+\color{blue}
+\index{Slice}
+{\small \begin{verbatim}
+Slice(t, grid) : TenSpcElt, Tup -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns the slice of the structure constants running through the given grid. The
+grid must have $v+1$ entries corresponding to the modules $U_v$, ..., $U_1$, 
+$U_0$. Furthermore, the entries must be structures containing positive integers. 
+These integers correspond to the the elements in the bases, and thus, must not
+exceed the dimension.
+
+\color{blue}
+\index{Foliation}
+{\small \begin{verbatim}
+Foliation(t, i) : TenSpcElt, RngIntElt -> Mtrx
+\end{verbatim} }
+\color{black}
+
+Returns the matrix whose rows are the structure constants with a fixed basis 
+element of $U_i$. In other words, row $k$ is the slice with the full grid but 
+fixing $k$ in the $i$ component.
+
+\color{blue}
+\index{SystemOfForms}
+{\small \begin{verbatim}
+SystemOfForms(t, i, j) : TenSpcElt, RngIntElt, RngIntElt -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns a sequence of $d_i\times d_j$ matrices, where $d_i=\dim U_i$ and 
+$d_j=\dim U_j$. Each matrix in the sequence corresponds to slices with a fixed
+grid where entries $i$ and $j$ run through their bases.
+
+\subsubsection{Degeneracy properties}
+
+Something??? %TODO: add something here.
+
+\color{blue}
+\index{NondegenerateMultimap}\index{NondegenerateBimap}\index{Nondegenerate}
+{\small \begin{verbatim}
+NondegenerateMultimap(t) : TenSpcElt -> TenSpcElt, Hmtp
+NondegenerateBimap(t) : TenSpcElt -> TenSpcElt, Hmtp
+Nondegenerate(t) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the nondegenerate multimap associated to $t$ along with a homotopism 
+from the given multimap to the returned multimap.
+
+\color{blue}
+\index{IsNondegenerate}
+{\small \begin{verbatim}
+IsNondegenerate(t) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $t$ is a nondegenerate multimap.
+
+\color{blue}
+\index{FullyNondegenerateMultimap}\index{FullyNondegenerateBimap}\index{FullyNondegenerate}
+{\small \begin{verbatim}
+FullyNondegenerateMultimap(t) : TenSpcElt -> TenSpcElt, Hmtp
+FullyNondegenerateBimap(t) : TenSpcElt -> TenSpcElt, Hmtp
+FullyNondegenerate(t) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the fully nondegenerate multimap associated to $t$ along with a
+homotopism from the given multimap to the returns multimap.
+
+\color{blue}
+\index{IsFullyNondegenerate}
+{\small \begin{verbatim}
+IsFullyNondegenerate(t) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $t$ is a fully nondegenerate multimap.
+
+\color{blue}
+\index{IsAlternating}\index{IsAntisymmetric}
+{\small \begin{verbatim}
+IsAlternating(t) : TenSpcElt -> BoolElt
+IsAntisymmetric(t) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $t$ is an alternating tensor.
+
+\color{blue}
+\index{IsSymmetric}
+{\small \begin{verbatim}
+IsSymmetric(t) : TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $t$ is a symmetric tensor.
+
+
+
+\section{Creating tensor spaces}
+
+Tensor spaces are described by the following type and its attributes.
+
+\color{blue}
+\index{TenSpc}
+{\small \begin{verbatim} %%Type
+TenSpc:
+  Cat     Mods      Ring      Valence
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Cat}] the category for the tensors in the tensor space.
+\item[{\tt Mods}] the sequence of modules in the frame of the tensor space. 
+\item[{\tt Ring}] the base ring of the tensor space. 
+\item[{\tt Valence}] the valence of the tensor space, same as the number of 
+modules minus 1. 
+\end{description}
+
+
+\subsection{Constructions of universal tensor spaces}
+
+Construction of universal tensor spaces is modeled after construction of free 
+modules and matrix spaces. For efficiency reasons, the actual representation may 
+vary based on the parameters, e.g. it may be a space of structure constants, 
+black-box functions, or systems of forms. So access to the tensors in these 
+tensor space should be made through the provided functions.
+
+\color{blue}
+\index{KTensorSpace}\index{RTensorSpace}
+{\small \begin{verbatim}
+KTensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
+RTensorSpace(R, S) : Rng, [RngIntElt] -> TenSpc
+KTensorSpace(K, S, C) : Fld, [RngIntElt], TenSpcCat -> TenSpc
+RTensorSpace(R, S, C) : Rng, [RngIntElt], TenSpcCat -> TenSpc
+\end{verbatim} }
+\color{black}
+
+For a commutative ring or field $R$ and sequence $[e_v,\dots,e_0]$, constructs a 
+representation of the universal tensor space 
+$R^{e_v\cdots e_0}\cong \hom_R(R^{e_v}\otimes_R\cdots \otimes_R R^{e_1}, 
+R^{e_0})$.
+
+The optional parameter $C$ specifies the tensor category.  The default is
+Albert's homotopism category. 
+
+\color{blue}
+\index{TensorSpace}
+{\small \begin{verbatim}
+TensorSpace(S) : [ModRng] -> TenSpc
+TensorSpace(S) : [ModTupRng] -> TenSpc
+TensorSpace(S) : [ModMatRng] -> TenSpc
+TensorSpace(S, C) : [ModRng], TenSpcCat -> TenSpc
+TensorSpace(S, C) : [ModTupRng], TenSpcCat -> TenSpc
+TensorSpace(S, C) : [ModMatRng], TenSpcCat -> TenSpc
+\end{verbatim} }
+\color{black}
+
+Given a sequence $U_v,\dots, U_0$ of $K$-modules returns a universal tensor 
+space equivalent to $\hom_K(U_v\otimes_K\cdots\otimes_K U_1,U_0)$.  
+
+
+The optional parameter $C$ specifies the tensor category.  The default is
+Albert's homotopism category. 
+
+\color{blue}
+\index{TensorSpace}
+{\small \begin{verbatim}
+TensorSpace(V, p, q) : ModTupFld, RngIntElt, RngIntElt -> TenSpc
+TensorSpace(K, d, p, q) : Fld, RngIntElt, RngIntElt, RngIntElt -> TenSpc
+\end{verbatim} }
+\color{black}
+
+Returns the $(p,q)$-tensor space over the vector space $V=K^d$. The first $p$
+indices are covariant and the last $q$ indices are contravariant.  
+
+This is functionally equivalent
+to creating a universal tensor space from the sequence 
+$[V,\dots,_p V, V^*,\dots,_q V^*]$
+and the tensor category with arrows $[0,\dots,_p 0, 1,\dots,_q 1]$ and 
+duplicates $\{\{p+q,\dots,1+q\},\{q,\dots,1\},\{0\}\}$.
+
+\section{Creating tensor categories}
+
+Multilinear algebra involves numerous categories.  For instance, the product 
+$\cdot:\mathbb{R}\times \mathbb{R}\rightarrowtail\mathbb{R}$ could be regarded 
+as a ring, in which case we would use homomorphisms of the form
+\begin{align*}
+	xf\cdot yf & = (x\cdot y)f.
+\end{align*}
+In another context this tensor becomes a (left) module, so homorphisms would be 
+linear maps, i.e.
+\begin{align*}
+	x\cdot (yf) & = (x\cdot y)f.
+\end{align*}
+In still a further category the tensor is an inner product and isometries 
+$xf\cdot yf = x\cdot y$ takes center stage. Much of multilinear algebra benefits
+from interactions between different categories. The complexity of the possible 
+categories grows with the valence.  We include a few standard categories but 
+allow for the general spectrum.
+
+
+\color{blue}
+\index{TenCat}
+{\small \begin{verbatim} %%Type
+TenCat:
+  Arrows  Repeats  Valence
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Arrows}] a ternary sequence  that defines the category of tensor 
+spaces. By default a $-1$ (called a {\em down arrow}) signifies a covariant 
+index, and a $1$ (an {\em up arrow}) signifies a contravariant  index, and $0$ 
+indicates a constant index.
+\item[{\tt Dups}] a partition of $\{0,\dots,v\}$, $v$ the valence, indicating 
+which modules are duplicates.
+\end{description}
+
+\color{blue}
+\index{TensorSpaceCategory}
+{\small \begin{verbatim}
+TensorSpaceCategory(A, D) : [RngIntElt], [RngIntElt] -> TenSpcCat
+\end{verbatim} }
+\color{black}
+
+Sets up a tensor space category with specified arrows $A$ and duplicates $D$.
+
+These parameters determine which of the many regularly used categories is 
+intended. Most of the standard options (Albert's homotopisms, isometries, and 
+adjoints) are included with special commands or assumed by default. Yet, for 
+general configurations the following properties approach is used.
+
+Take for instance a tensor $t$  specifying a multimap 
+$[x_2,x_1]:U_2\times U_1\rightarrowtail U_0$.  By default all its modules are 
+covariant. So given a second tensor $s$ with multimap 
+$\langle y_2,y_1\rangle:V_2\times V_1\rightarrowtail V_0$, a morphism 
+$f:t\to s$ will indicate a triple 
+$f=(f_2:U_2\to V_2, f_1:U_1\to V_1,f_0:U_0\to V_0)$ such that
+\begin{align*}
+	\langle x_2 f_2, x_1 f_1\rangle & = [x_2,x_1]f_0.
+\end{align*}
+This is Albert's notion of a {\em homotopism}.  
+
+Meanwhile, if the tensor spaces are specified
+with arrows $[-1,1,-1]$ then $f=(f_2:U_2\to V_2, f_1:V_1\to U_1,f_0:U_0\to V_0)$ 
+and satisfies the rule:
+\begin{align*}
+	\langle x_2 f_2, x_1\rangle & = [x_2,x_1 f_1]f_0.
+\end{align*}
+A further alternative is an arrow is $0$, for example $[0,-1,-1]$. This 
+indicates that $U_2=V_2$, as the last component is held constant.  Furthermore, 
+$f_2$ is the identity.  Accordingly the resulting morphisms in this category are 
+$U_2$-semilinear maps:
+\begin{align*}
+	\langle x_2, x_1 f_1\rangle & = [x_2,x_1]f_0.
+\end{align*}
+For general valence the arrows are reversed when the arrow index is $1$.
+\medskip
+
+Duplicates apply a different constraint on the category.  They force the 
+morphisms labeled by indices in a common equivalence class of the partition to 
+be equal as functions.  
+
+For example, suppose that in the example above has the duplicate partition 
+$\{\{2,1\},\{0\}\}$. Then all tensor spaces in this category are required to 
+have $U_2=U_1$, and (trivially) $U_0=U_0$. Furthermore, $f_2=f_1$. In particular
+it is not possible to have arrows in different directions on points in a common 
+equivalence class.  So for instance, the category of bilinear maps upto 
+isometries would be specified by arrows $[-1,-1,0]$ and partition 
+$\{\{2,1\},\{0\}\}$.
+
+\color{blue}
+\index{HomotopismCategory}
+{\small \begin{verbatim}
+HomotopismCategory() :  -> TenSpcCat
+\end{verbatim} }
+\color{black}
+
+Returns Albert's homotopism category -- all modules categories are covariant and 
+no duplicates considered.
+
+\color{blue}
+\index{CohomotopismCategory}
+{\small \begin{verbatim}
+CohomotopismCategory() :  -> TenSpcCat
+\end{verbatim} }
+\color{black}
+
+Returns the cohomotopism category -- all domain modules categories are 
+covariant, the codomain is contravariant, and no duplicates considered.
+
+\color{blue}
+\index{AdjointCategory}\index{LinearCategory}
+{\small \begin{verbatim}
+AdjointCategory(v,s,t) :  RngIntElt, RngIntElt, RngIntElt -> TenSpcCat
+LinearCategory(v,s,t) :  RngIntElt, RngIntElt, RngIntElt -> TenSpcCat
+\end{verbatim} }
+\color{black}
+
+Returns the tensor category where all modules are constant except in position 
+$s$ and $t$.  Both $s$ and $t$ are in $\{0,\dots, v\}$.
+Position $s$ is covariant, position $t$ is contravariant.
+
+
+\section{Operations on tensor, tensor spaces, and tensor categories}
+
+\subsection{Elements and Cardinality of Tensor Spaces}
+
+We view a tensor space as an $R$-module, so we have notions of generators, 
+dimension (if it is free), and cardinality.
+
+\color{blue}
+\index{Generators}
+{\small \begin{verbatim}
+Generators(T) : TenSpc -> SeqEnum
+\end{verbatim} }
+\color{black}
+
+Returns a sequence of generators for the tensor space. 
+
+\color{blue}
+\index{.}
+{\small \begin{verbatim}
+T . i : TenSpc, RngIntElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the $i$th generator of the tensor space $T$.
+
+\color{blue}
+\index{NumberOfGenerators}\index{Ngens}
+{\small \begin{verbatim}
+NumberOfGenerators(T) : TenSpc -> RngIntElt
+Ngens(T) : TenSpc -> RngIntElt
+\end{verbatim} }
+\color{black}
+
+Returns the number of generators of the tensor space $T$.
+
+\color{blue}
+\index{Dimension}
+{\small \begin{verbatim}
+Dimension(T) : TenSpc -> RngIntElt
+\end{verbatim} }
+\color{black}
+
+Returns the dimension of the tensor space $T$.
+
+\color{blue}
+\index{\#}
+{\small \begin{verbatim}
+# T : TenSpc -> RngIntElt
+\end{verbatim} }
+\color{black}
+
+Returns the size of the tensor space, provided it is finite.
+
+\color{blue}
+\index{Generators}
+{\small \begin{verbatim}
+Random(T) : TenSpc -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Provided the base ring has a random algorithm implemented, it returns a random 
+element of the tensor space.
+
+%%Example{Name}
+We can look at this example.
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!teal},backgroundcolor=\color{white!70!gray}]
+\end{lstlisting}
+}
+
+\subsection{Categorical operations}
+
+We include functions defined for the category of tensors.
+
+\color{blue}
+\index{SubMultimap}\index{SubBimap}\index{SubMap}
+{\small \begin{verbatim}
+SubMultimap(t, S) : TenSpcElt, SeqEnum -> TenSpcElt
+SubBimap(t, S) : TenSpcElt, SeqEnum -> TenSpcElt
+SubMap(t, S) : TenSpcElt, SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the smallest submap of $t$ containing $S$.
+
+\color{blue}
+\index{SubMultimap}\index{SubBimap}\index{SubMap}
+{\small \begin{verbatim}
+SubMultimap(t, D, C) : TenSpcElt, SeqEnum, Any -> TenSpcElt
+SubBimap(t, D, C) : TenSpcElt, SeqEnum, Any -> TenSpcElt
+SubMap(t, D, C) : TenSpcElt, SeqEnum, Any -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the smallest submap of $t$ containing $D$ in the domain and $C$ in the 
+codomain.
+
+\color{blue}
+\index{IsSubMultimap}\index{IsSubBimap}\index{IsSubMap}
+{\small \begin{verbatim}
+IsSubMultimap(t, s) : TenSpcElt, TenSpcElt -> BoolElt
+IsSubBimap(t, s) : TenSpcElt, TenSpcElt -> BoolElt
+IsSubMap(t, s) : TenSpcElt, TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides whether $s$ is a submultimap of $t$.
+
+\color{blue}
+\index{LocalIdeal}
+{\small \begin{verbatim}
+LocalIdeal(t, S, I) : TenSpcElt, SeqEnum, {RngIntElt} -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the local ideal of $t$ at $I$ constaining $S$.
+
+\color{blue}
+\index{LocalIdeal}
+{\small \begin{verbatim}
+LocalIdeal(t, D, C, I) : TenSpcElt, SeqEnum, Any, {RngIntElt} -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the local ideal of $t$ at $I$ constaining $D$ in the domain and $C$ 
+in the codomain.
+
+\color{blue}
+\index{LocalIdeal}
+{\small \begin{verbatim}
+LocalIdeal(t, s, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the local ideal of $t$ at $I$ constaining $s$ as a submap.
+
+
+\color{blue}
+\index{IsLocalIdeal}
+{\small \begin{verbatim}
+IsLocalIdeal(t, s, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if $s$ is a local ideal of $t$ at $I$.
+
+\color{blue}
+\index{Ideal}
+{\small \begin{verbatim}
+Ideal(t, S) : TenSpcElt, SeqEnum -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the ideal of $t$ containing $S$.
+
+\color{blue}
+\index{Ideal}
+{\small \begin{verbatim}
+Ideal(t, D, C) : TenSpcElt, SeqEnum, Any -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the ideal of $t$ containing $D$ in the domain and $C$ in the codomain.
+
+\color{blue}
+\index{Ideal}
+{\small \begin{verbatim}
+Ideal(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the ideal of $t$ containing $s$ as a submap.
+
+\color{blue}
+\index{IsIdeal}
+{\small \begin{verbatim}
+IsIdeal(t, s) : TenSpcElt, TenSpcElt -> BoolElt
+\end{verbatim} }
+\color{black}
+
+Decides if $s$ is an ideal of $t$.
+
+\color{blue}
+\index{LocalQuotient}
+{\small \begin{verbatim}
+LocalQuotient(t, s, I : \parameters) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt, Hmtp
+Check : BoolElt : true
+\end{verbatim} }
+\color{black}
+
+Returns the local quotient of $t$ by $s$ at $I$. If you know $s$ is a local 
+ideal of $t$ at $I$, set {\tt Check:=false} to skip the verification.
+
+\color{blue}
+\index{Quotient}
+{\small \begin{verbatim}
+Quotient(t, s : \parameters) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
+Check : BoolElt : true
+\end{verbatim} }
+\color{black}
+
+Returns the quotient of $t$ by $s$. If you know $s$ is an ideal of $t$, set 
+{\tt Check:=false} to skip the verification.
+
+\subsection{Constructing Groups and Algebras}
+Groups and algebras can be constructed from bimaps.
+
+\color{blue}
+\index{HeisenbergAlgebra}
+{\small \begin{verbatim}
+HeisenbergAlgebra(B) : TenSpcElt -> AlgGen
+\end{verbatim} }
+\color{black}
+
+Returns the Heisenberg algebra $A$ induced by the bimap $B$. If $B=\circ : 
+U\times V\rightarrowtail W$ is a bimap of $K$-vectorspaces, and $U$, $V$, and 
+$W$ are isomorphic, then $A$ is the algebra over $U$ with the given product. If 
+$U$ and $V$ are isomorphic but not with $W$, then $A$ is the algebra over 
+$U\oplus W$ with the given product. If $U$ is not isomorphic to $V$, then it 
+creates a new bimap $\bullet:(U\oplus V) \times (U\oplus V)\rightarrowtail W$, 
+where 
+\[ (u,v)\bullet (u',v') = u\circ v'. \]
+
+\color{blue}
+\index{HeisenbergLieAlgebra}
+{\small \begin{verbatim}
+HeisenbergLieAlgebra(B) : TenSpcElt -> AlgLie
+\end{verbatim} }
+\color{black}
+
+Returns the Heisenberg Lie algebra with Lie bracket given by the alternating 
+bimap induced by $B$.
+
+\color{blue}
+\index{HeisenbergGroup}
+{\small \begin{verbatim}
+HeisenbergGroup(B) : TenSpcElt -> GrpPC
+\end{verbatim} }
+\color{black}
+
+Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given by
+the alternating bimap induced by $B$.
+
+\section{Homotopisms}
+
+We define a new type for homotopisms: morphisms between tensors.
+\color{blue}
+\index{Hmtp}
+{\small \begin{verbatim} %%Type
+Hmtp:
+  Arrows      Codomain    Domain      Kernel      Maps
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt Arrows}] the sequence of 0s and 1s, which detail the order of the
+arrow. A 0 is covariant, and a 1 is contravariant. Therefore, a 0 goes from the 
+domain into the codomain, and a 1 goes from the codomain to the domain.
+\item[{\tt Codomain}] the codomain tensor.
+\item[{\tt Domain}] the domain tensor.
+\item[{\tt Kernel}] the kernel of the homotopism.
+\item[{\tt Map}] a list of maps of the various modules.
+\end{description}
+
+\subsection{Constructions of Homotopisms}
+
+Here is a way to create a homotopism. %%TODO: fix this.
+
+\color{blue}
+\index{Homotopism}
+{\small \begin{verbatim}
+Homotopism(t, s, M) : TenSpcElt, TenSpcElt, List -> Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the homotopism from $t$ to $s$ given by the list of maps $M$.
+
+\subsection{Basic Operations with Homotopisms}
+
+We provide some operations for homotopisms.
+
+\color{blue}
+\index{Domain}
+{\small \begin{verbatim}
+Domain(H) : Hmtp -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the domain tensor of $H$.
+
+\color{blue}
+\index{Codomain}
+{\small \begin{verbatim}
+Codomain(H) : Hmtp -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the codomain tensor of $H$.
+
+\color{blue}
+\index{Maps}
+{\small \begin{verbatim}
+Maps(H) : Hmtp -> List
+\end{verbatim} }
+\color{black}
+
+Returns the of maps for the various modules in the domain and codomain tensors.
+
+\color{blue}
+\index{Kernel}
+{\small \begin{verbatim}
+Kernel(H) : Hmtp -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the kernel of $H$ as an ideal of its domain tensor.
+
+\color{blue}
+\index{Image}
+{\small \begin{verbatim}
+Image(H) : Hmtp -> TenSpcElt
+\end{verbatim} }
+\color{black}
+
+Returns the image of $H$ as a submap of the codomain tensor.
+
+\section{Invariants of tensors}
+
+To help keep track of the structure of the associated algebras and groups to 
+tensors, we define a new attribute for some commonly used types. This attribute 
+enables the user to induce the action of the associated invariant onto the 
+desired factor.
+
+\color{blue}
+\index{DerivedFrom}
+{\small \begin{verbatim} %%Type
+AlgMat:
+  DerivedFrom
+AlgMatLie:
+  DerivedFrom
+GrpMat:
+  DerivedFrom
+\end{verbatim} }
+\color{black}
+
+\begin{description}
+\item[{\tt DerivedFrom}] a tuple containing the tensor where this object came
+from and the indices on which this object acts.
+\end{description}
+
+To access the projections or the objects acting on a specific factor, the 
+following should be used.
+
+\color{blue}
+\index{Induce}
+{\small \begin{verbatim}
+Induce(X, i) : AlgMat, RngIntElt -> AlgMat, Map
+Induce(X, i) : AlgMatLie, RngIntElt -> AlgMatLie, Map
+Induce(X, i) : GrpMat, RngIntElt -> GrpMat, Map
+\end{verbatim} }
+\color{black}
+
+Returns the induced sub-object associated to the $i$th factor of the associated 
+tensor and a projection from the given object to the returned sub-object.
+
+\subsection{Invariants as Multimaps}
+
+We integrate the invariant theory associated to bimaps and multimaps into the 
+realm of tensors. 
+
+\color{blue}
+\index{Radical}
+{\small \begin{verbatim}
+Radical(t, i) : TenSpcElt, RngIntElt -> Any
+\end{verbatim} }
+\color{black}
+
+Returns the $i$th radical as a subspace of $U_i$. 
+
+\color{blue}
+\index{Radical}
+{\small \begin{verbatim}
+Radical(t) : TenSpcElt -> Tup
+\end{verbatim} }
+\color{black}
+
+Returns the tuple of all the $i$-radicals for each $i\in \{1,...,v\}$.
+
+\color{blue}
+\index{Coradical}
+{\small \begin{verbatim}
+Coradical(t) : TenSpcElt -> Any, Map
+\end{verbatim} }
+\color{black}
+
+Returns the coradical of $t$ and a surjection from the codomain to the 
+coradical.
+
+\color{blue}
+\index{Singularity}
+{\small \begin{verbatim}
+Singularity(t, S) : TenSpcElt, {RngIntElt} -> Sch
+\end{verbatim} }
+\color{black}
+
+Returns the $S$-singularities of $t$ as the scheme of the zero-locus of a set of
+polynomials.
+
+\subsection{Invariants for Bimaps}
+
+The following are used only for tensors of valence 2.
+
+\color{blue}
+\index{AdjointAlgebra}
+{\small \begin{verbatim}
+AdjointAlgebra(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the adjoint $*$-algebra of the given bimap. 
+
+\color{blue}
+\index{LeftScalars} \index{MidScalars} \index{RightScalars}
+{\small \begin{verbatim}
+LeftScalars(B) : TenSpcElt -> AlgMat
+MidScalars(B) : TenSpcElt -> AlgMat
+RightScalars(B) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns $\mathcal{L}$, $\mathcal{M}$, or $\mathcal{R}$ for the associated bimap.
+
+%%Example{Name}
+We can look at this example.
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!teal},backgroundcolor=\color{white!70!gray}]
+\end{lstlisting}
+}
+
+\subsection{Invariants of General Multimaps}
+
+The following functions can be used for general multimaps.
+
+\color{blue}
+\index{Centroid}
+{\small \begin{verbatim}
+Centroid(t) : TenSpcElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the centroid of the tensor.
+
+\color{blue}
+\index{Centroid}
+{\small \begin{verbatim}
+Centroid(t, S) : TenSpcElt, {RngIntElt} -> AlgMat
+\end{verbatim} }
+\color{black}
+
+If $S\subseteq\{ 1,...,v\}$, then it returns the $S$-centroid of the tensor.
+
+\color{blue}
+\index{DerivationAlgebra}
+{\small \begin{verbatim}
+DerivationAlgebra(t) : TenSpcElt -> AlgMatLie
+\end{verbatim} }
+\color{black}
+
+Returns the derivation algebra of the tensor.
+
+\color{blue}
+\index{Nucleus}
+{\small \begin{verbatim}
+Nucleus(t, i, j) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
+\end{verbatim} }
+\color{black}
+
+Returns the $ij$-nucleus of the tensor. 
+
+%%Example{Name}
+We can look at this example.
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!teal},backgroundcolor=\color{white!70!gray}]
+\end{lstlisting}
+}
+
+If the centroid of a tensor is a commutative local ring, we can rewrite the 
+tensor over its centroid.
+
+%TODO: Add TensorOverCentroid in magma.
+\color{blue}
+\index{MultimapOverCentroid}\index{BimapOverCentroid}\index{TensorOverCentroid}
+{\small \begin{verbatim}
+MultimapOverCentroid(t) : TenSpcElt -> TenSpcElt, Hmtp
+BimapOverCentroid(t) : TenSpcElt -> TenSpcElt, Hmtp
+TensorOverCentroid(t) : TenSpcElt -> TenSpcElt, Hmtp
+\end{verbatim} }
+\color{black}
+
+Returns the tensor over its centroid and a homotopism to the returned tensor.
+
+%%Example{Name}
+We can look at this example.
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!teal},backgroundcolor=\color{white!70!gray}]
+\end{lstlisting}
+}
+
+We include some well-known polynomial invariants for bimaps.
+\color{blue}
+\index{Discriminant}
+{\small \begin{verbatim}
+Discriminant(B) : TenSpcElt -> RngMPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the discriminant of the bimap.
+
+\color{blue}
+\index{Pfaffian}
+{\small \begin{verbatim}
+Pfaffian(B) : TenSpcElt -> RngMPolElt
+\end{verbatim} }
+\color{black}
+
+Returns the Pfaffian of the alternating bimap.
+
+%%Example{Name}
+We can look at this example.
+{\small
+\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!teal},backgroundcolor=\color{white!70!gray}]
+\end{lstlisting}
+}
+
+\begin{bibdiv}
+\begin{biblist}
+
+\bib{Magma}{article}{
+   author={Bosma, Wieb},
+   author={Cannon, John},
+   author={Playoust, Catherine},
+   title={The Magma algebra system. I. The user language},
+   note={Computational algebra and number theory (London, 1993)},
+   journal={J. Symbolic Comput.},
+   volume={24},
+   date={1997},
+   number={3-4},
+   pages={235--265},
+   %issn={0747-7171},
+   review={\MR{1484478}},
+}
+
+\bib{FMW}{article}{
+   author={First, Uriya},
+   author={Maglione, Joshua},
+   author={Wilson, James B.},
+   title={Polynomial identity tensors and their invariants},
+   note={in preparation},
+}
+
+\end{biblist}
+\end{bibdiv}
+
+{\tt
+\printindex
+}
+
+\end{document}

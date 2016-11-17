@@ -1,0 +1,10 @@
+F := [ RandomMatrix(GF(2),2,3) : i in [1..4] ];
+T := Tensor(F,2,1);
+T;
+T2 := Tensor([2,2,2,2],[1..16]);
+F2 := AsMatrices(T2,3,2);
+T3 := Tensor(F2,2,1);
+Eltseq(T2) eq Eltseq(T3);
+T2 eq T3 ;
+Valence(T2);
+Valence(T3);
