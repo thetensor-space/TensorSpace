@@ -278,7 +278,7 @@ intrinsic SubConstructor( T::TenSpc, L::Tup ) -> TenSpc, Map
   for x in gens do
     nL cat:= [* y : y in x *];
   end for;
-  
+
   try
     require forall{ t : t in nL | IsCoercible(T,t) } : "Elements are not contained in tensor space.";
   catch err

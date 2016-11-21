@@ -107,6 +107,53 @@ __BlackBoxSanity := function(S,F)
   end if;
 end function;
 
+// Going to eventually convert this to a background function, where every tensor runs through this at creation.
+intrinsic TensorOnVectorSpaces( M::TenSpcElt ) -> TenSpcElt, Hmtp
+{Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.}
+  if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
+    Maps := [* map< X -> X | x:->x, y:->y > : X in __GLUE(M) *];
+    return M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra));
+  end if;
+  D := M`Domain;
+  v := M`Valence;
+  require forall{ X : X in D | __HasBasis(X) } : "Domain does not contain vector space structure.";
+  require __HasBasis(M`Codomain) : "Codomain does not have vector space structure.";
+  try
+    R := BaseRing(M);
+  catch err
+    error "Tensor does not have a base ring.";
+  end try;
+  require IsField(R) : "Base ring is not a field.";
+  B := [* Basis(D[i]) : i in [1..v] *];
+  V := [* VectorSpace( R, #B[i] ) : i in [1..v] *];
+  C := M`Codomain;
+  W := VectorSpace( R, #Basis(C) );
+  maps := [* map< D[i] -> V[i] | x:-> &+[ Coordinates( D[i], x )[j]*V[i].j : j in [1..#B[i]] ],
+                                 y:-> &+[ Coordinates( V[i], y )[j]*B[i][j] : j in [1..#B[i]] ] > : i in [1..v] *];
+  Append(~maps, map< C -> W | x:-> &+[ Coordinates( C, x )[j]*W.j : j in [1..Dimension(W)] ],
+                              y:-> &+[ Coordinates( W, y )[j]*Basis(C)[j] : j in [1..Dimension(W)] ] >);
+
+  F := function(x)
+    return < x[i] @@ maps[i] : i in [1..#x] > @ M @ maps[v+1];
+  end function;
+
+  N := __GetTensor( V, W, F : Cat := M`Cat );    
+  if assigned M`CoordImages then
+    N`CoordImages := M`CoordImages;
+  end if;
+  N`Nuclei := M`Nuclei;
+  N`Centroids := M`Centroids;
+  if assigned M`Coerce then
+    N`Coerce := [* M`Coerce[i] * maps[i] : i in [1..#maps] *];
+  end if;
+  if assigned M`Derivations then
+    N`Derivations := M`Derivations;
+  end if;
+  N`Permutation := M`Permutation;
+  H := __GetHomotopism( M, N, maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
+  return N,H;
+end intrinsic;
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -242,12 +289,14 @@ end intrinsic;
 // ==============================================================================
 //                             From algebraic objects
 // ==============================================================================
-intrinsic AssociatorTensor( A::Alg ) -> TenSpcElt
+intrinsic AssociatorTensor( A::Alg ) -> TenSpcElt, Map
 {Returns the tensor given by the associator in A.}
   F := function(x)
     return (x[1]*x[2])*x[3] - x[1]*(x[2]*x[3]);
   end function;
-  return __GetTensor( [* A, A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..4] *], Cat := TensorCategory( [1,1,1,1], {{0..3}}) );
+  T :=  __GetTensor( [* A, A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..4] *], Cat := TensorCategory( [1,1,1,1], {{0..3}}) );
+  S, H := TensorOnVectorSpaces(T);
+  return S, Maps(H)[1];
 end intrinsic;
 
 intrinsic Polarization( f::MPolElt ) -> TenSpcElt, MPolElt
@@ -287,20 +336,24 @@ intrinsic Polarization( f::RngUPolElt ) -> TenSpcElt
   return __GetTensor( [V,V], V, polar );
 end intrinsic;
 
-intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt
+intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Hmtp
 {Returns the tensor given by commutator in A.}
   F := function(x)
     return x[1]*x[2] - x[2]*x[1];
   end function;
-  return __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
+  T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
+  S, H := TensorOnVectorSpaces(T);
+  return S, Maps(H)[1];
 end intrinsic;
 
-intrinsic Tensor( A::Alg ) -> TenSpcElt 
+intrinsic Tensor( A::Alg ) -> TenSpcElt, Hmtp
 {Returns the tensor from A x A to A given by the product.}
   F := function(x)
     return x[1]*x[2];
   end function;
-  return __GetTensor( [*A, A*], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory([1,1,1],{{0,1,2}}) );
+  T := __GetTensor( [*A, A*], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory([1,1,1],{{0,1,2}}) );
+  S, H := TensorOnVectorSpaces(T);
+  return S, Maps(H)[1];
 end intrinsic;
 
 intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
@@ -449,52 +502,6 @@ intrinsic Shuffle( M::TenSpcElt, g::SeqEnum ) -> TenSpcElt
     require isit : "Permutation must act on {0..v}.";
   end if;
   return Shuffle(M,perm);
-end intrinsic;
-
-intrinsic TensorOnVectorSpaces( M::TenSpcElt ) -> TenSpcElt, Hmtp
-{Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.}
-  if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
-    Maps := [* map< X -> X | x:->x, y:->y > : X in __GLUE(M) *];
-    return M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra));
-  end if;
-  D := M`Domain;
-  v := M`Valence;
-  require forall{ X : X in D | __HasBasis(X) } : "Domain does not contain vector space structure.";
-  require __HasBasis(M`Codomain) : "Codomain does not have vector space structure.";
-  try
-    R := BaseRing(M);
-  catch err
-    error "Tensor does not have a base ring.";
-  end try;
-  require IsField(R) : "Base ring is not a field.";
-  B := [* Basis(D[i]) : i in [1..v] *];
-  V := [* VectorSpace( R, #B[i] ) : i in [1..v] *];
-  C := M`Codomain;
-  W := VectorSpace( R, #Basis(C) );
-  maps := [* map< D[i] -> V[i] | x:-> &+[ Coordinates( D[i], x )[j]*V[i].j : j in [1..#B[i]] ],
-                                 y:-> &+[ Coordinates( V[i], y )[j]*B[i][j] : j in [1..#B[i]] ] > : i in [1..v] *];
-  Append(~maps, map< C -> W | x:-> &+[ Coordinates( C, x )[j]*W.j : j in [1..Dimension(W)] ],
-                              y:-> &+[ Coordinates( W, y )[j]*Basis(C)[j] : j in [1..Dimension(W)] ] >);
-
-  F := function(x)
-    return < x[i] @@ maps[i] : i in [1..#x] > @ M @ maps[v+1];
-  end function;
-
-  N := __GetTensor( V, W, F : Cat := M`Cat );    
-  if assigned M`CoordImages then
-    N`CoordImages := M`CoordImages;
-  end if;
-  N`Nuclei := M`Nuclei;
-  N`Centroids := M`Centroids;
-  if assigned M`Coerce then
-    N`Coerce := [* M`Coerce[i] * maps[i] : i in [1..#maps] *];
-  end if;
-  if assigned M`Derivations then
-    N`Derivations := M`Derivations;
-  end if;
-  N`Permutation := M`Permutation;
-  H := __GetHomotopism( M, N, maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
-  return N,H;
 end intrinsic;
 
 intrinsic AntisymmetricTensor( t::TenSpcElt ) -> TenSpcElt

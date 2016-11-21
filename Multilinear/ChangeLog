@@ -1,3 +1,8 @@
+November 21, 2016
+  - When creating a tensor from algebras (e.g. CommutatorTensor), the tensor on
+    vector spaces is returned, along with a map from the algebra to the vector
+    space.
+
 September 26, 2016
   - Removed 'RecognizeStarAlgebra' from 'AdjointAlgebra' (TenSpcElt version).
 
