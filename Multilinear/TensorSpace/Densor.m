@@ -17,7 +17,12 @@ __GetDensorTensors := function( O, a, b, c )
   K := BaseRing(O[1]);
   d := #O;
   dims := [a,b,c];
-  vprint Multilinear, 1 : "Constructing linear system " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+
+  vprint Multilinear, 1 : "Setting linear system: " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+  if GetVerbose("Multilinear") eq 0 then
+    vprint DerivationClosure, 1 : "Setting linear system: " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+  end if;
+
   offset := [1,a+1,a+b+1];
   blocks := [* [ ExtractBlock(X,offset[i],offset[i],dims[i],dims[i]) : X in O ] : i in [1..3] *];
   //blocks[2] := [ Transpose(X) : X in blocks[2] ];
@@ -72,7 +77,12 @@ __GetDensorTensors := function( O, a, b, c )
 
   M := Transpose(X+Y)-Z;
   delete X, Y, Z;
-  vprint Multilinear, 1 : "Solving linear system " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+
+  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+  if GetVerbose("Multilinear") eq 0 then
+    vprint DerivationClosure, 1 : "Solving linear system: " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
+  end if;
+
   N := NullspaceMatrix(M);
   return N;
 end function;

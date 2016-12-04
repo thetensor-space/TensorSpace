@@ -1,3 +1,6 @@
+December 4, 2016
+  - Included more verbose commands.
+
 November 21, 2016
   - When creating a tensor from algebras (e.g. CommutatorTensor), the tensor on
     vector spaces is returned, along with a map from the algebra to the vector
