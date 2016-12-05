@@ -499,7 +499,7 @@ __DerivationsOfBimap := function(t)
 
   vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
   if GetVerbose("Multilinear") eq 0 then
-    vprint DerivaionAlgebra, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
+    vprint DerivationAlgebra, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
   end if;
 
   M := ZeroMatrix(K,a^2+b^2+c^2,a*b*c);
