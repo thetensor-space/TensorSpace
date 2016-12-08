@@ -62,8 +62,41 @@ __WriteOverPrimeField := function( Forms )
   return SystemOfForms(N);
 end function;
 
-intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpPC
-{Returns the group of class 2 and exponent p from the given Zp tensor B.}
+intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpMat
+{Returns the matrix group of class 2 from the given tensor B.}
+  require B`Valence eq 2 : "Tensor must have valence 2.";
+  try
+    _ := Eltseq(B);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  Forms := SystemOfForms(B);
+  K := BaseRing(B);
+  a := Dimension(Domain(B)[1]);
+  b := Dimension(Domain(B)[2]);
+  c := Dimension(Codomain(B));
+  
+  G := GL(1+a+c,K);
+  MS := RMatrixSpace(K,1+a+c,1+a+c);
+  I := MS!(G!1);
+  gens := [ G!(I + MS.(1+i)) : i in [1..a] ];
+  for i in [1..c] do
+    X := Transpose(Forms[c]);
+    for j in [1..b] do
+      v := X[j];
+      if v ne Parent(v)!0 then
+        col := Matrix(a,1,v);
+        gens cat:= [ G!(InsertBlock(I,col,2,1+a+i)) ];
+      end if;
+    end for;
+  end for;
+
+  H := sub< G | gens >;
+  return H;
+end intrinsic;
+
+intrinsic HeisenbergGroupPC( B::TenSpcElt ) -> GrpPC
+{Returns the pc-group of class 2 and exponent p from the given Zp tensor B.}
   require B`Valence eq 2 : "Tensor must have valence 2.";
   try
     _ := Eltseq(B);

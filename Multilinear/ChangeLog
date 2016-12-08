@@ -1,3 +1,7 @@
+December 8, 2016
+  - HeisenbergGroup now outputs a matrix group (GrpMat). To get a pc-group, use
+    HeisenbergGroupPC, this is the old instrinsic with a more fitting name.
+
 December 4, 2016
   - Included more verbose commands.
 

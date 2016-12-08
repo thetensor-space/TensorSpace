@@ -1,5 +1,6 @@
 174,0
-S,HeisenbergGroup,Returns the group of class 2 and exponent p from the given Zp tensor B,0,1,0,0,0,0,0,0,0,TenSpcElt,,129,-38,-38,-38,-38,-38
+S,HeisenbergGroup,Returns the matrix group of class 2 from the given tensor B,0,1,0,0,0,0,0,0,0,TenSpcElt,,178,-38,-38,-38,-38,-38
+S,HeisenbergGroupPC,Returns the pc-group of class 2 and exponent p from the given Zp tensor B,0,1,0,0,0,0,0,0,0,TenSpcElt,,129,-38,-38,-38,-38,-38
 S,HeisenbergAlgebra,Returns the algebra whose product is given by the tensor,0,1,0,0,0,0,0,0,0,TenSpcElt,,13,-38,-38,-38,-38,-38
 S,HeisenbergLieAlgebra,Returns the Lie algebra whose Lie bracket is given by the tensor,0,1,0,0,0,0,0,0,0,TenSpcElt,,15,-38,-38,-38,-38,-38
 S,Induce,"Given a group of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection",0,2,0,0,0,0,0,0,0,148,,0,0,178,,178,175,-38,-38,-38,-38
