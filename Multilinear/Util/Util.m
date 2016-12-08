@@ -81,7 +81,7 @@ intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpMat
   I := MS!(G!1);
   gens := [ G!(I + MS.(1+i)) : i in [1..a] ];
   for i in [1..c] do
-    X := Transpose(Forms[c]);
+    X := Transpose(Forms[i]);
     for j in [1..b] do
       v := X[j];
       if v ne Parent(v)!0 then

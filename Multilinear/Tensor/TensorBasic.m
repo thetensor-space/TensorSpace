@@ -366,7 +366,7 @@ intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
   if dims[m] eq dims[n] then
     M := MatrixAlgebra(K,dims[m]);
   else
-    M := KMatrixSpace(K,dims[m],dims[n]);
+    M := RMatrixSpace(K,dims[m],dims[n]);
   end if;
   Forms := [];
   CP := CartesianProduct( < [1..dims[k]] : k in Remove(Remove([1..#dims],n),m) > );
