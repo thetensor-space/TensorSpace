@@ -91,6 +91,12 @@ this is internally limited to p^256 which is only so that pQuotient can be calle
 This isn't necessary.  You can always, and perhaps should, give this group as a matrix
 group.  The pc-group version is unnatural for the name "Heisenberg"
 
+------------------------------------------------------------------------------------------
+ FIXED
+------------------------------------------------------------------------------------------
+
+Now HeisenbergGroup defaults to a matrix group. HeisenbergGroupPC will output a pc-group.
+
 ==========================================================================================
  BUG5: Nucleus as AlgMat
 ==========================================================================================-
