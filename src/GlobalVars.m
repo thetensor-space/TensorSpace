@@ -11,6 +11,7 @@ __GLUE := function( T ) // returns the 'domain' and the 'codomain'.
   end if;
 end function;
 
+
 /*
   Verbose names
 */
