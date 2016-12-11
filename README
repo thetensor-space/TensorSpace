@@ -3,3 +3,14 @@ integration in the computer algebra system MAGMA, v. 2.22 and beyond.
 
 This software was created by Joshua Maglione and James B. Wilson, Copyright 
 2016. GNU Public Liscence v. 3.
+
+Contents:
+
+Source Code is contained in the folder "src"
+Spec file is "./src/Multi.spec"
+Examples are included in the folder "Example"
+Documentation is included as "Multilinear.pdf"
+
+Example files are demonstrated in "Multilinear.pdf" and
+their file names coincide with their example title in the text.
+
