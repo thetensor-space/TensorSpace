@@ -1,3 +1,5 @@
+# Turns our documentation into an approximate version of MAGMA's doc format.
+
 import glob, os
 dir_name = input('Directory:')
 

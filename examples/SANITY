@@ -1,4 +1,4 @@
-AttachSpec("../Multi.spec");
+//AttachSpec("../Multi.spec");
 load "Alg_Invariants.m";
 load "BimapNotation.m";
 load "CoTenSpcConst.m";
