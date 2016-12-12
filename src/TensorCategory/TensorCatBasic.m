@@ -8,7 +8,7 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic Valence( C::TenCat ) -> RngIntElt
 {Returns the valence of the tensor category.}
-  return (C`Contra) select C`Valence-1 else C`Valence;
+  return C`Valence;
 end intrinsic;
 
 intrinsic RepeatPartition( C::TenCat ) -> SetEnum
@@ -34,5 +34,5 @@ end intrinsic;
 intrinsic Arrows( C::TenCat ) -> SeqEnum
 {Returns the directions of the arrows of the category. 
 A -1 signifies an up arrow, a 0 signifies an equal arrow, and a 1 signifies a down arrow.}
-  return C`Contra select [ i @ C`Arrows : i in Reverse([1..C`Valence]) ] else [ i @ C`Arrows : i in Reverse([0..C`Valence]) ];
+  return [ i @ C`Arrows : i in Reverse([0..C`Valence-1]) ];
 end intrinsic;

@@ -62,7 +62,7 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Val
     Permutation. . . . . . Used for shuffling tensors. Allows for on-the-fly computations; defaults is Sym({1..v+1})!1.
     Radicals . . . . . . . A list of the radicals for each Cartesian factor in the domain and the coradical.
     Reflexive. . . . . . . A record which states if the tensor is reflexive.
-    Valence. . . . . . . . The number of modules in the domain.
+    Valence. . . . . . . . The number of modules in the frame.
 */
 
 // ------------------------------------------------------------------------------

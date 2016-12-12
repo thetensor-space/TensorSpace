@@ -29,7 +29,7 @@ end function;
 // General universal tensor spaces
 intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
 {The universal tensor space with given modules and specified tensor category.}
-  require #S eq (C`Valence+1) : "Number of modules does not match tensor category valence.";
+  require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   try
     require forall{ M : M in S | BaseRing(M) cmpeq BaseRing(S[1]) } : "All modules must have a common base ring.";
   catch err
@@ -44,12 +44,12 @@ end intrinsic;
 
 intrinsic TensorSpace( S::SeqEnum ) -> TenSpc
 {The universal tensor space with given modules and homotopism category.}
-  return TensorSpace(S,HomotopismCategory(#S-1));
+  return TensorSpace(S,HomotopismCategory(#S));
 end intrinsic;
 
 intrinsic TensorSpace( S::List, C::TenCat ) -> TenSpc
 {The universal tensor space with given modules and specified tensor category.}
-  require #S eq (C`Valence+1) : "Number of modules does not match tensor category valence.";
+  require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   try
     require forall{ M : M in S | BaseRing(M) cmpeq BaseRing(S[1]) } : "All modules must have a common base ring.";
   catch err
@@ -64,13 +64,13 @@ end intrinsic;
 
 intrinsic TensorSpace( S::List ) -> TenSpc
 {The universal tensor space with given modules and homotopism category.}
-  return TensorSpace(S,HomotopismCategory(#S-1));
+  return TensorSpace(S,HomotopismCategory(#S));
 end intrinsic;
 
 // General universal cotensor spaces
 intrinsic CotensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
 {The universal cotensor space with given modules and specified tensor category.}
-  require #S eq (C`Valence) : "Number of modules does not match tensor category valence.";
+  require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   try
     require forall{ M : M in S | BaseRing(M) cmpeq BaseRing(S[1]) } : "All modules must have a common base ring.";
     require ISA(Type(BaseRing(S[1])),Fld) : "Base ring must be a field.";
@@ -88,12 +88,12 @@ end intrinsic;
 
 intrinsic CotensorSpace( S::SeqEnum ) -> TenSpc
 {The universal cotensor space with given modules and homotopism category.}
-  return CotensorSpace(S,HomotopismCategory(#S-1 : Contravariant := true));
+  return CotensorSpace(S,HomotopismCategory(#S+1 : Contravariant := true));
 end intrinsic;
 
 intrinsic CotensorSpace( S::List, C::TenCat ) -> TenSpc
 {The universal cotensor space with given modules and specified tensor category.}
-  require #S eq (C`Valence) : "Number of modules does not match tensor category valence.";
+  require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   try
     require forall{ M : M in S | BaseRing(M) cmpeq BaseRing(S[1]) } : "All modules must have a common base ring.";
     require ISA(Type(BaseRing(S[1])),Fld) : "Base ring must be a field.";
@@ -111,13 +111,13 @@ end intrinsic;
 
 intrinsic CotensorSpace( S::List ) -> TenSpc
 {The universal cotensor space with given modules and homotopism category.}
-  return CotensorSpace(S,HomotopismCategory(#S-1 : Contravariant := true));
+  return CotensorSpace(S,HomotopismCategory(#S+1 : Contravariant := true));
 end intrinsic;
 
 //Coordinatized universal tensor spaces.
 intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and specified category.}
-  require #S eq (C`Valence+1) : "Number of modules does not match tensor category valence.";
+  require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
   passed, err := __TensorCatSanity([* RSpace( R, s ) : s in S *], C);
   require passed : err;
@@ -126,12 +126,12 @@ end intrinsic;
 
 intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt] ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and homotopism category.}
-  return RTensorSpace( R, S, HomotopismCategory(#S-1) );
+  return RTensorSpace( R, S, HomotopismCategory(#S) );
 end intrinsic;
 
 intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
 {Universal tensor space with K-vector spaces of given dimenisions and specified category.}
-  require #S eq (C`Valence+1) : "Number of modules does not match tensor category valence.";
+  require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
   passed, err := __TensorCatSanity([* KSpace( K, s ) : s in S *], C);
   require passed : err;
@@ -140,13 +140,13 @@ end intrinsic;
 
 intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and homotopism category.}
-  return KTensorSpace( K, S, HomotopismCategory(#S-1) );
+  return KTensorSpace( K, S, HomotopismCategory(#S) );
 end intrinsic;
 
 //Coordinatized universal cotensor spaces.
 intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
 {Universal cotensor space with K-vector spaces of given dimenisions and specified category.}
-  require #S eq C`Valence : "Number of modules does not match tensor category valence.";
+  require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
   require C`Contra : "Category is not contravariant.";
   S cat:= [1];
@@ -157,7 +157,7 @@ end intrinsic;
 
 intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
 {Universal cotensor space with free R-modules of given ranks and homotopism category.}
-  return KCotensorSpace( K, S, HomotopismCategory(#S : Contravariant := true) );
+  return KCotensorSpace( K, S, HomotopismCategory(#S+1 : Contravariant := true) );
 end intrinsic;
 
 //Signatured tensor spaces.

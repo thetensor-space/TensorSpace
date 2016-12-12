@@ -64,7 +64,7 @@ end function;
 
 intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpMat
 {Returns the matrix group of class 2 from the given tensor B.}
-  require B`Valence eq 2 : "Tensor must have valence 2.";
+  require B`Valence eq 3 : "Tensor must have valence 3.";
   try
     _ := Eltseq(B);
   catch err
@@ -97,7 +97,7 @@ end intrinsic;
 
 intrinsic HeisenbergGroupPC( B::TenSpcElt ) -> GrpPC
 {Returns the pc-group of class 2 and exponent p from the given Zp tensor B.}
-  require B`Valence eq 2 : "Tensor must have valence 2.";
+  require B`Valence eq 3 : "Tensor must have valence 3.";
   try
     _ := Eltseq(B);
   catch err
@@ -129,7 +129,7 @@ end intrinsic;
 
 intrinsic HeisenbergAlgebra( B::TenSpcElt ) -> AlgGen
 {Returns the algebra whose product is given by the tensor.}
-  require B`Valence eq 2 : "Tensor must have valence 2.";
+  require B`Valence eq 3 : "Tensor must have valence 3.";
   try
     _ := Eltseq(B);
   catch err
@@ -156,7 +156,7 @@ end intrinsic;
 
 intrinsic HeisenbergLieAlgebra( B::TenSpcElt ) -> AlgLie
 {Returns the Lie algebra whose Lie bracket is given by the tensor.}
-  require B`Valence eq 2 : "Tensor must have valence 2.";
+  require B`Valence eq 3 : "Tensor must have valence 3.";
   try
     _ := Eltseq(B);
   catch err
@@ -179,7 +179,7 @@ intrinsic Induce( X::GrpMat, i::RngIntElt ) -> GrpMat, Map
 {Given a group of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i+1 in X`DerivedFrom[2] : "No restriction found.";
+  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
   return __GetInduction(X,i);
 end intrinsic;
 
@@ -187,7 +187,7 @@ intrinsic Induce( X::AlgMat, i::RngIntElt ) -> AlgMat, Map
 {Given an algebra of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i+1 in X`DerivedFrom[2] : "No restriction found.";
+  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
   return __GetInduction(X,i);
 end intrinsic;
 
@@ -195,7 +195,7 @@ intrinsic Induce( X::AlgMatLie, i::RngIntElt ) -> AlgMatLie, Map
 {Given a Lie algebra of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i+1 in X`DerivedFrom[2] : "No restriction found.";
+  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
   return __GetInduction(X,i);
 end intrinsic;
 

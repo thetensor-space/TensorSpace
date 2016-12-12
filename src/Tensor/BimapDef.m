@@ -122,13 +122,13 @@ end intrinsic;
 
 intrinsic LeftDomain( B::TenSpcElt ) -> BmpU
 {Returns the left domain of B used for coercion.}
-  require B`Valence eq 2 : "Must be a 2-tensor.";
+  require B`Valence eq 3 : "Must be a valence 3 tensor.";
   return B`Bimap`U;
 end intrinsic;
 
 intrinsic RightDomain( B::TenSpcElt ) -> BmpV
 {Returns the right domain of B used for coercion.}
-  require B`Valence eq 2 : "Must be a 2-tensor.";
+  require B`Valence eq 3 : "Must be a valence 3 tensor.";
   return B`Bimap`V;
 end intrinsic;
 
@@ -337,8 +337,8 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 intrinsic '*'( x::., B::TenSpcElt ) -> TenSpcElt
 {x * B}
-  require B`Valence le 2 : "Operation only defined for 2-tensors.";
-  if B`Valence eq 1 then
+  require B`Valence le 3 : "Operation only defined for valence 3 tensors.";
+  if B`Valence eq 2 then
     try
       return <x> @ B;
     catch err
@@ -368,8 +368,8 @@ end intrinsic;
 
 intrinsic '*'( B::TenSpcElt, y::. ) -> .
 {B * y}
-  require B`Valence le 2 : "Operation only defined for 2-tensors.";
-  if B`Valence eq 1 then
+  require B`Valence le 3 : "Operation only defined for valence 3 tensors.";
+  if B`Valence eq 2 then
     try
       return <y> @ B;
     catch err

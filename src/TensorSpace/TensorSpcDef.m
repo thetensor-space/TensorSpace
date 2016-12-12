@@ -22,15 +22,15 @@ intrinsic Print( T::TenSpc )
     ring := T`Ring;
   end if;
   if T`Cat`Contra then
-    s := Sprintf( "Cotensor space of dimension %o over %o with valence %o\n", d, ring, Valence(T) );
-    for i in [1..T`Valence-1] do
-      s cat:= Sprintf( "U%o : %o\n", T`Valence - i + 1, M[i] );
+    s := Sprintf( "Cotensor space of dimension %o over %o with valence %o\n", d, ring, T`Valence );
+    for i in [1..T`Valence-2] do 
+      s cat:= Sprintf( "U%o : %o\n", T`Valence - i, M[i] );
     end for;
     printf s cat Sprintf( "U1 : %o", M[#M-1] );
   else
     s := Sprintf( "Tensor space of dimension %o over %o with valence %o\n", d, ring, Valence(T) );
-    for i in [1..T`Valence] do
-      s cat:= Sprintf( "U%o : %o\n", T`Valence - i + 1, M[i] );
+    for i in [1..T`Valence-1] do
+      s cat:= Sprintf( "U%o : %o\n", T`Valence - i, M[i] );
     end for;
     printf s cat Sprintf( "U0 : %o", M[#M] );
   end if;
@@ -42,6 +42,7 @@ end intrinsic;
 intrinsic 'eq'( T::TenSpc, S::TenSpc ) -> BoolElt
 {T eq S}
   // easiest to hardest check. Once it fails it aborts.
+  // note that cmpeq is "stronger" than eq: will sometimes report false when true, but never true when false.
   return (T`Valence eq S`Valence) and (T`Cat eq S`Cat) and (T`Ring cmpeq S`Ring) and (T`Mod cmpeq S`Mod) and (T`Frame cmpeq S`Frame);
 end intrinsic;
 

@@ -9,7 +9,7 @@ IsContravariant(TS);
 
 
 
-Cat := HomotopismCategory(2 : Contravariant := true);
+Cat := HomotopismCategory(3 : Contravariant := true);
 Cat;
 T := Tensor(GF(5),[2,2],[1..4],Cat);
 T;

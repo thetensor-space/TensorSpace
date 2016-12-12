@@ -605,7 +605,7 @@ end function;
 // ==============================================================================
 intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
 {Returns the ith radical of t contained in Vi.}
-  v := t`Valence;
+  v := #t`Domain;
   require i ge 1 : "Argument must be a positive integer.";
   require i le v : "Argument exceeds valence of tensor.";
   if Type(t`Radicals[v-i+1]) ne RngIntElt then
@@ -641,19 +641,19 @@ end intrinsic;
 
 intrinsic Coradical( M::TenSpcElt ) -> ModTupRng, Map
 {Returns the coradical of M.}
-  if Type(M`Radicals[M`Valence+1]) ne RngIntElt then
-    return M`Radicals[M`Valence+1][1],M`Radicals[M`Valence+1][2];
+  if Type(M`Radicals[M`Valence]) ne RngIntElt then
+    return M`Radicals[M`Valence][1],M`Radicals[M`Valence][2];
   end if;
   require Type(M`Codomain) in __LIST : "Codomain not a vector space.";
   I := Image(M);
   C,pi := M`Codomain/I;
-  M`Radicals[M`Valence+1] := <C,pi>;
+  M`Radicals[M`Valence] := <C,pi>;
   return C,pi;
 end intrinsic;
 
 intrinsic Radical( M::TenSpcElt ) -> Tup
 {Returns the radical of M.}
-  return < Radical(M,i) : i in Reverse([1..M`Valence]) >;
+  return < Radical(M,i) : i in Reverse([1..#M`Domain]) >;
 end intrinsic;
 
 intrinsic Centroid( t::TenSpcElt ) -> AlgMat
@@ -666,10 +666,10 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
   catch err
     error "Cannot compute structure constants.";
   end try;
-  if t`Valence eq 2 then
+  if t`Valence eq 3 then
     C := __CentroidOfBimap( t );
   else
-    C := __SCentroid( t, {1..t`Valence} );
+    C := __SCentroid( t, {1..#t`Domain} );
   end if;
   C := __GetSmallerRandomGenerators(C);
 
@@ -685,12 +685,12 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
     for c in Generators(C) do
       blocks := [* ExtractBlock( c, &+(dims[1..i-1] cat [0])+1, &+(dims[1..i-1] cat [0])+1, dims[i], dims[i] ) : i in [1..#dims] *];
       assert forall{ x : x in CartesianProduct( < Basis(spaces[i]) : i in [1..#spaces-1] > ) |
-              (&and[ (MultiplyByBlock(x,blocks[i],i) @ tvs) eq (MultiplyByBlock(x,blocks[1],1) @ tvs) : i in [2..tvs`Valence] ]) and
+              (&and[ (MultiplyByBlock(x,blocks[i],i) @ tvs) eq (MultiplyByBlock(x,blocks[1],1) @ tvs) : i in [2..#tvs`Domain] ]) and
               ( ((x @ tvs)*blocks[#blocks]) eq (MultiplyByBlock(x,blocks[1],1) @ tvs) ) };
     end for;
     printf "  DONE!\n";
   end if;
-  C`DerivedFrom := < t, [1..t`Valence+1] >;
+  C`DerivedFrom := < t, [1..t`Valence] >;
   t`Centroids[2][1] := C;
   return C;
 end intrinsic;
@@ -706,7 +706,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
     error "Cannot compute structure constants.";
   end try;
   
-  if t`Valence eq 2 then
+  if t`Valence eq 3 then
     D := __DerivationsOfBimap( t );
   else
     D := __Derivations( t );
@@ -730,7 +730,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
     printf "  DONE!\n";
   end if;
 
-  D`DerivedFrom := < t, [1..t`Valence+1] >;
+  D`DerivedFrom := < t, [1..t`Valence] >;
   t`Derivations := D;
   return D;
 end intrinsic;
@@ -738,7 +738,7 @@ end intrinsic;
 intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
 {Returns the ij-nucleus of the tensor t.}
   require i ne j : "Integers must be distinct.";
-  v := t`Valence;
+  v := #t`Domain;
   require {i,j} subset {0..v} : "Integers must correspond to Cartesian factors.";
   if t`Cat`Contra then
     require 0 notin {i,j} : "Integers must be positive for cotensors.";
@@ -758,7 +758,7 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
     error "Cannot compute structure constants.";
   end try;
 
-  if t`Valence eq 2 then
+  if t`Valence eq 3 then
     if {i,j} eq {0,1} then
       Nij := __RightScalarsOfBimap(t);
     elif {i,j} eq {0,2} then
@@ -917,7 +917,7 @@ end intrinsic;
 // ==============================================================================
 intrinsic AdjointAlgebra( t::TenSpcElt ) -> AlgMat
 {Returns the adjoint *-algebra of the 2-tensor t.}
-  require t`Valence eq 2 : "Must be a 2-tensor.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   if assigned t`Bimap`Adjoint then
     return t`Bimap`Adjoint;
   end if;
@@ -936,7 +936,7 @@ end intrinsic;
 
 intrinsic LeftNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the left nucleus of the 2-tensor t.}
-  require t`Valence eq 2 : "Tensor must have valence 2.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   ind := Index(t`Nuclei[1], {0,2});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
@@ -965,13 +965,13 @@ end intrinsic;
 
 intrinsic MidNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the mid nucleus of the 2-tensor t.}
-  require t`Valence eq 2 : "Tensor must have valence 2.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   return Nucleus(t,2,1);
 end intrinsic;
 
 intrinsic RightNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the right nucleus of the 2-tensor t.}
-  require t`Valence eq 2 : "Tensor must have valence 2.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   ind := Index(t`Nuclei[1], {0,1});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
@@ -1003,7 +1003,7 @@ end intrinsic;
 // ==============================================================================
 intrinsic Discriminant( t::TenSpcElt ) -> RngMPolElt
 {Returns the (generalized) discriminant of the 2-tensor t.}
-  require t`Valence eq 2 : "Only defined for tensors of valence 2.";
+  require t`Valence eq 3 : "Only defined for tensors of valence 3.";
   K := BaseRing(t);
   require Type(K) ne BoolElt : "Tensor must have a base ring.";
   require Dimension(t`Domain[1]) eq Dimension(t`Domain[2]) : "Discriminant not defined for this tensor.";
@@ -1021,7 +1021,7 @@ end intrinsic;
 
 intrinsic Pfaffian( t::TenSpcElt ) -> RngMPolElt
 {Returns the (generalized) Pfaffian of the alternating bimap.}
-  require t`Valence eq 2 : "Only defined for tensors of valence 2.";
+  require t`Valence eq 3 : "Only defined for tensors of valence 3.";
   require IsAlternating(t) : "Tensor must be alternating.";
   try
     disc := Discriminant(t);

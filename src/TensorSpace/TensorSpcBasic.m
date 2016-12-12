@@ -22,7 +22,7 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic Valence( T::TenSpc ) -> RngIntElt
 {Returns the valence of the tensor space T.}
-  return (T`Cat`Contra) select T`Valence-1 else T`Valence;
+  return T`Valence;
 end intrinsic;
 
 intrinsic Frame( T::TenSpc ) -> List
@@ -149,6 +149,12 @@ intrinsic RandomTensor( R::Rng, S::[RngIntElt] ) -> TenSpcElt
   return Random(RTensorSpace(R,S));
 end intrinsic;
 
+intrinsic RandomCotensor( K::Fld, S::[RngIntElt] ) -> TenSpcElt
+{Returns a random tensor of the R-tensor space with the given dimensions.}
+  require __HasRandom(K) : "Base ring has no random algorithm.";
+  return Random(KCotensorSpace(K,S));
+end intrinsic;
+
 intrinsic UniversalTensorSpace( T::TenSpc ) -> TenSpc
 {Returns the universal tensor space with the same base ring, frame, and category.}
   return __GetTensorSpace( T`Ring, T`Frame, T`Cat );
@@ -183,19 +189,19 @@ end intrinsic;
 // Must be a better way to do these.
 intrinsic SymmetricSpace( T::TenSpc ) -> TenSpc
 {Returns the largest subtensor space of T where every tensor is symmetric.}
-  require forall{ X : X in T`Frame[1..T`Valence] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
   return SubtensorSpace(T,[T!SymmetricTensor(t) : t in Generators(T)]);
 end intrinsic;
 
 intrinsic AlternatingSpace( T::TenSpc ) -> TenSpc 
 {Returns the largest subtensor space of T where every tensor is alternating.}
-  require forall{ X : X in T`Frame[1..T`Valence] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
   return SubtensorSpace(T,[T!AlternatingTensor(t) : t in Generators(T)]);
 end intrinsic;
 
 intrinsic AntisymmetricSpace( T::TenSpc ) -> TenSpc 
 {Returns the largest subtensor space of T where every tensor is antisymmetric.}
-  require forall{ X : X in T`Frame[1..T`Valence] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
   return SubtensorSpace(T,[T!AntisymmetricTensor(t) : t in Generators(T)]);
 end intrinsic;
 
@@ -229,11 +235,11 @@ intrinsic AsTensorSpace( t::TenSpcElt, i::RngIntElt ) -> TenSpc, Mtrx
 {Returns the associated tensor space of the tensor in the i coordinate.}
   require i gt 0 : "Index must be positive.";
   F := Foliation(t,i);
-  surj := [0] cat Reverse(Remove([1..t`Valence],t`Valence-i+1));
+  surj := [0] cat Reverse(Remove([1..#t`Domain],t`Valence-i));
   part := { { Index(surj,x)-1 : x in S | x in surj } : S in t`Cat`Repeats };
   if {} in part then Exclude(~part,{}); end if;
   spaces := Frame(t);
-  Remove(~spaces,t`Valence-i+1);
+  Remove(~spaces,t`Valence-i);
   if t`Cat`Contra then
     Cat := TensorCategory(Remove(Arrows(t`Cat),i) cat [1],part join {{0}}); 
   else
@@ -253,12 +259,12 @@ intrinsic AsTensor( T::TenSpc ) -> TenSpcElt
     s cat:= Eltseq(T`Mod.i @ T`UniMap);
   end for;
   if T`Cat`Contra then
-    Cat := TensorCategory( Arrows(T`Cat) cat [1], T`Cat`Repeats join {{0}} ); 
+    Cat := TensorCategory( Arrows(T`Cat), T`Cat`Repeats ); 
     d := Degree(Generic(T)`Mod);
     indices := [ i+(j-1)*d : j in [1..Ngens(T`Mod)], i in [1..d] ];
     t := Tensor(BaseRing(T), [ Dimension(X) : X in T`Frame[1..#T`Frame-1] ] cat [Dimension(T)], s[indices], Cat);
   else
-    Cat := TensorCategory( [1] cat Arrows(T`Cat), T`Cat`Repeats join {{T`Valence+1}} );
+    Cat := TensorCategory( [1] cat Arrows(T`Cat), T`Cat`Repeats join {{T`Valence}} );
     t := Tensor(BaseRing(T),[Dimension(T)] cat [ Dimension(X) : X in T`Frame ], s);
   end if;
   return t;

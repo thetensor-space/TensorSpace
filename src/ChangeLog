@@ -1,3 +1,7 @@
+December 11, 2016
+  - Valence is now the number of modules in the frame. 
+  - Added 'RandomCotensor.'
+
 December 8, 2016
   - HeisenbergGroup now outputs a matrix group (GrpMat). To get a pc-group, use
     HeisenbergGroupPC, this is the old instrinsic with a more fitting name.

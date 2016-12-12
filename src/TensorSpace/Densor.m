@@ -92,7 +92,7 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic DerivationClosure( TS::TenSpc, O::[Mtrx] ) -> TenSpc
 {Returns the derivation closure of the tensor space with the given operators O.}
-  require TS`Valence eq 2 : "Tensor space must have valence 2.";
+  require TS`Valence eq 3 : "Tensor space must have valence 3.";
   dims := [ Dimension(X) : X in TS`Frame ];
   require Nrows(O[1]) eq &+dims and Ncols(O[1]) eq &+dims : "Incompatible operators.";
   require BaseRing(TS) eq BaseRing(O[1]) : "Base rings are incompatible.";
@@ -134,7 +134,7 @@ end intrinsic;
 
 intrinsic NucleusClosure( TS::TenSpc, O::[Mtrx], s::RngIntElt, t::RngIntElt ) -> TenSpc
 {Returns the nucleus closure of the tensor space with the given operators O acting on Us and Ut.}
-  require TS`Valence eq 2 : "Tensor space must have valence 2.";
+  require TS`Valence eq 3 : "Tensor space must have valence 3.";
   K := BaseRing(TS);
   require K eq BaseRing(O[1]) : "Base rings are incompatible.";
   dims := [ Dimension(X) : X in TS`Frame ];

@@ -21,15 +21,15 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> Hmtp
 {Constructs the homotopisms from t to s given by the maps in M.}
-  require #M eq t`Valence+1 : "Incorrect number of maps.";
+  require #M eq t`Valence : "Incorrect number of maps.";
   require t`Cat eq s`Cat : "Tensor categories are incompatible.";
   return __GetHomotopism( t, s, M );
 end intrinsic;
 
 intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat ) -> Hmtp
 {Constructs the homotopisms from t to s given by the maps in M and the tensor category C.}
-  require #M eq t`Valence+1 : "Incorrect number of maps.";
-  require #M eq C`Valence+1 : "Valence does not match the valence of tensors.";
+  require #M eq t`Valence : "Incorrect number of maps.";
+  require #M eq C`Valence : "Valence does not match the valence of tensors.";
   require t`Cat eq s`Cat : "Tensor categories are incompatible.";
   return __GetHomotopism( t, s, M : Cat := C );
 end intrinsic;

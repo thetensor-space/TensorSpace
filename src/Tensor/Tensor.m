@@ -22,12 +22,12 @@ end function;
 
 // Given a list of domain D, codomain C, and a user defined function F,
 // write the necessary information into t to make it a functional TenSpcElt.
-__GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismCategory(#D) )
+__GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismCategory(#D+1) )
   t := New(TenSpcElt);
   dom := CartesianProduct( < X : X in D > );
   m := map< dom -> C | x :-> F(x) >;
   t`Map := m;
-  t`Valence := #D;  
+  t`Valence := #D+1;  
   if Type(D) eq SeqEnum then
     t`Domain := [* X : X in D *];
   else // must be list
@@ -35,9 +35,10 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
     t`Domain := D;
   end if;
   t`Codomain := C;
-  t`Radicals := [* 0 : i in [1..t`Valence+1] *]; // radical and coradical
-  t`Nuclei := [* [* S : S in Subsets( {0..t`Valence},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence},2 )] *] *];
-  t`Centroids := [* [* S : S in Subsets( {1..t`Valence},i ), i in Reverse([2..t`Valence]) *], [* 0 : i in [1..2^(t`Valence)-t`Valence-1] *] *];
+  t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
+  t`Nuclei := [* [* S : S in Subsets( {0..t`Valence-1},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence-1},2 )] *] *];
+  t`Centroids := [* [* S : S in Subsets( {1..t`Valence-1},i ), i in Reverse([2..t`Valence-1]) *] *];
+  Append(~t`Centroids, [* 0 : i in [1..#t`Centroids[1]] *]);
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
   t`Reflexive := rec< rf | >;
   t`Cat := Cat;
@@ -48,7 +49,7 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   if Type(Co) ne BoolElt then
     t`Coerce := Co;
   end if;
-  if t`Valence eq 2 and not t`Cat`Contra then
+  if t`Valence eq 3 and not t`Cat`Contra then
     t := __GetBimapRecord(t);
   end if;
   return t;
@@ -115,7 +116,7 @@ intrinsic TensorOnVectorSpaces( M::TenSpcElt ) -> TenSpcElt, Hmtp
     return M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra));
   end if;
   D := M`Domain;
-  v := M`Valence;
+  v := #D;
   require forall{ X : X in D | __HasBasis(X) } : "Domain does not contain vector space structure.";
   require __HasBasis(M`Codomain) : "Codomain does not have vector space structure.";
   try
@@ -163,7 +164,7 @@ end intrinsic;
 intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt
 {Returns the tensor from the Cartesian product of the sequence D into C given by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in D.}
-  require #D eq Cat`Valence : "Given modules do not match category valence.";
+  require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
   passed, err := __TensorCatSanity([* X : X in D *], Cat);
@@ -182,7 +183,7 @@ end intrinsic;
 intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt
 {Returns the tensor from the sequence S evaluated by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in the domain.}
-  require #S-1 eq Cat`Valence : "Given modules do not match category valence.";
+  require #S eq Cat`Valence : "Given modules do not match category valence.";
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   passed, err := __TensorCatSanity(S, Cat);
@@ -201,7 +202,7 @@ end intrinsic;
 intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt
 {Returns the tensor from the Cartesian product of the list D into C given by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in D.}
-  require #D eq Cat`Valence : "Given modules do not match category valence.";
+  require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
   passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
   passed, err := __TensorCatSanity(D cat [*C*], Cat);
@@ -220,7 +221,7 @@ end intrinsic;
 intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt
 {Returns the tensor from the list S evaluated by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in the domain.}
-  require #S-1 eq Cat`Valence : "Given modules do not match category valence.";
+  require #S eq Cat`Valence : "Given modules do not match category valence.";
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   passed, err := __TensorCatSanity(S, Cat);
@@ -244,7 +245,7 @@ intrinsic Tensor( R::Rng, D::[RngIntElt], S::[RngElt], Cat::TenCat ) -> TenSpcEl
   if Cat`Contra then
     Append(~D,1);
   end if;
-  require #D eq Cat`Valence+1 : "Number of implied modules does not match category valence.";
+  require #D eq Cat`Valence : "Number of implied modules does not match category valence.";
   require &*(D) eq #S : "Dimensions do not match.";
   require IsCoercible( R, S[1] ) : "Entries cannot be coerced into the ring.";
   offsets := [ &*D[i+1..#D] : i in [1..#D-1] ] cat [1];
@@ -278,12 +279,12 @@ end intrinsic;
 
 intrinsic Tensor( R::Rng, D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
 {Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the tensor category Cat.}
-  return Tensor(R,D,S,HomotopismCategory(#D-1));
+  return Tensor(R,D,S,HomotopismCategory(#D));
 end intrinsic;
 
 intrinsic Tensor( D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
 {Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the tensor category Cat.}
-  return Tensor(Universe(D),D,S,HomotopismCategory(#D-1));
+  return Tensor(Universe(D),D,S,HomotopismCategory(#D));
 end intrinsic;
 
 // ==============================================================================
@@ -422,7 +423,7 @@ end intrinsic;
 // ==============================================================================
 intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt 
 {Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation g on the set [0..v].}
-  v := M`Valence;
+  v := #M`Domain;
   K := BaseRing(M);
   require IsField(K) : "Base ring must be a field.";
   if M`Cat`Contra then
@@ -462,10 +463,10 @@ intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   dom := CartesianProduct( < X : X in D > );
   m := map< dom -> C | x :-> F(x) >;
   t`Map := m;
-  t`Valence := #D;
+  t`Valence := #D+1;
   t`Domain := D;
   t`Codomain := C;
-  t`Radicals := [* 0 : i in [1..t`Valence+1] *]; // radical and coradical
+  t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
   t`Nuclei := [* [* S : S in Subsets( {0..t`Valence},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence},2 )] *] *];
   t`Centroids := [* [* S : S in Subsets( {1..t`Valence},i ), i in Reverse([2..t`Valence]) *], [* 0 : i in [1..2^(t`Valence)-t`Valence-1] *] *];
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
@@ -473,7 +474,7 @@ intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   if assigned M`Coerce then
     t`Coerce := M`Coerce[g_elt];
   end if;
-  if t`Valence eq 2 then
+  if t`Valence eq 3 then
     t := __GetBimapRecord(t);
   end if;
   if assigned M`CoordImages then
@@ -491,14 +492,14 @@ end intrinsic;
 intrinsic Shuffle( M::TenSpcElt, g::SeqEnum ) -> TenSpcElt
 {Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation given by g on the set [0..v].}
   if M`Cat`Contra then
-    isit, perm := IsCoercible(Sym({1..M`Valence}),g);
+    isit, perm := IsCoercible(Sym({1..M`Valence-1}),g);
     if not isit then
-      isit, perm := IsCoercible(Sym({0..M`Valence}),g);
+      isit, perm := IsCoercible(Sym({0..M`Valence-1}),g);
       require isit : "Permutation must act on {1..v}.";
       require Index(g,0) eq 1 : "Permutation must fix 0.";
     end if;
   else
-    isit, perm := IsCoercible(Sym({0..M`Valence}),g);
+    isit, perm := IsCoercible(Sym({0..M`Valence-1}),g);
     require isit : "Permutation must act on {0..v}.";
   end if;
   return Shuffle(M,perm);
@@ -519,7 +520,7 @@ intrinsic AntisymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   if IsAntisymmetric(t) then
     return t;
   end if;
-  G := Sym( {0..t`Valence} );
+  G := Sym( {0..t`Valence-1} );
   Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
   temp := [ K!0 : i in [1..#sc] ];
   for g in Stab do
@@ -564,7 +565,7 @@ intrinsic SymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   if IsSymmetric(t) then
     return t;
   end if;
-  G := Sym( {0..t`Valence} );
+  G := Sym( {0..t`Valence-1} );
   Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
   temp := [ K!0 : i in [1..#sc] ];
   for g in Stab do
@@ -591,7 +592,7 @@ intrinsic Tensor( M::[Mtrx], s::RngIntElt, t::RngIntElt, Cat::TenCat ) -> TenSpc
 {Returns the tensor given by the st-system of forms with the given tensor category.}  
   require s ne t : "Integers must be distinct.";
   require {s,t} subset {0..2} : "Integers must be contained in [0..2].";
-  require Cat`Valence eq 2 : "Tensor category incompatible.";
+  require Cat`Valence eq 3 : "Tensor category incompatible.";
   if Cat`Contra then
     require {s,t} subset {1,2} : "Integers must be contained in [1..2].";
     require #M eq 1 : "Does not represent a cotensor.";
@@ -614,7 +615,7 @@ end intrinsic;
 
 intrinsic Tensor( M::[Mtrx], s::RngIntElt, t::RngIntElt ) -> TenSpcElt
 {Returns the tensor given by the st-system of forms.}
-  return Tensor( M, s, t, HomotopismCategory(2) );
+  return Tensor( M, s, t, HomotopismCategory(3) );
 end intrinsic;
 
 intrinsic Tensor( M::Mtrx, s::RngIntElt, t::RngIntElt, Cat::TenCat ) -> TenSpcElt

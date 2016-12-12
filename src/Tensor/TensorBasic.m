@@ -23,7 +23,7 @@ end function;
 // Returns a list of spaces in the domain, provided the objects are in the domain of M.
 __GenerateDomain := function( M, D )
   dom := M`Domain;
-  n := M`Valence;
+  n := #dom;
   list := [* *];
   i := 1;
   while i le n do
@@ -61,7 +61,6 @@ end function;
 // Otherwise, returns false.
 __GenerateCodomain := function( M, C )
   cod := M`Codomain;
-//  n := M`Valence;
   if __HasBasis(C) then
     //subspace
     B := Basis(C);
@@ -115,7 +114,7 @@ end intrinsic;
 
 intrinsic Valence( t::TenSpcElt ) -> RngIntElt
 {Returns the valence of t.}  
-  return (t`Cat`Contra) select t`Valence-1 else t`Valence;
+  return t`Valence;
 end intrinsic;
 
 intrinsic Frame( t::TenSpcElt ) -> List
@@ -231,14 +230,14 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
     return t`CoordImages;
   elif assigned t`CoordImages then // came from shuffle but do not have to compute coord images from scratch
     g := t`Permutation^-1;
-    perm := Reverse([ t`Valence-i+1 : i in Eltseq(g) ]);
+    perm := Reverse([ t`Valence-i : i in Eltseq(g) ]); // CHECK THIS...
     spaces := __GLUE(t);
     spaces_old := spaces[perm];
     dims := [ Dimension(X) : X in spaces ];
     dims_old := [ Dimension(X) : X in spaces_old ];
-    CP := CartesianProduct(< [1..dims[i]] : i in [1..t`Valence+1] >);
+    CP := CartesianProduct(< [1..dims[i]] : i in [1..t`Valence] >);
     offsets_old := [ &*dims_old[i+1..#dims] : i in [1..#dims-1] ] cat [1]; 
-    indices := [ 1 + (&+[offsets_old[i]*(cp[perm[i]]-1): i in [1..t`Valence+1]]) : cp in CP ];
+    indices := [ 1 + (&+[offsets_old[i]*(cp[perm[i]]-1): i in [1..t`Valence]]) : cp in CP ];
     t`CoordImages := t`CoordImages[indices];
     t`Permutation := Parent(t`Permutation)!1;
     if not assigned t`Element then
@@ -276,10 +275,10 @@ end intrinsic;
 
 intrinsic Slice( t::TenSpcElt, grid::[SetEnum] ) -> SeqEnum
 {Returns the sequence of the tensor with the given grid.}
-  if t`Cat`Contra and #grid eq t`Valence then
+  if t`Cat`Contra and #grid+1 eq t`Valence then
     grid cat:= [{1}];
   end if;
-  require #grid eq t`Valence+1 : "Grid inconsistent with frame.";
+  require #grid eq t`Valence : "Grid inconsistent with frame.";
   try
     sc := StructureConstants(t);
   catch err
@@ -300,7 +299,7 @@ intrinsic InducedTensor( t::TenSpcElt, grid::[SetEnum] ) -> TenSpcElt
 {Returns the tensor induced by the grid.}
   seq := Slice(t,grid);
   dims := [#grid[i] : i in [1..#grid]];
-  if t`Cat`Contra and #grid eq t`Valence+1 then
+  if t`Cat`Contra and #grid eq t`Valence then
     Prune(~dims);
   end if;
   return Tensor( BaseRing(t), dims, seq, t`Cat );
@@ -309,11 +308,11 @@ end intrinsic;
 intrinsic Compress( t::TenSpcElt ) -> TenSpcElt
 {Compress all 1-dimensional spaces in the domain.}
   try
-    OneDims := [* <t`Domain[i], i> : i in [1..t`Valence] | Dimension(t`Domain[i]) eq 1 *];
+    OneDims := [* <t`Domain[i], i> : i in [1..#t`Domain] | Dimension(t`Domain[i]) eq 1 *];
   catch err
     error "Cannot compute dimensions of the modules.";
   end try;
-  if #OneDims eq 0 or t`Valence - #OneDims lt 1 then
+  if #OneDims eq 0 or #t`Domain - #OneDims lt 1 then
     return t;
   end if;
   m := t`Map;
@@ -325,8 +324,8 @@ intrinsic Compress( t::TenSpcElt ) -> TenSpcElt
     return < x : x in s > @ m;
   end function;
   dom := [*X : X in t`Domain | Dimension(X) ne 1*];
-  cmpl := [ i : i in [1..t`Valence] | forall{ j : j in [1..#OneDims] | OneDims[j][2] ne i } ] cat [t`Valence+1];
-  surj := [0] cat Reverse([ t`Valence-i+1 : i in [1..t`Valence] | Dimension(t`Domain[i]) ne 1 ]);
+  cmpl := [ i : i in [1..#t`Domain] | forall{ j : j in [1..#OneDims] | OneDims[j][2] ne i } ] cat [t`Valence-1];
+  surj := [0] cat Reverse([ t`Valence-i : i in [1..#t`Domain] | Dimension(t`Domain[i]) ne 1 ]);
   part := { { Index(surj,x)-1 : x in S | x in surj } : S in t`Cat`Repeats };
   if {} in part then
     Exclude(~part,{});
@@ -347,7 +346,7 @@ end intrinsic;
 
 intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
 {Returns the sequence of matrices.}
-  v := t`Valence;
+  v := #t`Domain;
   require i ne j : "Arguments 2 and 3 must be distinct.";
   require i in {0..v} : "Unknown argument 2.";
   require j in {0..v} : "Unkonwn arguemnt 3.";
@@ -386,7 +385,7 @@ end intrinsic;
 
 intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
 {Returns the system of forms for the given 2-tensor.}
-  require t`Valence eq 2 : "Tensor must have valence 2.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   return AsMatrices(t,2,1);
 end intrinsic;
 
@@ -399,7 +398,7 @@ intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
   end try;
   spaces := Frame(t);
   l := [ {1..Dimension(X)} : X in spaces ];
-  j := t`Valence-i+1;
+  j := t`Valence-i;
   F := [];
   for i in [1..Dimension(spaces[j])] do
     slice := l;
@@ -425,7 +424,7 @@ Note that the domain and codomain of the returned tensor will be vector spaces.}
   Rad := Radical(t);
   dom := [* *];
   proj := [* *];
-  for i in [1..t`Valence] do
+  for i in [1..#D] do
     Q,pi := D[i]/Rad[i];
     Append(~dom,Q);
     Append(~proj,pi);
@@ -437,7 +436,7 @@ Note that the domain and codomain of the returned tensor will be vector spaces.}
   end function;
 
   N := __GetTensor( dom, t`Codomain, F : Cat := M`Cat );
-  N`Radicals := [* sub< dom[i] | > : i in [1..N`Valence] *];
+  N`Radicals := [* sub< dom[i] | > : i in [1..#dom] *];
   if assigned t`Coerce then
     N`Coerce := [* t`Coerce[i] * proj[i] : i in [1..#proj] *];
   end if;
@@ -454,7 +453,7 @@ intrinsic IsNondegenerate( M::TenSpcElt ) -> BoolElt
   Rad := Radical(M);
   isit := forall{ R : R in Rad | #R eq 1 };
   if isit then
-    id := [* hom< M`Domain[i] -> M`Domain[i] | [ <x,x> : x in Generators(M`Domain[i]) ] > : i in [1..M`Valence] *];
+    id := [* hom< M`Domain[i] -> M`Domain[i] | [ <x,x> : x in Generators(M`Domain[i]) ] > : i in [1..#M`Domain] *];
     H := __GetHomotopism( M, M, id : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
     M`Nondegenerate := <M,H>;
   end if;
@@ -484,7 +483,7 @@ end intrinsic;
 intrinsic IsFullyNondegenerate( M::TenSpcElt ) -> BoolElt
 {Decides if M is fully nondegenerate.}
   R := Radical(M);
-  isit := forall{ i : i in [1..M`Valence] | R[i] eq sub< R[i] | > };
+  isit := forall{ i : i in [1..M`Valence] | R[i] eq sub< R[i] | > }; // CHECK THIS...
   if not isit then
     return false;
   end if;
@@ -509,7 +508,7 @@ intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
     return C![DotProduct(y @ M,x[#x])];
   end function;
   if M`Cat`Contra then 
-    Cat := CotensorCategory( Arrows(M`Cat) cat [1], { {x+1 : x in S} : S in M`Cat`Repeats } join {{1}} );
+    Cat := CotensorCategory( Prune(Arrows(M`Cat)) cat [1], { {x+1 : x in S} : S in M`Cat`Repeats } );
   else
     Cat := TensorCategory( Arrows(M`Cat) cat [1], { {x+1 : x in S} : S in M`Cat`Repeats } join {{0}} );
   end if;
@@ -544,7 +543,7 @@ intrinsic IsAntisymmetric( M::TenSpcElt ) -> BoolElt
   catch err
     error "Cannot compute structure constants.";
   end try;
-  if M`Valence eq 2 then
+  if M`Valence eq 3 then
     F := SystemOfForms(M);
     isit := forall{ f : f in F | Transpose(f) eq -f };
   else
@@ -578,7 +577,7 @@ intrinsic IsAlternating( t::TenSpcElt ) -> BoolElt
     return false;
   end if;
   isit := forall{ i : i in [1..Dimension(t`Domain[1])] | 
-          Slice(t, [ {i} : j in [1..t`Valence] ] cat [{1..Dimension(t`Codomain)}] ) eq [0 : j in [1..Dimension(t`Codomain)]] };
+          Slice(t, [ {i} : j in [1..#t`Domain] ] cat [{1..Dimension(t`Codomain)}] ) eq [0 : j in [1..Dimension(t`Codomain)]] };
   t`Reflexive`Alternating := isit;
   return isit;
 end intrinsic;
@@ -597,7 +596,7 @@ intrinsic IsSymmetric( M::TenSpcElt ) -> BoolElt
   catch err
     error "Cannot compute structure constants.";
   end try;
-  if M`Valence eq 2 then
+  if M`Valence eq 3 then
     F := SystemOfForms(M);
     isit := forall{ f : f in F | Transpose(f) eq f };
   else
@@ -618,8 +617,7 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 intrinsic Subtensor( M::TenSpcElt, D::List, C::. ) -> TenSpcElt
 {Returns the smallest submap of M containing the Cartesian product of D in the domain and C in the codomain.}
-  n := M`Valence;
-  require #D eq n : "Argument 2 does not match the valence of argument 1.";
+  require #D eq #M`Domain : "Argument 2 does not match the valence of argument 1.";
   if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
     M := TensorOnVectorSpaces(M);
   end if;
@@ -631,14 +629,14 @@ intrinsic Subtensor( M::TenSpcElt, D::List, C::. ) -> TenSpcElt
   require Type(Cod) ne BoolElt : "Argument 3 is not in the codomain.";
 
   // Fill the image
-  gens := CartesianProduct( < Basis(Dom[i]) : i in [1..n] > );
+  gens := CartesianProduct( < Basis(Dom[i]) : i in [1..#M`Domain] > );
   Cod := sub< M`Codomain | Cod, { g @ M : g in gens } >;
   if __HasBasis(C) then // remove superfluous generators
     Cod := sub< M`Codomain | Basis(Cod) >;
   end if;
 
   F := function(x)
-    return < (M`Domain)[i]!(x[i]) : i in [1..n] > @ M;
+    return < (M`Domain)[i]!(x[i]) : i in [1..#M`Domain] > @ M;
   end function;
 
   S := __GetTensor( Dom, Cod, F : Cat := M`Cat );
@@ -648,7 +646,7 @@ end intrinsic;
 intrinsic Subtensor( M::TenSpcElt, S::List ) -> TenSpcElt
 {Returns the smallest submap of M containing S. 
 The first v entries of S are contained in the domain of M, and the last entry of S is contained in the codomain of M.}
-  return Subtensor( M, S[1..M`Valence], S[M`Valence+1] );
+  return Subtensor( M, S[1..M`Valence-1], S[M`Valence] );
 end intrinsic;
 
 intrinsic IsSubtensor( M::TenSpcElt, N::TenSpcElt ) -> BoolElt
@@ -664,7 +662,7 @@ intrinsic IsSubtensor( M::TenSpcElt, N::TenSpcElt ) -> BoolElt
     return false;
   end if;
 
-  d := forall{ i : i in [1..N`Valence] | forall{ b : b in Basis(N`Domain[i]) | IsCoercible(M`Domain[i],b) } };
+  d := forall{ i : i in [1..#N`Domain] | forall{ b : b in Basis(N`Domain[i]) | IsCoercible(M`Domain[i],b) } };
   if d then
     c := forall{ b : b in Basis(N`Codomain) | IsCoercible(M`Codomain,b) };
   else
@@ -679,12 +677,11 @@ end intrinsic;
 intrinsic LocalIdeal( M::TenSpcElt, D::List, C::., I::{RngIntElt} ) -> TenSpcElt
 {Returns the smallest submap of M which is a local ideal containing D in the domain and C in the codomain. 
 Here, I is a subset of integers corresponding to the Cartesian factors in the domain.}
-  require Arrows(M`Cat) eq [ 1 : i in [0..M`Valence] ] : "Ideal not implemented for this category.";
-  n := M`Valence;
-  require #D eq n : "Argument 2 does not match the valence of argument 1.";
+  require Arrows(M`Cat) eq [ 1 : i in [1..M`Valence] ] : "Ideal not implemented for this category.";
+  require #D eq #M`Domain : "Argument 2 does not match the valence of argument 1.";
   require forall{ X : X in Frame(M) | Type(X) in __LIST } : "Domain and codomain must be vector spaces.";
-  require I subset {1..n} : "Argument 4 contains unknown values.";
-  I := {@ n-s+1 : s in I @};
+  require I subset {1..#M`Domain} : "Argument 4 contains unknown values.";
+  I := {@ M`Valence-s : s in I @};
   // Get the domain and codomain down to standard objects. 
   // Also, check that they lie in the correct spaces.  
   Dom := __GenerateDomain( M, D );
@@ -697,14 +694,14 @@ Here, I is a subset of integers corresponding to the Cartesian factors in the do
   for s in I do
     temp := [* X : X in Dom *];
     temp[s] := M`Domain[s];
-    gens := CartesianProduct( < Basis( temp[i] ) : i in [1..n] > );
+    gens := CartesianProduct( < Basis( temp[i] ) : i in [1..#M`Domain] > );
     Im join:= { g : g in gens };
   end for;
   Cod := sub< M`Codomain | Cod, { g @ M : g in Im } >;
   Cod := sub< M`Codomain | Basis(Cod) >; // reduce the number of generators.
   
   F := function(x)
-    return < (M`Domain)[i]!(x[i]) : i in [1..n] > @ M;
+    return < (M`Domain)[i]!(x[i]) : i in [1..#M`Domain] > @ M;
   end function;
 
   N := __GetTensor( Dom, Cod, F : Cat := M`Cat );
@@ -714,7 +711,7 @@ end intrinsic;
 intrinsic LocalIdeal( M::TenSpcElt, S::List, I::{RngIntElt} ) -> TenSpcElt
 {Returns the smallest submap of M which is a local ideal containing S. 
 Here, I is a subset of integers corresponding to the Cartesian factors in the domain.}
-  return LocalIdeal( M, S[1..M`Valence], S[M`Valence+1], I );
+  return LocalIdeal( M, S[1..M`Valence-1], S[M`Valence], I );
 end intrinsic;
 
 intrinsic LocalIdeal( M::TenSpcElt, N::TenSpcElt, I::{RngIntElt} ) -> TenSpcElt
@@ -727,13 +724,13 @@ intrinsic IsLocalIdeal( M::TenSpcElt, N::TenSpcElt, S::{RngIntElt} ) -> BoolElt
 {Decide if N is a local ideal of M. 
 Here, S is a subset of integers corresponding to the Cartesian factors in the domain.}
   require M`Cat eq N`Cat : "Tensors not in the same category.";
-  require Arrows(M`Cat) eq [ 1 : i in [0..M`Valence] ] : "Ideals not implemented for this category.";
+  require Arrows(M`Cat) eq [ 1 : i in [1..M`Valence] ] : "Ideals not implemented for this category.";
   require forall{ X : X in Frame(M) | Type(X) in __LIST } : "Domain and codomain of tensors must be vector spaces.";
   require forall{ X : X in Frame(N) | Type(X) in __LIST } : "Domain and codomain of tensors must be vector spaces.";
   if Parent(M) ne Parent(N) then
     return false;
   end if;
-  n := M`Valence;
+  n := #M`Domain;
   require S subset {1..n} : "Argument 3 contains unknown values.";
   S := {@ n-s+1 : s in S @};
 
@@ -755,23 +752,23 @@ end intrinsic;
 
 intrinsic Ideal( M::TenSpcElt, D::List, C::. ) -> TenSpcElt
 {Returns the smallest submap of M containing D in the domain and C in the codomain that is an ideal of M.}
-  return LocalIdeal( M, D, C, {1..Valence(M)} );
+  return LocalIdeal( M, D, C, {1..#M`Domain} );
 end intrinsic;
 
 intrinsic Ideal( M::TenSpcElt, S::List ) -> TenSpcElt
 {Returns the smallest submap of M containing S that is an ideal of M.}
-  return LocalIdeal( M, S[1..M`Valence], S[M`Valence+1], {1..Valence(M)} );
+  return LocalIdeal( M, S[1..M`Valence-1], S[M`Valence], {1..#M`Domain} );
 end intrinsic;
 
 intrinsic Ideal( M::TenSpcElt, N::TenSpcElt ) -> TenSpcElt
 {Returns the smallest submap of M containing N that is an ideal of M.}
   require M`Valence eq N`Valence : "Valences do not match.";
-  return LocalIdeal( M, [* x : x in N`Domain *], N`Codomain, {1..Valence(M)} );
+  return LocalIdeal( M, [* x : x in N`Domain *], N`Codomain, {1..#M`Domain} );
 end intrinsic;
 
 intrinsic IsIdeal( M::TenSpcElt, N::TenSpcElt ) -> BoolElt
 {Decides if N is an ideal of M.}
-  return IsLocalIdeal( M, N, {1..Valence(N)} );
+  return IsLocalIdeal( M, N, {1..#N`Domain} );
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -781,7 +778,7 @@ intrinsic LocalQuotient( M::TenSpcElt, N::TenSpcElt, S::SetEnum : Check := true 
 {Returns the local quotient of M by the local ideal N. 
 Here, S is a subset of integers corresponding to the Cartesian factors in the domain.}
   require M`Cat eq N`Cat : "Tensors not in the same category.";
-  require Arrows(M`Cat) eq [ 1 : i in [0..M`Valence] ] : "Quotient not implemented for this category.";
+  require Arrows(M`Cat) eq [ 1 : i in [1..M`Valence] ] : "Quotient not implemented for this category.";
   if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
     M,H2 := TensorOnVectorSpaces(M);
   end if;
@@ -789,7 +786,7 @@ Here, S is a subset of integers corresponding to the Cartesian factors in the do
     N := TensorOnVectorSpaces(N);
   end if;
   require Parent(M) eq Parent(N) : "Tensors are from different tensor spaces.";
-  n := M`Valence;
+  n := #M`Domain;
   require S subset {1..n} : "Argument 3 contains unknown values.";
   
   // Check S-ideal properties.
@@ -828,11 +825,11 @@ end intrinsic;
 intrinsic Quotient( M::TenSpcElt, N::TenSpcElt : Check := true ) -> TenSpcElt, Hmtp
 {Returns the quotient of M by the ideal N.}
   require M`Cat eq N`Cat : "Tensors not in the same category.";
-  require Arrows(M`Cat) eq [ 1 : i in [0..M`Valence] ] : "Quotient not implemented for this category.";
+  require Arrows(M`Cat) eq [ 1 : i in [1..M`Valence] ] : "Quotient not implemented for this category.";
   if Check then
     require IsIdeal( M, N ) : "Arugment is not an ideal.";
   end if;
-  return LocalQuotient( M, N, {1..M`Valence} : Check := false );
+  return LocalQuotient( M, N, {1..#M`Domain} : Check := false );
 end intrinsic;
 
 intrinsic '/'( M::TenSpcElt, N::TenSpcElt ) -> TenSpcElt, Hmtp

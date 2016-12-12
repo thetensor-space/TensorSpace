@@ -32,7 +32,7 @@ f := DoubleForm( Tensor( F, DotProd ) );
 f;
 
 IsAlternating(f);
-Gf := HeisenbergGroup(f);
+Gf := HeisenbergGroupPC(f);
 
 
 n := PrimitiveElement(GF(q)); // nonsquare
@@ -84,7 +84,7 @@ f_bar := Tensor( F2, RomanGQComm );
 f_bar;
 
 IsAlternating(f_bar);
-Gfb := HeisenbergGroup(f_bar);
+Gfb := HeisenbergGroupPC(f_bar);
 
 
 

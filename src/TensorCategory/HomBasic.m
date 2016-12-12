@@ -28,7 +28,7 @@ intrinsic Kernel( H::Hmtp ) -> TenSpcElt
   dom := Frame(H`Domain);
   cod := Frame(H`Codomain);
   maps := H`Maps;
-  v := H`Cat`Valence;
+  v := H`Cat`Valence-1;
   K_frame := ChangeUniverse([],Parent(H`Domain`Domain[1])); //workaround
   for i in Reverse([0..v]) do
     if i @ H`Cat`Arrows eq 1 then
@@ -57,7 +57,7 @@ intrinsic Image( H::Hmtp ) -> TenSpcElt
   dom := Frame(H`Domain);
   cod := Frame(H`Codomain);
   maps := H`Maps;
-  v := H`Cat`Valence;
+  v := H`Cat`Valence-1;
   I_frame := ChangeUniverse([],Parent(H`Domain`Domain[1]));
   for i in Reverse([0..v]) do
     if i @ H`Cat`Arrows eq 1 then

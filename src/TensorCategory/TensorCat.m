@@ -6,7 +6,7 @@
 __GetTensorCategory := function( a, P : Con := false )
   C := New(TenCat);
   C`Contra := Con;
-  C`Valence := Maximum( &join P );
+  C`Valence := #Domain(a);
   C`Arrows := a;
   C`Repeats := P;
   return C;
@@ -102,27 +102,27 @@ end intrinsic;
 intrinsic HomotopismCategory( v::RngIntElt : Contravariant := false ) -> TenCat
 {Albert's homotopism category with valence v.}
   if Contravariant then
-    return CotensorCategory( [ 1 : i in [1..v+1] ], { {i} : i in [1..v+1]} );
+    return CotensorCategory( [ 1 : i in [1..v-1] ], { {i} : i in [1..v-1]} );
   end if;
-  return TensorCategory( [ 1 : i in [0..v] ], { {i} : i in [0..v]} );
+  return TensorCategory( [ 1 : i in [0..v-1] ], { {i} : i in [0..v-1]} );
 end intrinsic;
 
 intrinsic CohomotopismCategory( v::RngIntElt ) -> TenCat
 {Albert's cohomotopism category with valence v.}
-  return TensorCategory( [ 1 : i in [1..v] ] cat [-1], { {i} : i in [0..v]} );
+  return TensorCategory( [ 1 : i in [1..v-1] ] cat [-1], { {i} : i in [0..v-1]} );
 end intrinsic;
 
 intrinsic AdjointCategory( v::RngIntElt, s::RngIntElt, t::RngIntElt ) -> TenCat
 {The adjoint, or linear, category between positions s and t in a given valence v.}
-  require v ge 1 : "Valence must be positive.";
-  require {s,t} subset {0..v} : "Positions of adjoints must be within valance range.";
+  require v ge 2 : "Valence must be at least 2.";
+  require {s,t} subset {0..v-1} : "Positions of adjoints must be within valance range.";
   require s ne t : "Adjoint positions cannot be equal.";
 
-  A := [ 0 : i in [0..v]];
-  A[s+1] := (s gt 0) select -1 else 1;
-  A[t+1] := (t gt 0) select 1 else -1;
+  A := [ 0 : i in [1..v]];
+  A[v-s] := (s gt 0) select -1 else 1;
+  A[v-t] := (t gt 0) select 1 else -1;
 
-  P := {{s}, {t}, {i : i in [0..v] | not ( (i eq s) or (i eq t))}};
+  P := {{s}, {t}, {i : i in [0..v-1] | not ( (i eq s) or (i eq t))}};
   return TensorCategory( A, P );
 end intrinsic;
 

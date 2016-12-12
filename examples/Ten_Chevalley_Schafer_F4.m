@@ -1,6 +1,6 @@
 J := ExceptionalJordanCSA(Rationals());
 T := Tensor(J);                                     
-T := ChangeTensorCategory(T, HomotopismCategory(2));
+T := ChangeTensorCategory(T, HomotopismCategory(3));
 D := DerivationAlgebra(T);
 D2 := Induce(D, 2);		// Represent D on U2.
 F4 := D2*D2;			// Commutator.

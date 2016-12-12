@@ -5,7 +5,7 @@ D := DerivationAlgebra(T);
 SemisimpleType(D);
 
 
-ChangeTensorCategory(~T,HomotopismCategory(2));
+ChangeTensorCategory(~T,HomotopismCategory(3));
 N := Nucleus(T,2,1);
 Dimension(N);
 N.1^2 eq N!-1;

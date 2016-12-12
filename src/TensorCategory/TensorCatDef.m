@@ -13,21 +13,16 @@ intrinsic Print( t::TenCat )
   else
     s := "Tensor category of valence ";
   end if;
-  s cat:= Sprintf( "%o (", Valence(t) );
+  s cat:= Sprintf( "%o (", t`Valence );
   a := t`Arrows;
-  i := t`Valence;
-  stop := (t`Contra) select 1 else 0;
-  while i ge stop do
+  i := t`Valence-1;
+  while i ge 0 do
     s cat:= ( i @ a eq 1 ) select "->" else (i @ a eq -1) select "<-" else "==";
     i -:= 1;
-    s cat:= (i eq stop-1) select ")" else ",";
+    s cat:= (i eq -1) select ")" else ",";
   end while;
   
   P := t`Repeats;
-  if t`Contra then 
-    assert {0} in P;
-    Exclude(~P,{0}); 
-  end if;
   i := #P;
   s cat:= " (";
   for X in P do

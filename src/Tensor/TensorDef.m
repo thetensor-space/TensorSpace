@@ -12,14 +12,14 @@ intrinsic Print( t::TenSpcElt )
 {Print t}
   D := t`Domain;
   if t`Cat`Contra then
-    s := Sprintf( "Cotensor of valence %o, ", Valence(t) );
-    i := t`Valence;
+    s := Sprintf( "Cotensor of valence %o, ", t`Valence );
+    i := t`Valence-1;
     while i gt 1 do
       s cat:= Sprintf( "U%o x ", i);
       i -:= 1;
     end while;
     s cat:= Sprintf( "U1 >-> K" );
-    i := t`Valence;
+    i := t`Valence-1;
     for X in D do
       s cat:= Sprintf( "\nU%o : %o", i, X );
       i -:= 1;
@@ -27,13 +27,13 @@ intrinsic Print( t::TenSpcElt )
     printf s;
   else
     s := Sprintf( "Tensor of valence %o, ", t`Valence );
-    i := t`Valence;
+    i := t`Valence-1;
     while i gt 1 do
       s cat:= Sprintf( "U%o x ", i);
       i -:= 1;
     end while;
     s cat:= Sprintf( "U1 >-> U0" );
-    i := t`Valence;
+    i := t`Valence-1;
     for X in D do
       s cat:= Sprintf( "\nU%o : %o", i, X );
       i -:= 1;
