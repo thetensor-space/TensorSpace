@@ -608,6 +608,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
   v := #t`Domain;
   require i ge 1 : "Argument must be a positive integer.";
   require i le v : "Argument exceeds valence of tensor.";
+  require ISA(Type(BaseRing(t)),Fld) : "Radicals only implemented for tensors over fields.";
   if Type(t`Radicals[v-i+1]) ne RngIntElt then
     return t`Radicals[v-i+1][1],t`Radicals[v-i+1][2];
   end if;
