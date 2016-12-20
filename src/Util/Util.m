@@ -7,7 +7,8 @@
 __GetInduction := function( X, i )
   t := X`DerivedFrom[1];
   v := t`Valence;
-  j := v-i+1;
+//  j := v-i+1;
+  j := v-i; // corrected after change in valence rules.
   gens := [ g : g in Generators(X) ];
   grp := Type(X) eq GrpMat;
   lie := Type(X) eq AlgMatLie;
