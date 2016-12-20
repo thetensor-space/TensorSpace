@@ -483,7 +483,7 @@ end intrinsic;
 intrinsic IsFullyNondegenerate( M::TenSpcElt ) -> BoolElt
 {Decides if M is fully nondegenerate.}
   R := Radical(M);
-  isit := forall{ i : i in [1..M`Valence] | R[i] eq sub< R[i] | > }; // CHECK THIS...
+  isit := forall{ i : i in [1..(M`Valence-1)] | R[i] eq sub< R[i] | > }; // CHECK THIS...
   if not isit then
     return false;
   end if;
