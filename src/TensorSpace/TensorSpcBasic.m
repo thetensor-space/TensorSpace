@@ -190,19 +190,19 @@ end intrinsic;
 intrinsic SymmetricSpace( T::TenSpc ) -> TenSpc
 {Returns the largest subtensor space of T where every tensor is symmetric.}
   require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
-  return SubtensorSpace(T,[T!SymmetricTensor(t) : t in Generators(T)]);
+  return sub< T | [T!SymmetricTensor(t) : t in Generators(T)] >;
 end intrinsic;
 
 intrinsic AlternatingSpace( T::TenSpc ) -> TenSpc 
 {Returns the largest subtensor space of T where every tensor is alternating.}
   require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
-  return SubtensorSpace(T,[T!AlternatingTensor(t) : t in Generators(T)]);
+  return sub<T | [T!AlternatingTensor(t) : t in Generators(T)]>;
 end intrinsic;
 
 intrinsic AntisymmetricSpace( T::TenSpc ) -> TenSpc 
 {Returns the largest subtensor space of T where every tensor is antisymmetric.}
   require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
-  return SubtensorSpace(T,[T!AntisymmetricTensor(t) : t in Generators(T)]);
+  return sub< T | [T!AntisymmetricTensor(t) : t in Generators(T)] >;
 end intrinsic;
 
 intrinsic AsCotensorSpace( t::TenSpcElt ) -> TenSpc, Mtrx
@@ -210,7 +210,7 @@ intrinsic AsCotensorSpace( t::TenSpcElt ) -> TenSpc, Mtrx
   require ISA(Type(BaseRing(t)),Fld) : "Base ring must be a field.";
   if t`Cat`Contra then
     U := Generic(Parent(t));
-    return SubtensorSpace(U,t);
+    return sub< U | [t] >;
   end if;
   F := Foliation(t,0);
   part := t`Cat`Repeats;
