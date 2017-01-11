@@ -7,7 +7,7 @@ This software was created by Joshua Maglione and James B. Wilson, Copyright
 Contents:
 
 Source Code is contained in the folder "src"
-Spec file is "./src/Multi.spec"
+Spec file is "./eMAGma.spec"
 
 Examples are included in the folder "example"
 Documentation is included as "Multilinear.pdf" in "doc"
