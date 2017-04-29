@@ -95,3 +95,9 @@ intrinsic ChangeTensorCategory( ~H::Hmtp, C::TenCat )
 {Returns the homotopism with the given category.}
   H`Cat := C;
 end intrinsic;
+
+intrinsic '.'( H::Hmtp, i::RngIntElt ) -> Map
+{Returns the map on the ith coordinate.}
+  M := Maps(H);
+  return M[#M-i];
+end intrinsic;
