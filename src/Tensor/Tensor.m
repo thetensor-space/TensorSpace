@@ -108,23 +108,22 @@ __BlackBoxSanity := function(S,F)
   end if;
 end function;
 
-// Going to eventually convert this to a background function, where every tensor runs through this at creation.
-intrinsic TensorOnVectorSpaces( M::TenSpcElt ) -> TenSpcElt, Hmtp
-{Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.}
+// Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.
+__TensorOnVectorSpaces := function(M)
   if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
     Maps := [* map< X -> X | x:->x, y:->y > : X in __GLUE(M) *];
     return M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra));
   end if;
   D := M`Domain;
   v := #D;
-  require forall{ X : X in D | __HasBasis(X) } : "Domain does not contain vector space structure.";
-  require __HasBasis(M`Codomain) : "Codomain does not have vector space structure.";
+  assert forall{ X : X in D | __HasBasis(X) }; //: "Domain does not contain vector space structure.";
+  assert __HasBasis(M`Codomain); //: "Codomain does not have vector space structure.";
   try
     R := BaseRing(M);
   catch err
     error "Tensor does not have a base ring.";
   end try;
-  require IsField(R) : "Base ring is not a field.";
+  assert IsField(R); //: "Base ring is not a field.";
   B := [* Basis(D[i]) : i in [1..v] *];
   V := [* VectorSpace( R, #B[i] ) : i in [1..v] *];
   C := M`Codomain;
@@ -153,7 +152,7 @@ intrinsic TensorOnVectorSpaces( M::TenSpcElt ) -> TenSpcElt, Hmtp
   N`Permutation := M`Permutation;
   H := __GetHomotopism( M, N, maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
   return N,H;
-end intrinsic;
+end function;
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
@@ -296,7 +295,7 @@ intrinsic AssociatorTensor( A::Alg ) -> TenSpcElt, Map
     return (x[1]*x[2])*x[3] - x[1]*(x[2]*x[3]);
   end function;
   T :=  __GetTensor( [* A, A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..4] *], Cat := TensorCategory( [1,1,1,1], {{0..3}}) );
-  S, H := TensorOnVectorSpaces(T);
+  S, H := __TensorOnVectorSpaces(T);
   return S, Maps(H)[1];
 end intrinsic;
 
@@ -343,7 +342,7 @@ intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Hmtp
     return x[1]*x[2] - x[2]*x[1];
   end function;
   T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
-  S, H := TensorOnVectorSpaces(T);
+  S, H := __TensorOnVectorSpaces(T);
   return S, Maps(H)[1];
 end intrinsic;
 
@@ -353,7 +352,7 @@ intrinsic Tensor( A::Alg ) -> TenSpcElt, Hmtp
     return x[1]*x[2];
   end function;
   T := __GetTensor( [*A, A*], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory([1,1,1],{{0,1,2}}) );
-  S, H := TensorOnVectorSpaces(T);
+  S, H := __TensorOnVectorSpaces(T);
   return S, Maps(H)[1];
 end intrinsic;
 

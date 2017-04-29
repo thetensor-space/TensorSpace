@@ -5,7 +5,7 @@
 */
 
 
-import "Tensor.m" : __GetTensor;
+import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __GLUE;
 import "../Util/ConjugateCyclic.m" : __IsCyclic;
@@ -628,7 +628,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
   
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Radical)";
-    tvs := TensorOnVectorSpaces(t);
+    tvs := __TensorOnVectorSpaces(t);
     for j in [1..10] do
       x := < Random(X) : X in tvs`Domain >;
       x[v-i+1] := Random(R);
@@ -676,7 +676,7 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Centroid)";
-    tvs := TensorOnVectorSpaces(t);
+    tvs := __TensorOnVectorSpaces(t);
     spaces := __GLUE(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
@@ -716,7 +716,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (DerivationAlgebra)";
-    tvs := TensorOnVectorSpaces(t);
+    tvs := __TensorOnVectorSpaces(t);
     spaces := __GLUE(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
@@ -790,7 +790,7 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
   
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Nucleus)";
-    tvs := TensorOnVectorSpaces(t);
+    tvs := __TensorOnVectorSpaces(t);
     spaces := Reverse(__GLUE(tvs));
     MultiplyByBlock := function(x,B,k)
       x[k] := x[k]*B;
@@ -834,7 +834,7 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   isit,X := __IsCyclic(S);
   require isit : "Centroid is not a commutative local ring.";
   
-  t,H2 := TensorOnVectorSpaces(t);
+  t,H2 := __TensorOnVectorSpaces(t);
   D := t`Domain;
   C := t`Codomain;
   dims := [ Dimension(X) : X in D ] cat [ Dimension(C) ];
@@ -849,10 +849,11 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
     Append(~phi_inv,g);
   end for;
   e := Degree( E, K );
+  Y := [* &+[ Eltseq(E.1@phi_inv[j])[i]*blocks[j]^(i-1) : i in [1..e] ] : j in [1..#phi] *];
   
   Spaces := __GLUE(t);
-  InvSubs := [* [ sub< Spaces[i] | [ Spaces[i].1*blocks[i]^j : j in [0..e-1] ] > ] : i in [1..#Spaces] *]; // invariant subspaces
-  // loop through the spaces and get the rest of the invariant subspaces
+  InvSubs := [* [ sub< Spaces[i] | [ Spaces[i].1*Y[i]^j : j in [0..e-1] ] > ] : i in [1..#Spaces] *]; // cent-invariant subspaces
+  // loop through the spaces and get the rest of the cent-invariant subspaces
   for i in [1..#Spaces] do
     notdone := true;
     while notdone do
@@ -861,7 +862,7 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
       if Dimension(Q) eq 0 then
         notdone := false;
       else
-        S := sub< Spaces[i] | [ (Q.1@@pi)*blocks[i]^j : j in [0..e-1] ] >;
+        S := sub< Spaces[i] | [ (Q.1@@pi)*Y[i]^j : j in [0..e-1] ] >;
         Append(~InvSubs[i],S);
       end if;
     end while;
@@ -874,14 +875,14 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
 
   ToNewSpace := function(x,i)
     c := Coordinates(VS[i],VS[i]!x);
-    vec := [ Exts[i]!(c[(j-1)*e+1..j*e]) : j in [1..dims[i] div e] ];
+    vec := [ Exts[i]!(c[(j-1)*e+1..j*e]) : j in [1..dims[i] div e] ]; // skip this
     vec := [ v @ phi[i] : v in vec ];
     return vec;
   end function;
 
   ToOldSpace := function(y,i)
     c := Eltseq(y);
-    c := [ x @ phi_inv[i] : x in c ];
+    c := [ x @ phi_inv[i] : x in c ]; // skip this?
     vec := &cat[ Eltseq(c[j]) : j in [1..#c] ];
     vec := &+[ vec[j]*Bases[i][j] : j in [1..#Bases[i]] ];
     return vec;
@@ -894,7 +895,8 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
     return (< x[i] @@ Maps[i] : i in [1..#x] > @ t) @ Maps[#Maps];
   end function;
 
-  s := __GetTensor( dom, cod, F : Cat := t`Cat );
+  s := __GetTensor( dom, cod, F : Cat := t`Cat );s;
+  s := Tensor(E, [Dimension(d) : d in dom] cat [Dimension(cod)], Eltseq(s));s;
   H := __GetHomotopism( t, s, Maps : Cat := HomotopismCategory(t`Valence) );
   if assigned t`Coerce then
     s`Coerce := [* t`Coerce[i] * Maps[i] : i in [1..#t`Coerce] *];
@@ -904,10 +906,27 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   end if;
 
   if __SANITY_CHECK then
-    printf "Sanity check turned on... (MultimapOverCentroid)";
+    printf "Sanity check turned on... (TensorOverCentroid)";
     assert forall{ x : x in CartesianProduct( < Basis( X ) : X in t`Domain > ) |
-           (< x[i] @ Maps[i] : i in [1..#x] > @ s) eq (x @ t @ Maps[#Maps]) };
+           (< x[i] @ Maps[i] : i in [1..#x] > @ s) eq ((x @ t) @ Maps[#Maps]) };
     printf "  DONE!\n";
+    D := Domain(s);
+    K := BaseRing(s);
+    U := { k : k in K | k ne 0 };
+    for i in [1..1000] do
+      C := [ Random(U) : i in [1..#D] ];
+      x := < Random(d) : d in D >;
+      y := < Random(d) : d in D >;
+      k := &*C;
+      z := < C[i]*x[i] + y[i] : i in [1..#x] >;
+      for i in [1..#D] do
+        u := z;
+        v := z;
+        u[i] := x[i];
+        v[i] := y[i];
+        assert z@s eq C[i]*(u@s)+(v@s);
+      end for;
+    end for;
   end if;
 
   return s,H;
