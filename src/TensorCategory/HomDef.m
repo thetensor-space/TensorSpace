@@ -12,11 +12,11 @@ intrinsic Print( H::Hmtp )
   A := H`Cat`Arrows;
   v := H`Domain`Valence;
   s := Sprintf( "Maps from " );
-  for i in [1..v-1] do
+  for i in [2..v-1] do
     s cat:= Sprintf( "U%o x ", v-i+1 );
   end for;
   s cat:= Sprintf( "U1 >-> U0 to " );
-  for i in [1..v-1] do
+  for i in [2..v-1] do
     s cat:= Sprintf( "V%o x ", v-i+1 );
   end for;
   s cat:= Sprintf( "V1 >-> V0." );
