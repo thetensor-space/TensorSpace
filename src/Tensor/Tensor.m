@@ -110,20 +110,31 @@ end function;
 
 // Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.
 __TensorOnVectorSpaces := function(M)
+  // if M is already a tensor over vector spaces, do nothing.
   if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
     Maps := [* map< X -> X | x:->x, y:->y > : X in __GLUE(M) *];
-    return M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra));
+    return true, M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra)), _;
   end if;
+
   D := M`Domain;
   v := #D;
-  assert forall{ X : X in D | __HasBasis(X) }; //: "Domain does not contain vector space structure.";
-  assert __HasBasis(M`Codomain); //: "Codomain does not have vector space structure.";
+
+  // checks to make sure the domain and codomain have a vector space structure.
+  if exists{ X : X in D | not __HasBasis(X) } then
+    return false, _, _, "Domain does not contain vector space structure.";
+  end if;
+  if not __HasBasis(M`Codomain) then
+    return false, _, _, "Codomain does not have vector space structure.";
+  end if;
   try
     R := BaseRing(M);
   catch err
-    error "Tensor does not have a base ring.";
+    return false, _, _, "Tensor does not have a base ring.";
   end try;
-  assert IsField(R); //: "Base ring is not a field.";
+  if not IsField(R) then 
+    return false, _, _, "Base ring is not a field.";
+  end if;
+
   B := [* Basis(D[i]) : i in [1..v] *];
   V := [* VectorSpace( R, #B[i] ) : i in [1..v] *];
   C := M`Codomain;
@@ -151,7 +162,8 @@ __TensorOnVectorSpaces := function(M)
   end if;
   N`Permutation := M`Permutation;
   H := __GetHomotopism( M, N, maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
-  return N,H;
+
+  return true, N, H, _;
 end function;
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -160,7 +172,7 @@ end function;
 // ==============================================================================
 //                                  Black-box
 // ==============================================================================
-intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt
+intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the Cartesian product of the sequence D into C given by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in D.}
   require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
@@ -168,18 +180,24 @@ The UserProgram F must take as input a tuple in D.}
   require passed : err;
   passed, err := __TensorCatSanity([* X : X in D *], Cat);
   require passed : err;
-  return __GetTensor( D, C, F : Cat := Cat );
+  T := __GetTensor( D, C, F : Cat := Cat );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( D::SeqEnum, C::., F::UserProgram ) -> TenSpcElt
+intrinsic Tensor( D::SeqEnum, C::., F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the Cartesian product of the sequence D into C given by F. 
 The UserProgram F must take as input a tuple in D.}
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
-  return __GetTensor( D, C, F );
+  T := __GetTensor( D, C, F );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt
+intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the sequence S evaluated by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in the domain.}
   require #S eq Cat`Valence : "Given modules do not match category valence.";
@@ -187,18 +205,24 @@ The UserProgram F must take as input a tuple in the domain.}
   require passed : err;
   passed, err := __TensorCatSanity(S, Cat);
   require passed : err;
-  return __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
+  T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( S::SeqEnum, F::UserProgram ) -> TenSpcElt
+intrinsic Tensor( S::SeqEnum, F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the sequence S evaluated by F. 
 The UserProgram F must take as input a tuple in the domain.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
-  return __GetTensor( S[1..#S-1], S[#S], F );
+  T := __GetTensor( S[1..#S-1], S[#S], F );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt
+intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the Cartesian product of the list D into C given by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in D.}
   require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
@@ -206,18 +230,24 @@ The UserProgram F must take as input a tuple in D.}
   require passed : err;
   passed, err := __TensorCatSanity(D cat [*C*], Cat);
   require passed : err;
-  return __GetTensor( D, C, F : Cat := Cat );
+  T := __GetTensor( D, C, F : Cat := Cat );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( D::List, C::., F::UserProgram ) -> TenSpcElt
+intrinsic Tensor( D::List, C::., F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the Cartesian product of the list D into C given by F. 
 The UserProgram F must take as input a tuple in D.}
   passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
-  return __GetTensor( D, C, F );
+  T := __GetTensor( D, C, F );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt
+intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the list S evaluated by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in the domain.}
   require #S eq Cat`Valence : "Given modules do not match category valence.";
@@ -225,15 +255,21 @@ The UserProgram F must take as input a tuple in the domain.}
   require passed : err;
   passed, err := __TensorCatSanity(S, Cat);
   require passed : err;
-  return __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
+  T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
-intrinsic Tensor( S::List, F::UserProgram ) -> TenSpcElt
+intrinsic Tensor( S::List, F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
 {Returns the tensor from the list S evaluated by F. 
 The UserProgram F must take as input a tuple in the domain.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
-  return __GetTensor( S[1..#S-1], S[#S], F );
+  T := __GetTensor( S[1..#S-1], S[#S], F );
+  passed, S, H, err := __TensorOnVectorSpaces( T );
+  require passed : err;
+  return S, T, H;
 end intrinsic;
 
 // ==============================================================================
