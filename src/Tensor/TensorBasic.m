@@ -3,7 +3,7 @@
 */
 
 
-import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __GLUE;
+import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
@@ -144,7 +144,7 @@ intrinsic ChangeTensorCategory( t::TenSpcElt, C::TenCat ) -> TenSpcElt
 {Returns the given tensor in the given category.}
   require t`Cat`Contra eq C`Contra : "Both must be co- or contravariant.";
   require C`Valence eq t`Valence : "Valence does not match.";
-  passed, err := __TensorCatSanity( __GLUE(t), C );
+  passed, err := __TensorCatSanity( __FRAME(t), C );
   require passed : err;
   return __CopyTensorWithCat(t,C);
 end intrinsic;
@@ -153,7 +153,7 @@ intrinsic ChangeTensorCategory( ~t::TenSpcElt, C::TenCat )
 {Returns the given tensor in the given category.}
   require t`Cat`Contra eq C`Contra : "Both must be co- or contravariant.";
   require C`Valence eq t`Valence : "Valence does not match.";
-  passed, err := __TensorCatSanity( __GLUE(t), C );
+  passed, err := __TensorCatSanity( __FRAME(t), C );
   require passed : err;
   t := __CopyTensorWithCat(t,C);
 end intrinsic;
@@ -231,7 +231,7 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
   elif assigned t`CoordImages then // came from shuffle but do not have to compute coord images from scratch
     g := t`Permutation^-1;
     perm := Reverse([ t`Valence-i : i in Eltseq(g) ]); // CHECK THIS...
-    spaces := __GLUE(t);
+    spaces := __FRAME(t);
     spaces_old := spaces[perm];
     dims := [ Dimension(X) : X in spaces ];
     dims_old := [ Dimension(X) : X in spaces_old ];
@@ -286,7 +286,7 @@ intrinsic Slice( t::TenSpcElt, grid::[SetEnum] ) -> SeqEnum
     error "Cannot compute structure constants.";
   end try;
   Grid := CartesianProduct(grid);
-  spaces := __GLUE(t);
+  spaces := __FRAME(t);
   require forall{ i : i in [1..#grid] | grid[i] subset {1..Dimension(spaces[i])} } : "Unknown values in grid.";
   K := BaseRing(t);
   dims := [ Dimension(X) : X in spaces ];
@@ -361,7 +361,7 @@ intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
   b := v-j+1;
   m := Minimum([a,b]);
   n := Maximum([a,b]);
-  spaces := __GLUE(t);
+  spaces := __FRAME(t);
   dims := [ Dimension(X) : X in spaces ];
   if dims[m] eq dims[n] then
     M := MatrixAlgebra(K,dims[m]);
@@ -502,7 +502,7 @@ intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
   end if;
   K := BaseRing(M);
   require ISA(Type(K),Fld) : "Base ring must be a field.";
-  D := __GLUE(M);
+  D := __FRAME(M);
   C := VectorSpace(K,1);
   F := function(x)
     y := < x[i] : i in [1..#x-1] >;
@@ -523,7 +523,7 @@ intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (AssociatedForm)";
-    I := CartesianProduct( < Basis(X) : X in __GLUE(M) > );
+    I := CartesianProduct( < Basis(X) : X in __FRAME(M) > );
     assert forall{ x : x in I | Coordinates(M`Codomain,< x[i] : i in [1..#x-1]> @ M)[Index(Basis(M`Codomain),x[#x])] eq (x@Form)[1] };
     printf "  DONE!\n";
   end if;

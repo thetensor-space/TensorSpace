@@ -3,7 +3,7 @@
 */
 
 
-import "../GlobalVars.m" : __GLUE;
+import "../GlobalVars.m" : __FRAME;
 
 // ------------------------------------------------------------------------------
 //                                      Print
@@ -85,12 +85,12 @@ intrinsic IsCoercible( T::TenSpc, t::TenSpcElt ) -> BoolElt
     s := Tensor(R,D,Eltseq(e@T`UniMap),T`Cat);
     s`Parent := T;
     s`Element := e;
-   if exists{ i : i in [1..#__GLUE(s)] | not __GLUE(s)[i] cmpeq __GLUE(T)[i] } then // if it has a different frame, fix
+   if exists{ i : i in [1..#__FRAME(s)] | not __FRAME(s)[i] cmpeq __FRAME(T)[i] } then // if it has a different frame, fix
       try
-        M := [* map< __GLUE(T)[i] -> __GLUE(s)[i] | x :-> (__GLUE(s)[i])!Coordinates(__GLUE(T)[i],x) > : i in [1..#__GLUE(T)] *];
+        M := [* map< __FRAME(T)[i] -> __FRAME(s)[i] | x :-> (__FRAME(s)[i])!Coordinates(__FRAME(T)[i],x) > : i in [1..#__FRAME(T)] *];
         s`Coerce := M;
-        s`Domain := __GLUE(T)[1..#__GLUE(T)-1];
-        s`Codomain := __GLUE(T)[#__GLUE(T)];
+        s`Domain := __FRAME(T)[1..#__FRAME(T)-1];
+        s`Codomain := __FRAME(T)[#__FRAME(T)];
         return true,s;
       catch err
         return false,"Incompatible";
@@ -121,18 +121,27 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
     s := Tensor(R,D,Eltseq(e@T`UniMap),T`Cat);
     s`Parent := T;
     s`Element := e;
-   if exists{ i : i in [1..#__GLUE(s)] | not __GLUE(s)[i] cmpeq __GLUE(T)[i] } then // if it has a different frame, fix
+   if exists{ i : i in [1..#__FRAME(s)] | not __FRAME(s)[i] cmpeq __FRAME(T)[i] } then // if it has a different frame, fix
       try
-        M := [* map< __GLUE(T)[i] -> __GLUE(s)[i] | x :-> (__GLUE(s)[i])!Coordinates(__GLUE(T)[i],x) > : i in [1..#__GLUE(T)] *];
+        M := [* map< __FRAME(T)[i] -> __FRAME(s)[i] | x :-> (__FRAME(s)[i])!Coordinates(__FRAME(T)[i],x) > : i in [1..#__FRAME(T)] *];
         s`Coerce := M;
-        s`Domain := __GLUE(T)[1..#__GLUE(T)-1];
-        s`Codomain := __GLUE(T)[#__GLUE(T)];
+        s`Domain := __FRAME(T)[1..#__FRAME(T)-1];
+        s`Codomain := __FRAME(T)[#__FRAME(T)];
         return true,s;
       catch err
         return false,"Incompatible";
       end try;
     end if;
     return true,s;
+  end if;
+  return false,"Incompatible.";
+end intrinsic;
+
+// Only used to do T!0 to get the trivial tensor.
+intrinsic IsCoercible( T::TenSpc, t::RngIntElt ) -> BoolElt
+{Determines if t is coercible in T.}
+  if t eq 0 then
+    return true,T!(Eltseq(Codomain(T`UniMap)!0));
   end if;
   return false,"Incompatible.";
 end intrinsic;

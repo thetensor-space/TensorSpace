@@ -1,3 +1,30 @@
+May 9, 2017
+  - Updated license, README, and added instrinsic 'eMAGmaVersion'.
+
+May 8, 2017
+  - Fixed a valence bug with Shuffle.
+
+May 3, 2017
+  - Black-box tensor constructors return TenSpcElt, TenSpcElt, Hmtp. That is, 
+    the tensor (over vector spaces), the given tensor, and a homotopism from the
+    given tensor TO the tensor over vector spaces. We may remove the last two 
+    outputs at a later date.
+  - Fixed a bug with StructureConstants.
+
+April 29, 2017
+  - Removed TensorOnVectorSpaces. Now black-box tensors go through this function
+    internally, so such a tensor is returned over vector spaces. 
+  - Fixed a bug with TensorOverCentroid.
+  - Fixed a bug when printing homotopisms.
+  - Homotopisms now go through a verification process. This can be skipped with 
+    the optional parameter 'Check:=false'.
+
+December 20, 2016
+  - Fixed a few bugs.
+
+December 19, 2016
+  - Fixed valence issue with IsFullyNondegenerate.
+
 December 11, 2016
   - Valence is now the number of modules in the frame. 
   - Added 'RandomCotensor.'

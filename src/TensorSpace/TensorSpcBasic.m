@@ -3,7 +3,7 @@
 */
 
 
-import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __GLUE;
+import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "TensorSpc.m" : __GetTensorSpace;
 
 __HasRandom := function( X )
@@ -116,7 +116,7 @@ intrinsic Random( T::TenSpc ) -> TenSpcElt
 {Returns a random element of T.}
   dims := [ Dimension(M) : M in T`Frame ];
   if exists{ d : d in dims | d eq 0 } then // to fix a bug when one entry is 0
-    spaces := __GLUE(T);
+    spaces := __FRAME(T);
     C := spaces[#spaces];
     F := function(x)
       return C!0;

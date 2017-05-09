@@ -3,6 +3,8 @@
   of the Multilinear package.
 */
 
+import "GlobalVars.m" : __VERSION;
+
 
 // ------------------------------------------------------------------------------
 //                             Tensor space categories.
@@ -133,3 +135,12 @@ declare attributes AlgGen : Star;
     DerivedFrom. . . . . . A tuple containing the tensor it came from and the indices of the spaces.
     Star . . . . . . . . . An involution on the algebra.
 */
+
+// ------------------------------------------------------------------------------
+//                                     Version
+// ------------------------------------------------------------------------------
+
+intrinsic eMAGmaVersion() -> MonStgElt
+{Returns the version number of eMAGma.}
+  return __VERSION;
+end intrinsic;

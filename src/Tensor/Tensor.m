@@ -3,7 +3,7 @@
 */ 
 
 
-import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __GLUE;
+import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "TensorBasic.m" : __HasBasis;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
@@ -112,7 +112,7 @@ end function;
 __TensorOnVectorSpaces := function(M)
   // if M is already a tensor over vector spaces, do nothing.
   if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
-    Maps := [* map< X -> X | x:->x, y:->y > : X in __GLUE(M) *];
+    Maps := [* map< X -> X | x:->x, y:->y > : X in __FRAME(M) *];
     return true, M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra)), _;
   end if;
 
@@ -478,7 +478,7 @@ intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   end try;
   g_elt := Reverse([ v-i : i in Eltseq(g) ]);
   ginv_elt := Reverse([ v-i : i in Eltseq(g^-1) ]);
-  spaces := __GLUE(M);
+  spaces := __FRAME(M);
   N_spaces := spaces[g_elt];
   D := N_spaces[1..v-1]; 
   C := N_spaces[v];

@@ -7,7 +7,7 @@
 
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
-import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __GLUE;
+import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "../Util/ConjugateCyclic.m" : __IsCyclic;
 
 // Given vectors return blocks
@@ -677,7 +677,7 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Centroid)";
     tvs := __TensorOnVectorSpaces(t);
-    spaces := __GLUE(tvs);
+    spaces := __FRAME(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
       x[i] := x[i]*B;
@@ -717,7 +717,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
   if __SANITY_CHECK then
     printf "Sanity check turned on... (DerivationAlgebra)";
     tvs := __TensorOnVectorSpaces(t);
-    spaces := __GLUE(tvs);
+    spaces := __FRAME(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
       x[i] := x[i]*B;
@@ -791,7 +791,7 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Nucleus)";
     tvs := __TensorOnVectorSpaces(t);
-    spaces := Reverse(__GLUE(tvs));
+    spaces := Reverse(__FRAME(tvs));
     MultiplyByBlock := function(x,B,k)
       x[k] := x[k]*B;
       return x;
@@ -851,7 +851,7 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   e := Degree( E, K );
   Y := [* &+[ Eltseq(E.1@phi_inv[j])[i]*blocks[j]^(i-1) : i in [1..e] ] : j in [1..#phi] *];
   
-  Spaces := __GLUE(t);
+  Spaces := __FRAME(t);
   InvSubs := [* [ [ Spaces[i].1*Y[i]^j : j in [0..e-1] ] ] : i in [1..#Spaces] *]; // cent-invariant subspaces
   // loop through the spaces and get the rest of the cent-invariant subspaces
   for i in [1..#Spaces] do
