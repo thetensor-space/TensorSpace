@@ -457,31 +457,31 @@ end intrinsic;
 //                                  New from old
 // ==============================================================================
 intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt 
-{Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation g on the set [0..v].}
-  v := #M`Domain;
+{Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation g on the set [0..v-1].}
+  v := #M`Domain+1;
   K := BaseRing(M);
   require IsField(K) : "Base ring must be a field.";
   if M`Cat`Contra then
-    require Labelling(Parent(g)) in {{1..v},{0..v}} : "Permutation must act on {1..v}.";
-    if Labelling(Parent(g)) eq {1..v} then
+    require Labelling(Parent(g)) in {{1..v-1},{0..v-1}} : "Permutation must act on {1..v-1}.";
+    if Labelling(Parent(g)) eq {1..v-1} then
       g := Parent(M`Permutation)!([0] cat Eltseq(g));
     else
       require 0^g eq 0 : "Permutation must fix 0 for cotensors.";
     end if;
   else
-    require Labelling(Parent(g)) eq {0..v} : "Permuation must act on {0..v}.";
+    require Labelling(Parent(g)) eq {0..v-1} : "Permuation must act on {0..v-1}.";
   end if;
   try
     _ := Eltseq(M);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  g_elt := Reverse([ v-i+1 : i in Eltseq(g) ]);
-  ginv_elt := Reverse([ v-i+1 : i in Eltseq(g^-1) ]);
+  g_elt := Reverse([ v-i : i in Eltseq(g) ]);
+  ginv_elt := Reverse([ v-i : i in Eltseq(g^-1) ]);
   spaces := __GLUE(M);
   N_spaces := spaces[g_elt];
-  D := N_spaces[1..v]; 
-  C := N_spaces[v+1];
+  D := N_spaces[1..v-1]; 
+  C := N_spaces[v];
   AF := AssociatedForm( M );
   F := function( x )
     seq := [];
