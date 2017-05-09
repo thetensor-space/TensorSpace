@@ -26,7 +26,9 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// General universal tensor spaces
+// ==============================================================================
+//                       General Universal (Co)Tensor Spaces
+// ==============================================================================
 intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
 {The universal tensor space with given modules and specified tensor category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
@@ -67,7 +69,7 @@ intrinsic TensorSpace( S::List ) -> TenSpc
   return TensorSpace(S,HomotopismCategory(#S));
 end intrinsic;
 
-// General universal cotensor spaces
+
 intrinsic CotensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
 {The universal cotensor space with given modules and specified tensor category.}
   require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
@@ -114,7 +116,9 @@ intrinsic CotensorSpace( S::List ) -> TenSpc
   return CotensorSpace(S,HomotopismCategory(#S+1 : Contravariant := true));
 end intrinsic;
 
-//Coordinatized universal tensor spaces.
+// ==============================================================================
+//                   Coordinatized Universal (Co)Tensor Spaces
+// ==============================================================================
 intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and specified category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
@@ -143,7 +147,7 @@ intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
   return KTensorSpace( K, S, HomotopismCategory(#S) );
 end intrinsic;
 
-//Coordinatized universal cotensor spaces.
+
 intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
 {Universal cotensor space with K-vector spaces of given dimenisions and specified category.}
   require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
@@ -160,7 +164,9 @@ intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
   return KCotensorSpace( K, S, HomotopismCategory(#S+1 : Contravariant := true) );
 end intrinsic;
 
-//Signatured tensor spaces.
+// ==============================================================================
+//                     Signatured Universal (Co)Tensor Spaces
+// ==============================================================================
 intrinsic TensorSpace( K::Fld, d::RngIntElt, p::RngIntElt, q::RngIntElt ) -> TenSpc
 {Returns the signatured (p,q)-tensor space over K^d.}
   require d ge 0 : "Argument 2 must be nonnegative.";
@@ -184,7 +190,9 @@ intrinsic TensorSpace( V::ModTupFld, p::RngIntElt, q::RngIntElt ) -> TenSpc
   return __GetTensorSpace( BaseRing(V), [* V : i in [1..p+q] *] cat [*KSpace(BaseRing(V),1)*], C );
 end intrinsic;
 
-// Standard examples
+// ==============================================================================
+//                                Standard Examples
+// ==============================================================================
 intrinsic ExteriorCotensorSpace( V::ModTupFld, n::RngIntElt ) -> TenSpc
 {Returns the nth exterior power of V as a cotensor space.}
   d := Dimension(V); 

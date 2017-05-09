@@ -30,7 +30,7 @@ declare attributes TenSpc : Cat, Frame, Mod, Ring, UniMap, Valence;
     Frame. . . . . . . . . The sequence of the modules in the frame.
     Mod. . . . . . . . . . The R-module T.
     Ring . . . . . . . . . The base ring.
-    UniMap . . . . . . . . The universal map; either into the space of multimaps or from the tensor product.
+    UniMap . . . . . . . . The universal map: T -> hom( Va, ... hom(V1, V0) ... ).
     Valence. . . . . . . . The valence of the space.
 */
 
