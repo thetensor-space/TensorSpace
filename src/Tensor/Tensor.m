@@ -109,6 +109,7 @@ __BlackBoxSanity := function(S,F)
 end function;
 
 // Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.
+// returns Bool, TenSpcElt, Hmtp, MonStgElt.
 __TensorOnVectorSpaces := function(M)
   // if M is already a tensor over vector spaces, do nothing.
   if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
@@ -282,6 +283,11 @@ intrinsic Tensor( R::Rng, D::[RngIntElt], S::[RngElt], Cat::TenCat ) -> TenSpcEl
   end if;
   require #D eq Cat`Valence : "Number of implied modules does not match category valence.";
   require &*(D) eq #S : "Dimensions do not match.";
+  if #S eq 0 then // in case 0-dimensional
+    F := func< x | RSpace(R, D[#D])!0 >;
+    t := __GetTensor( [* RSpace( R, D[i] ) : i in [1..#D-1] *], RSpace( R, D[#D] ), F : Cat := Cat );
+    return t;
+  end if;
   require IsCoercible( R, S[1] ) : "Entries cannot be coerced into the ring.";
   offsets := [ &*D[i+1..#D] : i in [1..#D-1] ] cat [1];
   F := function(x)
@@ -331,7 +337,8 @@ intrinsic AssociatorTensor( A::Alg ) -> TenSpcElt, Map
     return (x[1]*x[2])*x[3] - x[1]*(x[2]*x[3]);
   end function;
   T :=  __GetTensor( [* A, A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..4] *], Cat := TensorCategory( [1,1,1,1], {{0..3}}) );
-  S, H := __TensorOnVectorSpaces(T);
+  passed, S, H, err := __TensorOnVectorSpaces(T);
+  require passed : err;
   return S, Maps(H)[1];
 end intrinsic;
 
@@ -378,7 +385,8 @@ intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Hmtp
     return x[1]*x[2] - x[2]*x[1];
   end function;
   T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
-  S, H := __TensorOnVectorSpaces(T);
+  passed, S, H, err := __TensorOnVectorSpaces(T);
+  require passed : err;
   return S, Maps(H)[1];
 end intrinsic;
 
@@ -388,7 +396,8 @@ intrinsic Tensor( A::Alg ) -> TenSpcElt, Hmtp
     return x[1]*x[2];
   end function;
   T := __GetTensor( [*A, A*], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory([1,1,1],{{0,1,2}}) );
-  S, H := __TensorOnVectorSpaces(T);
+  passed, S, H, err := __TensorOnVectorSpaces(T);
+  require passed : err;
   return S, Maps(H)[1];
 end intrinsic;
 

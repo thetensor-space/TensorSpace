@@ -1,5 +1,8 @@
 May 9, 2017
   - Updated license, README, and added instrinsic 'eMAGmaVersion'.
+  - Added functionality for tensors and tensor spaces whose frame contains a 
+    0-dimensional space. 
+  - Added 'T!0' as a shortcut to get the trivial tensor of a tensor space.
 
 May 8, 2017
   - Fixed a valence bug with Shuffle.

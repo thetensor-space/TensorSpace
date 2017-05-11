@@ -109,6 +109,12 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
   if &*D ne #S then // check frames
     return false,"Incompatible frames.";
   end if;
+  if #S eq 0 then // check if T is 0-dimensional
+    s := Tensor(R,D,[],T`Cat);
+    s`Parent := T;
+    s`Element := T`Mod!0;
+    return true,s;
+  end if;
   if not IsCoercible(R,S[1]) then // check rings
     return false,"Cannot coerce ring structures.";
   end if;

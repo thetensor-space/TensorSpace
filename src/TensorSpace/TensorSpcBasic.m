@@ -75,10 +75,10 @@ end intrinsic;
 
 intrinsic '.'( T::TenSpc, i::RngIntElt ) -> TenSpcElt
 {T.i}
-  require i ge 1 : "Argument 2 must be positive.";
+  require i ge 1 : "Integer must be positive.";
   M := T`Mod;
   d := Dimension(M);
-  require i le d : "Argument 2 should be in range [1.." cat IntegerToString(d) cat "].";
+  require i le d : "Integer should be in range [1.." cat IntegerToString(d) cat "].";
   gen := Eltseq(M.i @ T`UniMap);
   t := T!gen;
   t`Element := M.i;

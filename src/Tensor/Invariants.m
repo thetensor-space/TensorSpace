@@ -628,7 +628,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
   
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Radical)";
-    tvs := __TensorOnVectorSpaces(t);
+    _, tvs := __TensorOnVectorSpaces(t);
     for j in [1..10] do
       x := < Random(X) : X in tvs`Domain >;
       x[v-i+1] := Random(R);
@@ -676,7 +676,7 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Centroid)";
-    tvs := __TensorOnVectorSpaces(t);
+    _, tvs := __TensorOnVectorSpaces(t);
     spaces := __FRAME(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
@@ -716,7 +716,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (DerivationAlgebra)";
-    tvs := __TensorOnVectorSpaces(t);
+    _, tvs := __TensorOnVectorSpaces(t);
     spaces := __FRAME(tvs);
     dims := [ Dimension(X) : X in spaces ];
     MultiplyByBlock := function(x,B,i)
@@ -790,7 +790,7 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
   
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Nucleus)";
-    tvs := __TensorOnVectorSpaces(t);
+    _, tvs := __TensorOnVectorSpaces(t);
     spaces := Reverse(__FRAME(tvs));
     MultiplyByBlock := function(x,B,k)
       x[k] := x[k]*B;
@@ -834,7 +834,8 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   isit,X := __IsCyclic(S);
   require isit : "Centroid is not a commutative local ring.";
   
-  t,H2 := __TensorOnVectorSpaces(t);
+  passed, t, H2, err := __TensorOnVectorSpaces(t);
+  require passed : err;
   D := t`Domain;
   C := t`Codomain;
   dims := [ Dimension(X) : X in D ] cat [ Dimension(C) ];

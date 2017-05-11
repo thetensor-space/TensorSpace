@@ -184,10 +184,11 @@ intrinsic Image( t::TenSpcElt ) -> ModTupRng, Map
   end if;
 
   try
-    s, H := __TensorOnVectorSpaces(t);
+    passed, s, H, err := __TensorOnVectorSpaces(t);
   catch err
     error "Cannot extract vector space structure.";
   end try;
+  require passed : err;
 
   try
     sc := Eltseq(t);
@@ -251,8 +252,8 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
   catch err
     error "Tensor does not have a base ring.";
   end try;
-  //M := __TensorOnVectorSpaces(t); // needed?
-  M := t;
+  passed, M, _, err := __TensorOnVectorSpaces(t); // needed?
+  require passed : err;
   v := M`Valence;
   d := Dimension(M`Codomain);
   B := < Basis(X) : X in M`Domain >;  
@@ -416,7 +417,8 @@ Note that the domain and codomain of the returned tensor will be vector spaces.}
     return M`Nondegenerate[1], M`Nondegenerate[2];
   end if;
   if exists{ X : X in M`Domain cat [* M`Codomain *] | Type(X) ne ModTupFld } then
-    t,H2 := __TensorOnVectorSpaces(M);
+    passed, t, H2, err := __TensorOnVectorSpaces(M);
+    require passed : err;
   else
     t := M;
   end if;
@@ -498,7 +500,8 @@ end intrinsic;
 intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
 {If M : Vn x ... x V1 >-> V0, returns the associated form F : Vn x ... x V0 >-> K as vector spaces.}
   if exists{ X : X in Frame(M) | Type(X) ne ModTupFld } then
-    M := __TensorOnVectorSpaces(M);
+    passed, M, _, err := __TensorOnVectorSpaces(M);
+    require passed : err;
   end if;
   K := BaseRing(M);
   require ISA(Type(K),Fld) : "Base ring must be a field.";
@@ -620,7 +623,8 @@ intrinsic Subtensor( M::TenSpcElt, D::List, C::. ) -> TenSpcElt
 {Returns the smallest submap of M containing the Cartesian product of D in the domain and C in the codomain.}
   require #D eq #M`Domain : "Argument 2 does not match the valence of argument 1.";
   if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
-    M := __TensorOnVectorSpaces(M);
+    passed, M, _, err := __TensorOnVectorSpaces(M);
+    require passed : err;
   end if;
   // Get the domain and codomain down to standard objects. 
   // Also, check that they lie in the correct spaces.  
@@ -654,10 +658,12 @@ intrinsic IsSubtensor( M::TenSpcElt, N::TenSpcElt ) -> BoolElt
 {Decides if N is a subtensor of M.}
   require M`Cat eq N`Cat : "Tensors not in the same category.";
   if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
-    M,H2 := __TensorOnVectorSpaces(M);
+    passed, M, H2, err := __TensorOnVectorSpaces(M);
+    require passed : err;
   end if;
   if exists{ X : X in Frame(N) | Type(X) notin __LIST } then
-    N := __TensorOnVectorSpaces(N);
+    passed, N, _, err := __TensorOnVectorSpaces(N);
+    require passed : err;
   end if;
   if Parent(M) ne Parent(N) then
     return false;
@@ -781,10 +787,12 @@ Here, S is a subset of integers corresponding to the Cartesian factors in the do
   require M`Cat eq N`Cat : "Tensors not in the same category.";
   require Arrows(M`Cat) eq [ 1 : i in [1..M`Valence] ] : "Quotient not implemented for this category.";
   if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
-    M,H2 := __TensorOnVectorSpaces(M);
+    passed, M, H2, err := __TensorOnVectorSpaces(M);
+    require passed : err;
   end if;
   if exists{ X : X in Frame(N) | Type(X) notin __LIST } then
-    N := __TensorOnVectorSpaces(N);
+    passed, N, _, err := __TensorOnVectorSpaces(N);
+    require passed : err;
   end if;
   require Parent(M) eq Parent(N) : "Tensors are from different tensor spaces.";
   n := #M`Domain;
