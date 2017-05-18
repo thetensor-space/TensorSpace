@@ -30,8 +30,6 @@ then a default tensor category is used based on the method of creation.
 
 \minitoc
 
-\noindent{\bf Contents}
-
 \section{Creating tensors}
 
 \subsection{Black-box tensors}
@@ -301,9 +299,10 @@ Each tensor is assigned a category relevant to its origin.
 
 
 \color{blue}
-\index{Tensor!algebra}
+\index{Tensor!algebra}\index{Tensor!polynomial ring}
 {\small \begin{verbatim}
-Tensor(A): Alg -> TenSpcElt
+Tensor(A) : Alg -> TenSpcElt
+Tensor(A) : RngUPolRes -> TenSpcElt
 \end{verbatim} }
 \color{black}
 
@@ -364,8 +363,9 @@ true
 \color{blue}
 \index{pCentralTensor}
 {\small \begin{verbatim}
-pCentralTensor(G, s, t) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt
-pCentralTensor(G, p, s, t) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+pCentralTensor(G, p, s, t) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt, Map, Map, Map
+pCentralTensor(G, s, t) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt, Map, Map, Map
+pCentralTensor(G) : GrpPC -> TenSpcElt, Map, Map, Map
 \end{verbatim} }
 \color{black}
 
@@ -375,6 +375,8 @@ series $\eta$ of $G$.  The bilinear map pairs $\eta_s/\eta_{s+1}$ with $
 \eta_{t}/\eta_{t+1}$ into $\eta_{s+t}/\eta_{s+t+1}$.  If $s=t$ the tensor 
 category is set to force $U_2=U_1$; 
 otherwise it is the general homotopism category.
+In addition, maps from the subgroups into the vector spaces are returned. 
+If $p$, $s$, and $t$ are not given, it is assumed $G$ is a $p$-group and $s=t=1$.
 
 %%Example{Name}
 \medskip

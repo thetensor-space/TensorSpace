@@ -1,46 +1,33 @@
-\documentclass{amsbook}
+\documentclass{documentation}
 
-\usepackage{hyperref}
-\usepackage[shortalphabetic]{amsrefs}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage{xcolor}
-\usepackage{listings}
-\usepackage{framed}
 \usepackage{minitoc}
-%\usepackage{framed}
 
 \title{Multilinear Algebra Package}
 
 \author{Joshua Maglione}
-\address{
-	Department of Mathematics\\
-	Colorado State University\\
-	Fort Collins, CO 80523\\
-	USA
-}
-\email{maglione@math.colostate.edu}
+\address{Colorado State University}
+\email{josh.maglione@gmail.com}
 
 \author{James B. Wilson}
-\address{
-	Department of Mathematics\\
-	Colorado State University\\
-	Fort Collins, CO 80523\\
-	USA
-}
-\email{James.Wilson@ColoState.Edu}
+\address{Colorado State University}
+\email{james.wilson@colostate.edu}
+
+\version{1.1}
 \date{\today}
+\copyrightyear{2016}
 
 \makeindex
 
 %-----------------------------------------------------------------------------
 \begin{document}
 
-\dominitoc
+\frontmatter
 
+\dominitoc
 \maketitle
 \tableofcontents
+
+\mainmatter
 
 \chapter{Introduction}
 
@@ -115,6 +102,8 @@ tensor categories and to define standard categories.
 
 \input{cyclic.tex}
 
+\backmatter
+
 \begin{bibdiv}
 \begin{biblist}
 
@@ -143,7 +132,7 @@ tensor categories and to define standard categories.
    pages={405--416},
    issn={0022-4049},
    review={\MR{3124207}},
-   doi={10.1016/j.jpaa.2013.06.011},
+   %doi={10.1016/j.jpaa.2013.06.011},
 }
 \bib{BW:Module-iso}{article}{
    author={Brooksbank, Peter A.},
