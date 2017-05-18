@@ -16,53 +16,45 @@ vary based on the parameters, e.g. it may be a space of structure constants,
 black-box functions, or systems of forms. So access to the tensors in these 
 tensor space should be made through the provided functions.
 
-\color{blue}
 \index{KTensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 KTensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
 KTensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 For a field $K$ and sequence $S=[d_v,\cdots, d_0]$, 
 returns the universal tensor space $\hom_K(K^{d_v},\dots ,\hom_K(K^{d_1},K^{d_0})\cdots )\cong K^{d_v\cdots d_0}$
 with covariant tensor category given by $C$.
 The default is Albert's homotopism category.
 
-\color{blue}
 \index{RTensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 RTensorSpace(R, S) : Rng, [RngIntElt] -> TenSpc
 RTensorSpace(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 For a commutative and unital ring $R$ and sequence $S=[d_v,\cdots, d_0]$, 
 returns the universal tensor space $\hom_R(R^{d_v},\dots ,\hom_R(R^{d_1},R^{d_0})\cdots )\cong R^{d_v\cdots d_0}$
 with covariant tensor category given by $C$.
 The default is Albert's homotopism category.
 
-\color{blue}
 \index{TensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 TensorSpace(S) : SeqEnum -> TenSpc
 TensorSpace(S) : List -> TenSpc
 TensorSpace(S, C) : SeqEnum, TenCat -> TenSpc
 TensorSpace(S, C) : List, TenCat -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Given a sequence $S=[U_v,\dots, U_0]$ of $K$-modules returns a universal tensor 
 space equivalent to $\hom_K(U_v\otimes_K\cdots\otimes_K U_1,U_0)$ with covariant tensor 
 category given by $C$. The default is Albert's homotopism category. 
 
-\color{blue}
 \index{TensorSpace!signatured}
-{\small \begin{verbatim}
+\begin{intrinsics}
 TensorSpace(V, p, q) : ModTupFld, RngIntElt, RngIntElt -> TenSpc
 TensorSpace(K, d, p, q) : Fld, RngIntElt, RngIntElt, RngIntElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the signatured $(p,q)$-tensor space over the vector space $V=K^d$. 
 The first $p$ indices are covariant and the last $q$ indices are contravariant.  
@@ -72,11 +64,10 @@ $[V,\dots,_p V, V^*,\dots,_q V^*]$
 and the tensor category with arrows $[1,\dots,_p 1, -1,\dots,_q -1]$ and 
 duplicates $\{\{p+q,\dots,1+q\},\{q,\dots,1\},\{0\}\}$.
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt TenSpc\_Const}\\
-{\small We demonstrate how to construct universal tensor spaces.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenSpc\_Const]
+We demonstrate how to construct universal tensor spaces.
+
+\begin{code}
 > TS := KTensorSpace(Rationals(),[ i : i in [3..7] ]);
 > TS;
 Tensor space of dimension 2520 over Rational Field with 
@@ -94,10 +85,11 @@ U3 : Full Vector space of degree 4 over Rational Field
 U2 : Full Vector space of degree 5 over Rational Field
 U1 : Full Vector space of degree 6 over Rational Field
 U0 : Full Vector space of degree 7 over Rational Field
-\end{lstlisting} 
+\end{code}
+
 Give a tensor space a frame.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > R := pAdicRing(3,6);
 > Fr := [RSpace(R,5), sub<RSpace(R,3)|[0,1,0],[0,0,1]>,\
 >   RSpace(R,2)];
@@ -126,11 +118,12 @@ Echelonized basis:
 (0 1 0)
 (0 0 1)
 U0 : Full RSpace of degree 2 over pAdicRing(3, 6)
-\end{lstlisting}
+\end{code}
+
 With signatured tensor spaces, the tensor category is not immediately obvious at print out. 
 Instead, one can glean categorical information using {\tt TensorCategory} on a tensor space.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > TS := TensorSpace( VectorSpace(GF(3),3), 2, 4 );
 > TS;
 Tensor space of dimension 729 over GF(3) with valence 6
@@ -145,46 +138,41 @@ U0 : Full Vector space of degree 1 over GF(3)
 > TensorCategory(TS);
 Tensor category of Valence 6 (<-,<-,->,->,->,->,==)
 ({ 0 },{ 5 .. 6 },{ 1 .. 4 })
-\end{lstlisting}
+\end{code}
+
 We see that the indices 5 and 6 are contravariant and both are linked together as well. Furthermore the covariant indices are 1--4, which are also linked together.
-}
-\end{framed}
+\end{example}
 
 \subsection{Universal cotensor spaces}~
 
 We only consider cotensor spaces over fields.
 
-\color{blue}
 \index{KCotensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 KCotensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
 KCotensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 For a field $K$ and sequence $S=[d_v,\dots, d_1]$ returns the universal cotensor 
 space $\hom_K(K^{d_v}\otimes \cdots \otimes K^{d_1},K)\cong K^{d_v\cdots d_1}$ with the given contravariant tensor category $C$.
 The default is Albert's homotopism category.
 
-\color{blue}
 \index{CotensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 CotensorSpace(S) : SeqEnum -> TenSpc
 CotensorSpace(S) : List -> TenSpc
 CotensorSpace(S, C) : SeqEnum, TenCat -> TenSpc
 CotensorSpace(S, C) : List, TenCat -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Given a sequence $S=[U_v,\dots, U_1]$ of $K$-vector spaces returns the universal tensor 
 space equivalent to $\hom_K(U_v\otimes_K\cdots\otimes_K U_1,K)$ with contravariant tensor 
 category given by $C$. The default is Albert's homotopism category.
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt CoTenSpc\_Const}\\
-{\small We construct cotensor spaces in the same way as we do tensor spaces.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[CoTenSpc\_Const]
+We construct cotensor spaces in the same way as we do tensor spaces.
+
+\begin{code}
 > CT := KCotensorSpace(GF(2),[ i : i in [5..7] ]);
 > CT;
 Cotensor space of dimension 210 over GF(2) with valence 2
@@ -210,64 +198,52 @@ U1 : Full Vector space of degree 4 over GF(2^3)
 > 
 > TensorCategory(CT);
 Cotensor category of valence 2 (->,==,<-) ({ 1 },{ 2 },{ 3 })
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Some standard constructions}
 
 We include some subspaces generated by well-known tensors.
 
-\color{blue}
 \index{AlternatingSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 AlternatingSpace(T) : TenSpc -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the sub(co-)tensor space generated by all the alternating (co-)tensors contained in the given (co-)tensor space.
 
-\color{blue}
 \index{AntisymmetricSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 AntisymmetricSpace(T) : TenSpc -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the sub(co-)tensor space generated by all the antisymmetric (co-)tensors contained in the given (co-)tensor space.
 
-\color{blue}
 \index{SymmetricSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 SymmetricSpace(T) : TenSpc -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the sub(co-)tensor space generated by all the symmetric (co-)tensors contained in the given (co-)tensor space.
 
-\color{blue}
 \index{ExteriorCotensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 ExteriorCotensorSpace(V, n) : ModTupFld, RngIntElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the cotensor space given by the $n$th exterior power of the vector space $V$.
 
-\color{blue}
 \index{SymmetricCotensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 SymmetricCotensorSpace(V, n) : ModTupFld, RngIntElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the cotensor space given by the $n$th symmetric power of the vector space $V$.
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt TenSpc\_Const2}\\
-{\small We construct the symmetric subtensor space of the universal tensor space.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenSpc\_Const2]
+We construct the symmetric subtensor space of the universal tensor space.
+
+\begin{code}
 > TS := KTensorSpace(GF(3), [3,3,3,2]);
 > TS;
 Tensor space of dimension 54 over GF(3) with valence 3
@@ -303,11 +279,12 @@ U0 : Full Vector space of degree 2 over GF(3)
     [1 1 2]
     [0 2 0]
 ]
-\end{lstlisting}
+\end{code}
+
 For $V=\mathbb{F}_{25}^6$, we construct the fourth exterior power of $V$, $\Lambda^4(V)$ 
 as a sub cotensor space of dimension $\binom{6}{4}=15$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > V := VectorSpace(GF(25),6);
 > E := ExteriorCotensorSpace(V,4);
 > E;
@@ -320,67 +297,58 @@ U1 : Full Vector space of degree 6 over GF(5^2)
 > T := Random(E);
 > IsAlternating(T);
 true
-\end{lstlisting} }
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Subspaces as closures}~
 
-\color{blue}
 \index{DerivationClosure}
-{\small \begin{verbatim}
+\begin{intrinsics}
 DerivationClosure(TS, O) : TenSpc, AlgMat -> TenSpc
 DerivationClosure(TS, O) : TenSpc, ModMatFld -> TenSpc
 DerivationClosure(TS, O) : TenSpc, AlgMatLie -> TenSpc
 DerivationClosure(TS, O) : TenSpc, [Mtrx] -> TenSpc
 DerivationClosure(TS, O) : TenSpc, [AlgMatLie] -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the derivation closure of the given tensor space $TS$, with frame $U_2\times U_1\rightarrowtail U_0$, with operators $O\subseteq \text{End}(U_2)\times \text{End}(U_1)\times \text{End}(U_0)$.
 Currently, this only works for tensor spaces of valence 2.
 This is the subspace whose tensors' derivation algebra contains $O$.
 
-\color{blue}
 \index{DerivationClosure}
-{\small \begin{verbatim}
+\begin{intrinsics}
 DerivationClosure(TS, T) : TenSpc, TenSpcElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the derivation closure of the given tensor space $TS$, with frame $U_2\times U_1\rightarrowtail U_0$, with operators $O\subseteq \text{End}(U_2)\times \text{End}(U_1)\times \text{End}(U_0)$.
 Currently, this only works for tensor spaces of valence 2.
 This is the subspace whose tensors' derivation algebra contains the derivation algebra of $T$.
 
-\color{blue}
 \index{NucleusClosure}
-{\small \begin{verbatim}
+\begin{intrinsics}
 NucleusClosure(TS, O, s, t) : TenSpc, AlgMat, RngIntElt, RngIntElt -> TenSpc
 NucleusClosure(TS, O, s, t) : TenSpc, ModMatFld, RngIntElt, RngIntElt -> TenSpc
 NucleusClosure(TS, O, s, t) : TenSpc, [Mtrx], RngIntElt, RngIntElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the nucleus closure of the tensor space $TS$, with frame $U_2\times U_1\rightarrowtail U_0$, with operators $O\subseteq \text{End}(U_s)\times \text{End}(U_t)$.
 Currently, this only works for tensor spaces of valence 2.
 This returns the subspace whose tensors' $st$-nuclues contains $O$.
 
-\color{blue}
 \index{NucleusClosure}
-{\small \begin{verbatim}
+\begin{intrinsics}
 NucleusClosure(TS, T, s, t) : TenSpc, TenSpcElt, RngIntElt, RngIntElt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the nucleus closure of the tensor space $TS$, with frame $U_2\times U_1\rightarrowtail U_0$, with operators $O\subseteq \text{End}(U_s)\times \text{End}(U_t)$.
 Currently, this only works for tensor spaces of valence 2.
 This returns the subspace whose tensors' $st$-nuclues contains the $st$-nucleus of $T$.
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt Der\_Closure}\\
-{\small We illustrate the fact that the (hyper-)matrix multiplication is unique. 
+\begin{example}[Der\_Closure]
+We illustrate the fact that the (hyper-)matrix multiplication is unique. 
 The derivation closure of the tensor in the universal tensor space is 1-dimensional.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Fr := [ KMatrixSpace(GF(3),2,3),
 >   KMatrixSpace(GF(3),3,2),KMatrixSpace(GF(3),2,2) ];
 > F := func< x | x[1]*x[2] >;
@@ -404,14 +372,13 @@ Tensor space of dimension 1 over GF(3) with valence 2
 U2 : Full Vector space of degree 6 over GF(3)
 U1 : Full Vector space of degree 6 over GF(3)
 U0 : Full Vector space of degree 4 over GF(3)
-\end{lstlisting} }
-\end{framed}
+\end{code}
+\end{example}
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt Nuc\_Closure}\\
-{\small We illustrate that the commutator from the Heisenberg group is unique over the correct field.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[Nuc\_Closure]
+We illustrate that the commutator from the Heisenberg group is unique over the correct field.
+
+\begin{code}
 > H := ClassicalSylow( GL(3,125), 5 ); // Heisenberg group
 > T := pCentralTensor(H,5,1,1);
 > T;
@@ -419,10 +386,11 @@ Tensor of valence 2, U2 x U1 >-> U0
 U2 : Full Vector space of degree 6 over GF(5)
 U1 : Full Vector space of degree 6 over GF(5)
 U0 : Full Vector space of degree 3 over GF(5)
-\end{lstlisting}
+\end{code}
+
 The centroid of $T$ will be 3-dimensional and is isomorphic to $\mathbb{F}_{125}$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > C := Centroid(T);
 > C;
 Matrix Algebra of degree 15 with 3 generators over GF(5)
@@ -441,19 +409,19 @@ Tensor space of dimension 1 over GF(5^3) with valence 2
 U2 : Full Vector space of degree 2 over GF(5^3)
 U1 : Full Vector space of degree 2 over GF(5^3)
 U0 : Full Vector space of degree 1 over GF(5^3)
-\end{lstlisting} 
+\end{code}
+
 Compare this closure with the closure of our original tensor over $\mathbb{F}_5$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > NT := NucleusClosure(Parent(T),T,2,1);
 > NT;
 Tensor space of dimension 36 over GF(5) with valence 2
 U2 : Full Vector space of degree 6 over GF(5)
 U1 : Full Vector space of degree 6 over GF(5)
 U0 : Full Vector space of degree 3 over GF(5)
-\end{lstlisting} }
-\end{framed}
-
+\end{code}
+\end{example}
 
 \section{Operations on tensor spaces}
 
@@ -461,57 +429,47 @@ U0 : Full Vector space of degree 3 over GF(5)
 
 We define some intuitive functions for tensor spaces, similar to those found for modules.
 
-\color{blue}
 \index{in}
-{\small \begin{verbatim}
+\begin{intrinsics}
 T in TS : TenSpcElt, TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if $T$ is contained in the tensor space $TS$.
 
-\color{blue}
 \index{IsCoercible!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsCoercible(TS, T) : TenSpc, TenSpcElt -> BoolElt, TenSpcElt
 TS ! T : TenSpc, TenSpcElt -> BoolElt, TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the tensor $T$ can be coerced into the tensor space $TS$. If so, the tensor is returned as an element of $TS$.
 
-\color{blue}
 \index{IsCoercible!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsCoercible(TS, S) : TenSpc, SeqEnum -> BoolElt, TenSpcElt
 TS ! S : TenSpc, SeqEnum -> BoolElt, TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the sequence $S$ can be coerced into the tensor space $TS$ as a tensor. If so, the corresponding tensor is returned. 
 
-\color{blue}
 \index{eq!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 S eq T : TenSpc, TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the tensor spaces $S$ and $T$ are equal.
 
-\color{blue}
 \index{subset}
-{\small \begin{verbatim}
+\begin{intrinsics}
 S subset T : TenSpc, TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if $S$ is a subset of the tensor space $T$.
 
-\begin{framed}{\bf Example} {\tt TenCoerce}\\
-{\small We illustrate that using {\tt !} is the same as creating the tensor from scratch.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenCoerce]
+We illustrate that using {\tt !} is the same as creating the tensor from scratch.
+
+\begin{code}
 > TS := KTensorSpace( GF(2), [2,3,2] );
 > TS;
 Tensor space of dimension 12 over GF(2) with valence 2
@@ -529,10 +487,11 @@ U0 : Full Vector space of degree 2 over GF(2)
 > 
 > T eq Tensor(GF(2),[2,3,2],S);
 true
-\end{lstlisting}
+\end{code}
+
 We demonstrate how to coerce into the symmetric cube of $V=\mathbb{Q}^{10}$ and construct a subcotensor space.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > V := VectorSpace(Rationals(),10);
 > SS := SymmetricCotensorSpace(V,3);
 > SS;
@@ -554,87 +513,72 @@ true
 true
 > SS.2 in CT;
 false
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Tensor spaces as modules}
 
 We view a tensor space as a $K$-module, so we have notions of generators, 
 dimension (if it is free), and cardinality.
 
-\color{blue}
 \index{Generators}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Generators(T) : TenSpc -> SeqEnum
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns a sequence of generators for the tensor space. 
 
-\color{blue}
 \index{.}
-{\small \begin{verbatim}
+\begin{intrinsics}
 T . i : TenSpc, RngIntElt -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the $i$th generator of the tensor space $T$.
 
-\color{blue}
 \index{NumberOfGenerators}\index{Ngens}
-{\small \begin{verbatim}
+\begin{intrinsics}
 NumberOfGenerators(T) : TenSpc -> RngIntElt
 Ngens(T) : TenSpc -> RngIntElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the number of generators of the tensor space $T$.
 
-\color{blue}
 \index{Dimension}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Dimension(T) : TenSpc -> RngIntElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the dimension of the tensor space $T$ as a free $K$-module.
 
-\color{blue}
 \index{\#}
-{\small \begin{verbatim}
+\begin{intrinsics}
 # T : TenSpc -> RngIntElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the size of the tensor space, provided it is finite.
 
-\color{blue}
 \index{Random}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Random(T) : TenSpc -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Provided the base ring has a random algorithm in Magma, it returns a random 
 element of the tensor space $T$.
 
-\color{blue}
 \index{RandomTensor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 RandomTensor(R, S) : Rng, [RngIntElt] -> TenSpcElt
 RandomTensor(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Provided $R$ has a random algorithm in Magma, it returns a random tensor from 
 the tensor space $\hom_R(R^{d_v},\dots,\hom_R(R^{d_1},R^{d_0})\cdots )$ with category $C$.
 The default category is the homotopism category.
 
-\begin{framed}{\bf Example} {\tt TenSpc\_Module}\\
-{\small We demonstrate the module functions for a tensor space.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenSpc\_Module]
+We demonstrate the module functions for a tensor space.
+
+\begin{code}
 > TS := KTensorSpace( GF(9), [2,2,2,2] );
 > TS;
 Tensor space of dimension 16 over GF(3^2) with valence 3
@@ -650,10 +594,11 @@ true
 > 
 > Eltseq(TS.2);
 [ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-\end{lstlisting}
+\end{code}
+
 We can use {\tt RandomTensor} to get a random tensor or cotensor from scratch.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > T := RandomTensor(GF(3),[2,2,2]);
 > T;
 Tensor of valence 2, U2 x U1 >-> U0
@@ -668,113 +613,92 @@ Cotensor of valence 2, U3 x U2 x U1 >-> K
 U3 : Full Vector space of degree 2 over GF(3)
 U2 : Full Vector space of degree 2 over GF(3)
 U1 : Full Vector space of degree 2 over GF(3)
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Properties of tensor spaces}
 
 We define some functions to access basic properties of tensor spaces.
 
-\color{blue}
 \index{Valence!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Valence(T) : TenSpc -> RngIntElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the valence of the tensor space.
 
-\color{blue}
 \index{Frame!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Frame(T) : TenSpc -> List
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the list of modules in the frame of the tensor space.
 
-\color{blue}
 \index{BaseRing!tensor space}\index{BaseField!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 BaseRing(T) : TenSpc -> Rng
 BaseField(T) : TenSpc -> Fld
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the base ring (or field) of the tensor space.
 
-\color{blue}
 \index{TensorCategory!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 TensorCategory(T) : TenSpc -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the underlying tensor category of the tensor space.
 
-\color{blue}
 \index{IsCovariant!tensor space}\index{IsContravariant!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsCovariant(T) : TenSpc -> BoolElt
 IsContravariant(T) : TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the underlying tensor category is covariant or contravariant.
 
-\color{blue}
 \index{ChangeTensorCategory!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 ChangeTensorCategory(T, C) : TenSpc, TenCat -> TenSpc
 ChangeTensorCategory(~T, C) : TenSpc, TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the tensor category with the given tensor category.
 
-\color{blue}
 \index{IsAlternating!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsAlternating(T) : TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if every tensor in the tensor space is an alternating tensor.
 
-\color{blue}
 \index{IsAntisymmetric!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsAntisymmetric(T) : TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if every tensor in the tensor space is an antisymmetric tensor.
 
-\color{blue}
 \index{IsSymmetric!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsSymmetric(T) : TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if every tensor in the tensor space is a symmetric tensor.
 
-\color{blue}
 \index{UniversalTensorSpace}\index{UniversalCotensorSpace}\index{Generic}
-{\small \begin{verbatim}
+\begin{intrinsics}
 UniversalTensorSpace(T) : TenSpc -> TenSpc
 UniversalCotensorSpace(T) : TenSpc -> TenSpc
 Generic(T) : TenSpc -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the universal (co-)tensor space with the same frame and category as $T$.
 
-\begin{framed}{\bf Example} {\tt TenSpc\_Prop}\\
-{\small We demonstrate the functions to obtain standard tensor space properties.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenSpc\_Prop]
+We demonstrate the functions to obtain standard tensor space properties.
+
+\begin{code}
 > TS := KTensorSpace( GF(23), [3,4,5,6] );
 > TS;
 Tensor space of dimension 360 over GF(23) with valence 3
@@ -804,10 +728,11 @@ Tensor category of Valence 3 (->,->,->,->)
 > TensorCategory(TS);
 Tensor category of Valence 3 (->,->,<-,<-) 
 ({ 1 },{ 2 },{ 0 },{ 3 })
-\end{lstlisting}
+\end{code}
+
 We construct the universal cotensor space of the symmetric cube, $S^3(V)$, of a vector space $V$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > V := VectorSpace( GF(3), 5 );
 > S := SymmetricCotensorSpace(V,3);
 > S;
@@ -823,9 +748,8 @@ U1 : Full Vector space of degree 5 over GF(3)
 > 
 > IsSymmetric(S);
 true
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \chapter{Tensor categories}
 
@@ -895,14 +819,13 @@ It is useful to distinguish from tensors and cotensors at the categorical level,
 so a tensor category is either covariant or contravariant as well 
 (in the latter case, referred to as a cotensor category).
 
-\section{Creating tensor categories}
-\color{blue}
+\section{Creating tensor categories}~
+
 \index{TensorCategory!constructor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 TensorCategory(A, P) : [RngIntElt], {SetEnum} -> TenCat
 TensorCategory(A, P) : Map, {SetEnum} -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Sets up a covariant tensor space category with specified direction of
 arrows $A$, and a partition $P$ indicating variables to be treated as
@@ -910,13 +833,11 @@ equivalent.  The fiber $A^{-1}(1)$ denotes the covariant variables,
 $A^{-1}(0)$ identifies the constant variables, and $A^{-1}(-1)$ marks
 the contra-variant variables.  
 
-\color{blue}
 \index{CotensorCategory!constructor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 CotensorCategory(A, P) : [RngIntElt], {SetEnum} -> TenCat
 CotensorCategory(A, P) : Map, {SetEnum} -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Sets up a contra-variant tensor space category with specified direction of
 arrows $A$, and a partition $P$ indicating variables to be treated as
@@ -924,45 +845,39 @@ equivalent.  The fiber $A^{-1}(1)$ denotes the covariant variables,
 $A^{-1}(0)$ identifies the constant variables, and $A^{-1}(-1)$ marks
 the contra-variant variables.  
 
-\color{blue}
 \index{HomotopismCategory}
-{\small \begin{verbatim}
+\begin{intrinsics}
 HomotopismCategory(v : \parameters) : RngIntElt -> TenCat
 Contravariant : BoolElt : false
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns Albert's homotopism category -- all modules categories are covariant 
 and 
 no duplicates considered.
 Set the optional parameter {\tt Contravariant} to {\tt true} to make it a cotensor category.
 
-\color{blue}
 \index{CohomotopismCategory}
-{\small \begin{verbatim}
+\begin{intrinsics}
 CohomotopismCategory(v) : RngIntElt -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the cohomotopism category -- all domain modules categories are 
 covariant, the codomain is contravariant, and no duplicates considered.
 
-\color{blue}
 \index{AdjointCategory}\index{LinearCategory}
-{\small \begin{verbatim}
+\begin{intrinsics}
 AdjointCategory(v, s, t) :  RngIntElt, RngIntElt, RngIntElt -> TenCat
 LinearCategory(v, s, t) :  RngIntElt, RngIntElt, RngIntElt -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the tensor category where all modules are constant except in position 
 $s$ and $t$.  Both $s$ and $t$ are in $\{0,\dots, v\}$.
 Position $s$ is covariant, position $t$ is contravariant.
 
-\begin{framed}{\bf Example} {\tt TenCat\_Const}\\
-{\small We illustrate how to construct tensor categories.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenCat\_Const]
+We illustrate how to construct tensor categories.
+
+\begin{code}
 > Cat := TensorCategory([1,-1,0],{{0},{1},{2}});
 > Cat;
 Tensor category of Valence 2 (->,<-,==) ({ 1 },{ 2 },{ 0 })
@@ -978,10 +893,11 @@ Tensor category of Valence 2 (->,<-,==) ({ 1 },{ 2 },{ 0 })
 > 
 > IsContravariant(TS);
 false
-\end{lstlisting}
+\end{code}
+
 All the tensor constructors that allow a {\tt TenCat} input can be used to make cotensors.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Cat := HomotopismCategory(2 : Contravariant := true);
 > Cat;
 Cotensor category of valence 2 (->,->) ({ 1 },{ 2 })
@@ -990,65 +906,54 @@ Cotensor category of valence 2 (->,->) ({ 1 },{ 2 })
 Cotensor of valence 1, U2 x U1 >-> K
 U2 : Full Vector space of degree 2 over GF(5)
 U1 : Full Vector space of degree 2 over GF(5)
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \section{Operations on tensor categories}
 
 We have basic operations for tensor categories.
 
-\color{blue}
 \index{eq!tensor category}
-{\small \begin{verbatim}
+\begin{intrinsics}
 C1 eq C2 : TenCat, TenCat -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the tensor categories are the same.
 
-\color{blue}
 \index{Valence!tensor category}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Valence(C) : TenCat -> RngIntElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the valence of the tensor category.
 
-\color{blue}
 \index{Arrows}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Arrows(C) : TenCat -> SeqEnum
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the sequence of arrows of the tensor category. 
 A $-1$ signifies an a contravariant index, a $0$ signifies a constant index, and a $1$ signifies a covariant index.
 
-\color{blue}
 \index{RepeatPartition}
-{\small \begin{verbatim}
+\begin{intrinsics}
 RepeatPartition(C) : TenCat -> SetEnum
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the repeat partition for the tensor category.
 
-\color{blue}
 \index{IsCovariant!tensor category}\index{IsContravariant!tensor category}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsCovariant(C) : TenCat -> BoolElt
 IsContravariant(C) : TenCat -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the tensor category is covariant or contravariant.
 
-\begin{framed}{\bf Example} {\tt TenCat\_Prop}\\
-{\small We obtain basic properties of tensor categories.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenCat\_Prop]
+We obtain basic properties of tensor categories.
+
+\begin{code}
 > C1 := TensorCategory([1,1,-1,1],{{0,3},{1},{2}});
 > C1;
 Tensor category of Valence 3 (->,->,<-,->) ({ 1 },{ 2 },
@@ -1069,9 +974,8 @@ false
 3
 > Arrows(C2);
 [ 1, 1, 1, 1 ]
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \section{Categorical operations}
 
@@ -1080,137 +984,111 @@ false
 We include functions defined for the category of tensors.
 Most functions are currently defined only for Albert's homotopism category.
 
-\color{blue}
 \index{Subtensor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Subtensor(T, S) : TenSpcElt, List -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the smallest submap of $T$ containing $S$.
 
-\color{blue}
 \index{Subtensor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Subtensor(T, D, C) : TenSpcElt, List, Any -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the smallest submap of $T$ containing $D$ in the domain and $C$ in the 
 codomain.
 
-\color{blue}
 \index{IsSubtensor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsSubtensor(T, S) : TenSpcElt, TenSpcElt -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides whether $S$ is a subtensor of $T$.
 
-\color{blue}
 \index{LocalIdeal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 LocalIdeal(T, S, I) : TenSpcElt, List, {RngIntElt} -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the local ideal of $T$ at $I$ constaining $S$.
 
-\color{blue}
 \index{LocalIdeal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 LocalIdeal(T, D, C, I) : TenSpcElt, List, Any, {RngIntElt} -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the local ideal of $T$ at $I$ constaining $D$ in the domain and $C$ 
 in the codomain.
 
-\color{blue}
 \index{LocalIdeal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 LocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the local ideal of $T$ at $I$ constaining $S$ as a submap.
 
 
-\color{blue}
 \index{IsLocalIdeal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsLocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if $S$ is a local ideal of $T$ at $I$.
 
-\color{blue}
 \index{Ideal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Ideal(T, S) : TenSpcElt, List -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the ideal of $T$ containing $S$.
 
-\color{blue}
 \index{Ideal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Ideal(T, D, C) : TenSpcElt, List, Any -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the ideal of $T$ containing $D$ in the domain and $C$ in the codomain.
 
-\color{blue}
 \index{Ideal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Ideal(T, S) : TenSpcElt, TenSpcElt -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the ideal of $T$ containing $S$ as a submap.
 
-\color{blue}
 \index{IsIdeal}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsIdeal(T, S) : TenSpcElt, TenSpcElt -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if $S$ is an ideal of $T$.
 
-\color{blue}
 \index{LocalQuotient}
-{\small \begin{verbatim}
+\begin{intrinsics}
 LocalQuotient(T, S, I : \parameters) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt, Hmtp
 Check : BoolElt : true
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the local quotient of $T$ by $S$ at $I$. If you know $S$ is a local 
 ideal of $T$ at $I$, set {\tt Check} to {\tt false} to skip the verification.
 A homotopism is also returned, mapping from $T$ to $T/S$.
 
-\color{blue}
 \index{Quotient!tensor}\index{/!tensor}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Quotient(T, S : \parameters) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
 Check : BoolElt : true
 T / S : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the quotient of $T$ by $S$. If you know $S$ is an ideal of $T$, 
 set {\tt Check} to {\tt false} to skip the verification.
 A homotopism is also returned, mapping from $T$ to $T/S$.
 
-\begin{framed}{\bf Example} {\tt Ten\_Cat\_Ops}\\
-{\small We will construct a quotient of tensors. First, we construct a subtensor from a random tensor.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[Ten\_Cat\_Ops]
+We will construct a quotient of tensors. First, we construct a subtensor from a random tensor.
+
+\begin{code}
 > T := RandomTensor(GF(5),[4,4,2]);
 > T := RandomTensor(GF(5),[4,4,2]);
 > T;
@@ -1242,10 +1120,11 @@ Echelonized basis:
 > 
 > IsSubtensor(T,S);
 true
-\end{lstlisting}
+\end{code}
+
 Now we construct the ideal of $T$ containing $S$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > I := Ideal(T,S);
 > I;
 Tensor of valence 2, U2 x U1 >-> U0
@@ -1266,10 +1145,11 @@ Generators:
 > 
 > IsIdeal(T,I);
 true
-\end{lstlisting}
+\end{code}
+
 Finally, we construct the quotient of $T$ by $I$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > T/I;
 Tensor of valence 2, U2 x U1 >-> U0
 U2 : Full Vector space of degree 3 over GF(5)
@@ -1282,55 +1162,46 @@ U1 -> V1: Mapping from: Full Vector space of degree 4 over
 GF(5) to Full Vector space of degree 3 over GF(5)
 U0 -> V0: Mapping from: Full Vector space of degree 2 over 
 GF(5) to Full Vector space of degree 0 over GF(5)
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Categorical operations on tensor spaces}
 
 We have categorical notions for tensor spaces as well.
 
-\color{blue}
 \index{SubtensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 SubtensorSpace(T, L) : TenSpc, [TenSpcElt] -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the subtensor space of $T$ generated by the tensors in the sequence $L$.
 
-\color{blue}
 \index{SubtensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 SubtensorSpace(T, t) : TenSpc, TenSpcelt -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the subtensor space of $T$ generated by the tensor $t$.
 
-\color{blue}
 \index{IsSubtensorSpace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsSubtensorSpace(T, S) : TenSpc, TenSpc -> BoolElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Decides if the tensor space $S$ is a subtensor space of $T$.
 
-\color{blue}
 \index{Quotient!tensor space}\index{/!tensor space}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Quotient(T, S) : TenSpc, TenSpc -> TenSpc
 T / S : TenSpc, TenSpc -> TenSpc
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the quotient tensor space of $T$ by $S$.
 
-\begin{framed}{\bf Example} {\tt TenSpc\_Cat\_Ops}\\
-{\small We construct a subtensor space.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[TenSpc\_Cat\_Ops]
+We construct a subtensor space.
+
+\begin{code}
 > T := KTensorSpace(GF(2),[4,4,2]);
 > T;
 Tensor space of dimension 32 over GF(2) with valence 2
@@ -1357,10 +1228,11 @@ U0 : Full Vector space of degree 2 over GF(2)
     [1 0 0 0]
     [0 0 1 0]
 ]
-\end{lstlisting}
+\end{code}
+
 Now we compute the quotient tensor space $Q=T/S$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Q := T/S;
 > Q;
 Tensor space of dimension 16 over GF(2) with valence 2
@@ -1391,9 +1263,8 @@ U0 : Full Vector space of degree 2 over GF(2)
     [0 0 0 0]
     [0 0 0 0]
 ]
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \section{Homotopisms}
 
@@ -1401,21 +1272,19 @@ Magma provides functions for homotopisms. Homotopisms are also equipped with a t
 
 \subsection{Constructions of Homotopisms}~
 
-\color{blue}
 \index{Homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Homotopism(T, S, M) : TenSpcElt, TenSpcElt, List -> Hmtp
 Homotopism(T, S, M, C) : TenSpcElt, TenSpcElt, List, TenCat -> Hmtp
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the homotopism from $T$ to $S$ given by the list of maps $M$ and the category $C$. 
 The default tensor category is the same as tensor categories for $T$ and $S$.
 
-\begin{framed}{\bf Example} {\tt Hmtp\_Const}\\
-{\small We illustrate how to construct tensor categories.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[Hmtp\_Const]
+We illustrate how to construct tensor categories.
+
+\begin{code}
 > TS := KTensorSpace(GF(4),[2,3,4]);
 > T := Random(TS);
 > S := Random(TS);
@@ -1452,92 +1321,76 @@ U0 -> V0:
 [    0     1 $.1^2   $.1]
 [    0     0   $.1 $.1^2]
 [  $.1 $.1^2   $.1     0]
-\end{lstlisting} }
-\end{framed}
+\end{code}
+\end{example}
 
 
 \subsection{Basic Operations with Homotopisms}
 
 We provide some operations for homotopisms.
 
-\color{blue}
 \index{$*$!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 H1 * H2 : Hmtp, Hmtp -> Hmtp
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the composition of the homotopisms $H_1$ and $H_2$.
 
-\color{blue}
 \index{Domain!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Domain(H) : Hmtp -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the domain tensor of $H$.
 
-\color{blue}
 \index{Codomain!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Codomain(H) : Hmtp -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the codomain tensor of $H$.
 
-\color{blue}
 \index{Maps}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Maps(H) : Hmtp -> List
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the of maps for the various modules in the domain and codomain 
 tensors.
 
-\color{blue}
 \index{TensorCategory!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 TensorCategory(H) : Hmtp -> TenCat
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the tensor category of $H$.
 
-\color{blue}
 \index{ChangeTensorCategory!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 ChangeTensorCategory(H, C) : Hmtp, TenCat -> Hmtp
 ChangeTensorCategory(~H, C) : Hmtp, TenCat -> Hmtp
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Changes the tensor category of $H$ to the given category.
 
-\color{blue}
 \index{Kernel}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Kernel(H) : Hmtp -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the kernel of $H$ as an ideal of its domain tensor.
 
-\color{blue}
 \index{Image!homotopism}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Image(H) : Hmtp -> TenSpcElt
-\end{verbatim} }
-\color{black}
+\end{intrinsics}
 
 Returns the image of $H$ as a submap of the codomain tensor.
 
-\begin{framed}{\bf Example} {\tt Hmtp\_Ops}\\
-{\small We perform basic operations with homotopisms.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+\begin{example}[Hmtp\_Ops]
+We perform basic operations with homotopisms.
+
+\begin{code}
 > T := RandomTensor(GF(7),[5,4,3]);
 > F := Frame(T);
 > 
@@ -1555,10 +1408,11 @@ Tensor of valence 2, U2 x U1 >-> U0
 U2 : Vector space of degree 5, dimension 0 over GF(7)
 U1 : Vector space of degree 4, dimension 0 over GF(7)
 U0 : Vector space of degree 3, dimension 0 over GF(7)
-\end{lstlisting}
+\end{code}
+
 If the tensor is over vector spaces, then matrices can be used to create a homotopism.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > M := [* RandomMatrix(GF(7),i,i) : i in [5,4,3] *];
 > G := Homotopism(T,T,M);
 > G;
@@ -1578,10 +1432,11 @@ U0 -> V0:
 [6 4 1]
 [2 6 5]
 [1 2 3]
-\end{lstlisting}
+\end{code}
+
 Homotopisms can be composed so long as Magma can compose each of the individual maps.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > G*G;
 Maps from U2 x U1 >-> U0 to V2 x V1 >-> V0.
 U2 -> V2: 
@@ -1599,10 +1454,11 @@ U0 -> V0:
 [3 1 1]
 [1 5 5]
 [6 1 6]
-\end{lstlisting}
+\end{code}
+
 We can change the underlying category for the homotopism $G$ to get a different morphism.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Cat := TensorCategory([1,-1,1],{{0},{1},{2}});
 > G := Homotopism(T,T,M,Cat);
 > G;
@@ -1639,6 +1495,6 @@ U1 : Full Vector space of degree 4 over GF(7)
 U0 : Vector space of degree 3, dimension 1 over GF(7)
 Echelonized basis:
 (1 4 0)
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
+

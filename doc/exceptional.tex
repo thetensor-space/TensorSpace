@@ -8,30 +8,24 @@ are also provided.
 
 \subsection{Nonassociative algebras with involutions}~
 
-\color{blue}
 \index{IsStarAlgebra}
-{\small \begin{verbatim}
+\begin{intrinsics}
 IsStarAlgebra(A) : AlgGen -> BoolElt
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Decides if algebra has an involution, i.e. a $*$-algebra.
 
-\color{blue}
 \index{Star}
-{\small \begin{verbatim}
+\begin{intrinsics}
 Star(A) : AlgGen -> Map
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Returns involution of given $*$-algebra.
 
-%%Example{Name}
-\begin{framed}{\bf Example} {\tt Star\_Alg}\\
-{\small 
+\begin{example}[Star\_Alg]
 We demonstrate the functions dealing with involutions of nonassociative algebras.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > A := OctonionAlgebra(Rationals(),-1,-1,-1);
 > IsStarAlgebra(A);
 true
@@ -46,57 +40,46 @@ true
 (0 1 0 0 0 0 0 0)
 > A.2 @ s;
 ( 0 -1  0  0  0  0  0  0)
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \subsection{Operations on power associative algebras}~
 The following operations are defined for nonassociative algebras for which $x*(x*x)=(x*x)*x$.
 
-\color{blue}
 \index{GenericMinimalPolynomial}\index{GenericMinimumPolynomial}
-{\small \begin{verbatim}
+\begin{intrinsics}
 GenericMinimalPolynomial(x) : AlgGenElt -> FldElt
 GenericMinimumPolynomial(x) : AlgGenElt -> FldElt
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 The generic minimum polynomial of an element in a power associative algebra.
 
-\color{blue}
 \index{GenericNorm}
-{\small \begin{verbatim}
+\begin{intrinsics}
 GenericNorm(x) : AlgGenElt -> FldElt
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
+
 The generic norm of an element in a power associative algebra.
 
-\color{blue}
 \index{GenericTrace}
-{\small \begin{verbatim}
+\begin{intrinsics}
 GenericTrace(x) : AlgGenElt -> FldElt
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 The generic trace of an element in a power associative algebra.
 
-\color{blue}
 \index{GenericTracelessSubspaceBasis}
-{\small \begin{verbatim}
+\begin{intrinsics}
 GenericTracelessSubspaceBasis(A) : AlgGen -> Any
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Given a power associative algebra return a basis for the elements of generic trace 0.
 
-%%Example{Name}
-\begin{framed}
-\noindent {\bf Example} {\tt Ten\_Generic}\\
-{\small
+\begin{example}[Ten\_Generic]
 The trace $x+\bar{x}$ of a quaternion doubles the rational component, producing
 degenerate behavior in characteristic $2$.  The generic trace avoids this.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Q := QuaternionAlgebra(Rationals(), 1,1);
 > Trace(Q!1);        
 2
@@ -107,11 +90,12 @@ teal},backgroundcolor=\color{white!70!gray}]
 0
 > GenericTrace(Q!1);
 1
-\end{lstlisting}
+\end{code}
+
 The generic minimum polynomial of an element $x$ in power associative algebra
 need only be a factor of the minimal polynomial of its right regular matrix $yR_x:=x*y$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > J := ExceptionalJordanCSA(GF(5));
 > p := GenericMinimumPolynomial(J.3+J.12);
 > Rx := AsMatrices(Tensor(J), 2,0);     // yR_x = y*x.
@@ -122,19 +106,16 @@ teal},backgroundcolor=\color{white!70!gray}]
 6
 > q mod p;
 0
-\end{lstlisting}
-}
-\end{framed}
+\end{code}
+\end{example}
 
 \section{Compositions algebras}
 
-\color{blue}
 \index{CompositionAlgebra}
-{\small \begin{verbatim}
+\begin{intrinsics}
 CompositionAlgebra(K, a) : Fld, [FldElt] -> AlgGen
 CompositionAlgebra(K, a) : Fld, [RngIntElt] -> AlgGen
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Constructs the composition algebra with specified parameters.  The algebra returned
 has an involution.  
@@ -144,94 +125,79 @@ the individually classified algebras according to Hurwitz's theorem.  In the cas
 fields the type returned is an algebra with involution, possibly the identity.
 
 
-\color{blue}
 \index{OctonionAlgebra}
-{\small \begin{verbatim}
+\begin{intrinsics}
 OctonionAlgebra(K, a, b, c) : Fld, FldElt, FldElt, FldElt -> AlgGen
 OctonionAlgebra(K, a, b, c) : Fld, RngIntElt, RngIntElt, RngIntElt -> AlgGen
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Octonion algebra with involution given by the specified parameters.
 This builds the Cayley-Dickson algebra over the quaternion algebra
 $\left(\frac{a,b}{K}\right)$.  In particular, Magma's implementation
 of quaternion algebras is applied.
 
-\color{blue}
 \index{SplitOctonionAlgebra}
-{\small \begin{verbatim}
+\begin{intrinsics}
 SplitOctonionAlgebra(K) : Fld -> AlgGen
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Returns the split octonion algebra over the field $F$.
 
 
-%%Example{Name}
-\begin{framed}
-\noindent {\bf Example} {\tt Ten\_Triality}\\
-{\small
+\begin{example}[Ten\_Triality]
 The following example demonstrates some of the mechanics by exploring
 the concept of triality \cite{Schafer}*{III.8}.
 
 The Cartan-Jacobson theorem asserts that for fields of characteristic other
 than 2 and 3, the derivation algebra of an octonion algebra is of Lie type 
 $G_2$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > O := OctonionAlgebra(GF(7),-1,-1,-1);
 > L := DerivationAlgebra(O);   // Derivations as an algebra.
 > SemisimpleType(L);
 G2
-\end{lstlisting}
+\end{code}
+
 Cartan's triality obtains $G_2$ from $D_4$ by relaxing to
 derivations of the octonions as a generic tensor, rather than as an 
 algebra.  
 This is done computationally by changing the category of the octonion product
 from an algebra to a tensor.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > T := Tensor(O);
 > T := ChangeTensorCategory(T,HomotopismCategory(2)); 
 > M := DerivationAlgebra(T);  // Derivations as a tensor.
 > SemisimpleType(M/SolvableRadical(M));
 D4
-\end{lstlisting}
-}
-\end{framed}
-%%End Example
+\end{code}
+\end{example}
 
 \section{Jordan algebras}
 
 
-\color{blue}
 \index{JordanTripleProduct}
-{\small \begin{verbatim}
+\begin{intrinsics}
 JordanTripleProduct(J) : AlgGen -> TenSpcElt
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Returns the tensor describing the Jordan triple product.
 
-\color{blue}
 \index{JordanSpinAlgebra}
-{\small \begin{verbatim}
+\begin{intrinsics}
 JordanSpinAlgebra(F) : TenSpcElt -> AlgGen
 JordanSpinAlgebra(F) : Any -> AlgGen
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 Returns the special Jordan algebra of spin type for given symmetric form.
 
-%%Example{Name}
-\begin{framed}
-\noindent {\bf Example} {\tt Ten\_Jordan\_Basic}\\
-{\small
+\begin{example}[Ten\_Jordan\_Basic]
 Jordan algebras have suggestive analogues of 
 commutative associative algebras, but experimenting shows serious 
 differences.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > F := IdentityMatrix(Rationals(),2);
 > J := JordanSpinAlgebra(F);
 > T := Tensor(J); 
@@ -247,43 +213,34 @@ true
 > e := (1/2)*(J.1+J.2);             
 > e^2 eq e;  // An idempotent of J?
 true
-\end{lstlisting}
+\end{code}
+
 Pierce decompositions in Jordan algebras have the usual 0 and 1 eigenspaces
 but an additional 1/2-eigenspace emerges as well.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > Re := (1/2)*(R[1]+R[2]);
 > Eigenvalues(Re);
 { <1, 1>, <1/2, 1>, <0, 1> }
-\end{lstlisting}
-}
-\end{framed}
-%%End Example
+\end{code}
+\end{example}
 
-
-\color{blue}
 \index{ExceptionalJordanCSA}
-{\small \begin{verbatim}
+\begin{intrinsics}
 ExceptionalJordanCSA(O) : AlgGen -> AlgGen
 ExceptionalJordanCSA(K) : Fld -> AlgGen
-\end{verbatim}}
-\color{black}
+\end{intrinsics}
 
 The exception central simple Jordan algebra over the given octonions.
 If a field is supplied instead then the split octonion algebra over the
 field is used.
 
-
-\medskip
-%%Example{Name}
-\begin{framed}
-\noindent {\bf Example} {\tt Ten\_Chevalley\_Shafer\_F4}\\
-{\small
+\begin{example}[Ten\_Chevalley\_Shafer\_F4]
 In characteristic not $2$ or $3$, the exceptional central 
 simple Jordan algebra can be used to construct
 the exceptional Lie algebra of type $F_4$.
-\begin{lstlisting}[frame=single,basicstyle=\ttfamily\color{black!30!
-teal},backgroundcolor=\color{white!70!gray}]
+
+\begin{code}
 > J := ExceptionalJordanCSA(Rationals());
 > T := Tensor(J);                                     
 > T := ChangeTensorCategory(T, HomotopismCategory(2));
@@ -294,7 +251,6 @@ teal},backgroundcolor=\color{white!70!gray}]
 F4
 > F4;               // F4 represented on a 27-dim module.
 Matrix Lie Algebra of degree 27 over Rational Field
-\end{lstlisting}
-}
-\end{framed}
-%%End Example
+\end{code}
+\end{example}
+
