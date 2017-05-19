@@ -537,9 +537,9 @@ Generators(T) : TenSpc -> SeqEnum
 
 Returns a sequence of generators for the tensor space. 
 
-\index{.}
+\index{.!tensor space}
 \begin{intrinsics}
-T . i : TenSpc, RngIntElt -> TenSpcElt
+T.i : TenSpc, RngIntElt -> TenSpcElt
 \end{intrinsics}
 
 Returns the $i$th generator of the tensor space $T$.
@@ -1376,8 +1376,15 @@ Returns the codomain tensor of $H$.
 Maps(H) : Hmtp -> List
 \end{intrinsics}
 
-Returns the of maps for the various modules in the domain and codomain 
+Returns the list of maps for the various modules in the domain and codomain 
 tensors.
+
+\index{.!homotopisms}
+\begin{intrinsics}
+H.i : Hmtp, RngIntElt -> Map
+\end{intrinsics}
+
+Returns the map on the $i$th coordinate.
 
 \index{TensorCategory!homotopism}
 \begin{intrinsics}

@@ -21,6 +21,7 @@ April 29, 2017
   - Fixed a bug when printing homotopisms.
   - Homotopisms now go through a verification process. This can be skipped with 
     the optional parameter 'Check:=false'.
+  - Added '.' functionality to homotopisms.
 
 December 20, 2016
   - Fixed a few bugs.

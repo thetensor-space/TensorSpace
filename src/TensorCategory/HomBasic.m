@@ -99,5 +99,6 @@ end intrinsic;
 intrinsic '.'( H::Hmtp, i::RngIntElt ) -> Map
 {Returns the map on the ith coordinate.}
   M := Maps(H);
+  require i in [0..#M-1] : "Integer should be in range [0.." cat IntegerToString(#M-1) cat "].";
   return M[#M-i];
 end intrinsic;
