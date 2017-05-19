@@ -33,19 +33,20 @@ then a default tensor category is used based on the method of creation.
 \section{Creating tensors}
 
 \subsection{Black-box tensors}
-A user can specify a tensor by a black-box function that 
-evaluates the required
+A user can specify a tensor by a black-box function that evaluates the required
 multilinear map.
 
 \index{Tensor!black-box}
 \begin{intrinsics}
-Tensor(S, F) : SeqEnum, UserProgram -> TenSpcElt
-Tensor(S, F) : List, UserProgram -> TenSpcElt
-Tensor(S, F, Cat) : SeqEnum, UserProgram, TenCat -> TenSpcElt
-Tensor(S, F, Cat) : List, UserProgram, TenCat -> TenSpcElt
+Tensor(S, F) : SeqEnum, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(S, F) : List, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(S, F, Cat) : SeqEnum, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(S, F, Cat) : List, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
 \end{intrinsics}
 
-Returns the tensor with the frame specified by $S$ and tensor category $Cat$. 
+Returns two tensors $T_1$ and $T_2$ and a homotopism from $T_2$ to $T_1$ in the given category $Cat$. 
+$T_1$ is a tensor over vector spaces (essentially forgetting all other structure), and $T_2$ is a tensor over the given frame $S$. 
+Note that it may not be possible to apply all intrinsics to $T_2$, which is why $T_1$ is returned first. 
 The last entry is assumed to be the codomain of the multilinear map. 
 The user-defined function $F$ should take as
 input a tuple of elements of the domain and return an element of the codomain.
@@ -54,14 +55,15 @@ If no tensor category is provided, the Albert's homotopism category is used.
 
 \index{Tensor!black-box}
 \begin{intrinsics}
-Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt
-Tensor(D, C, F) : List, Any, UserProgram -> TenSpcElt
-Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt
-Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt
+Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(D, C, F) : List, Any, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
 \end{intrinsics}
 
-Returns the tensor with tensor category $Cat$ and frame specified by $D$ and $C$, where $D$ is a sequence 
-of spaces in the domain and $C$ the codomain. 
+Returns two tensors $T_1$ and $T_2$ and a homotopism from $T_2$ to $T_1$ in the given category $Cat$. 
+$T_1$ is a tensor over vector spaces (essentially forgetting all other structure), and $T_2$ is a tensor from the domain $D$ into the codomain $C$. 
+Note that it may not be possible to apply all intrinsics to $T_2$, which is why $T_1$ is returned first. 
 The user-defined function $F$ should take as input a tuple of elements of $D$ and return an element of $C$.
 If no tensor category is provided, the Albert's homotopism category is used.
 
@@ -468,14 +470,14 @@ Returns the sum or scalar multiple of tensors as module elements of the tensor
 space. The corresponding multilinear maps are the sum or scalar multiple of the 
 multilinear maps.
 
-\index{TensorOnVectorSpaces}
-\begin{intrinsics}
-TensorOnVectorSpaces(T) : TenSpcElt -> TenSpcElt, Hmtp
-\end{intrinsics}
+%\index{TensorOnVectorSpaces}
+%\begin{intrinsics}
+%TensorOnVectorSpaces(T) : TenSpcElt -> TenSpcElt, Hmtp
+%\end{intrinsics}
 
-Returns the tensor on vector spaces and an isotopism from the given tensor. 
-This is a forgetful functor that forces all domain and codomain terms to be 
-vector spaces.
+%Returns the tensor on vector spaces and an isotopism from the given tensor. 
+%This is a forgetful functor that forces all domain and codomain terms to be 
+%vector spaces.
 
 \index{AssociatedForm}
 \begin{intrinsics}
@@ -907,10 +909,12 @@ RightDomain(B) : TenSpcElt -> BmpV
 Returns the right domain, $U_1$, of $B$  framed by $[U_2,U_1,U_0]$. 
 setup for use with infix notation.
 
-\index{IsCoercible!bilinear}
+\index{IsCoercible!bilinear}\index{BANG!bilinear}
 \begin{intrinsics}
 IsCoercible(S,x) : BmpU, Any -> BoolElt, BmpUElt
 IsCoercible(S,x) : BmpV, Any -> BoolElt, BmpVElt
+S!x : BmpU, Any -> BoolElt, BmpUElt
+S!x : BmpV, Any -> BoolElt, BmpVElt
 \end{intrinsics}
 
 Decides if $x$ can be coerced into $S$, and if it can, it returns the coerced 
@@ -1468,14 +1472,16 @@ HeisenbergLieAlgebra(B) : TenSpcElt -> AlgLie
 Returns the Heisenberg Lie algebra with Lie bracket given by the alternating 
 bilinear tensor induced by $B$.
 
-\index{HeisenbergGroup}
+\index{HeisenbergGroup}\index{HeisenbergGroupPC}
 \begin{intrinsics}
-HeisenbergGroup(B) : TenSpcElt -> GrpPC
+HeisenbergGroup(B) : TenSpcElt -> GrpMat
+HeisenbergGroupPC(B) : TenSpcElt -> GrpPC
 \end{intrinsics}
 
 Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given 
 by the alternating bilinear tensor induced by $B$. 
-This uses the {\tt pQuotient} functions to convert a finitely presented group into a polycyclic group.
+The intrinsic {\tt HeisenbergGroupPC} uses the {\tt pQuotient} functions to convert a finitely presented group into a polycyclic group.
+
 
 \begin{example}[Ten\_Heisenberg]
 From a single 2-tensor we construct an algebra, a Lie algebra, and a $p$-group.
