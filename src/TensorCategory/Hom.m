@@ -2,6 +2,8 @@
   This file contains all the homotopism constructors.
 */
 
+import "../GlobalVars.m" : __FRAME;
+
 __VerifyHomotopism := function( B, C, H )
   Dom := Domain(B);
   v := #Dom+1;
@@ -11,6 +13,12 @@ end function;
 
 __GetHomotopism := function( B, C, M : Cat := 0, Check := true )
   H := New(Hmtp);
+  F_B := __FRAME(B);
+  F_C := __FRAME(C);
+  // the @ operator does not work for AlgMatElt or GrpMatElt
+  while exists(i){ i : i in [1..#M] | ISA(Type(M[i]), AlgMatElt) or ISA(Type(M[i]), GrpMatElt) } do
+    M[i] := Hom(F_B[i], F_C[i])!(M[i]);
+  end while;
   H`Maps := M;
   H`Domain := B;
   H`Codomain := C;
