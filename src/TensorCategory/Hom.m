@@ -55,3 +55,14 @@ intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat : Check := 
   H, isit := __GetHomotopism( t, s, M : Cat := C, Check := Check );
   return H;
 end intrinsic;
+
+intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> BoolElt
+{Decides if the given maps are a homotopism from t to s.}
+  require #M eq t`Valence : "Incorrect number of maps.";
+  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
+  H, isit := __GetHomotopism( t, s, M );
+  if isit then
+    return isit, H;
+  end if;
+  return false, _;
+end intrinsic;
