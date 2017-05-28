@@ -102,9 +102,9 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-intrinsic Domain( t::TenSpcElt ) -> SetCart
+intrinsic Domain( t::TenSpcElt ) -> List
 {Returns the domain of t.}
-  return CartesianProduct(< X : X in t`Domain >);
+  return t`Domain;
 end intrinsic;
 
 intrinsic Codomain( t::TenSpcElt ) -> .
