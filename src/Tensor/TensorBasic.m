@@ -102,9 +102,9 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-intrinsic Domain( t::TenSpcElt ) -> List
-{Returns the Cartesian factors in the domain of t.}
-  return t`Domain;
+intrinsic Domain( t::TenSpcElt ) -> SetCart
+{Returns the domain of t.}
+  return CartesianProduct(< X : X in t`Domain >);
 end intrinsic;
 
 intrinsic Codomain( t::TenSpcElt ) -> .
@@ -288,13 +288,37 @@ intrinsic Slice( t::TenSpcElt, grid::[SetEnum] ) -> SeqEnum
   end try;
   Grid := CartesianProduct(grid);
   spaces := __FRAME(t);
-  require forall{ i : i in [1..#grid] | grid[i] subset {1..Dimension(spaces[i])} } : "Unknown values in grid.";
+  require forall{ i : i in [1..#grid] | grid[i] subset {1..Dimension(spaces[i])} } : "Unknown value in grid.";
   K := BaseRing(t);
   dims := [ Dimension(X) : X in spaces ];
   offsets := [ &*dims[i+1..#dims] : i in [1..#dims-1] ] cat [1];
   perm := Eltseq(t`Permutation);
 	indices := [ 1 + (&+[offsets[i]*(coord[i]-1): i in [1..#dims]]) : coord in Grid ];
 	return sc[indices];
+end intrinsic;
+
+intrinsic Assign( t::TenSpcElt, ind::[RngIntElt], k::. ) -> TenSpcElt
+{Returns the tensor where the entry in t from the sequence ind is replaced by k. 
+Equivalent to s = t; s[ind] = k;}
+  require t`Valence eq #ind : "Inconsistent indices with frame.";
+  dims := [ Dimension(X) : X in __FRAME(t) ];
+  require forall{ i : i in [1..#ind] | ind[i] le dims[i] and ind[i] gt 0 } : "Unknown value in indices.";
+  require IsCoercible(BaseRing(t`Codomain), k) : "Value not contained in codomain.";
+  try
+    s := Eltseq(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  offsets := [ &*dims[i+1..#dims] : i in [1..#dims-1] ] cat [1];
+  index := 1 + (&+[offsets[i]*(ind[i]-1): i in [1..#dims]]); 
+  s[index] := BaseRing(t`Codomain)!k;
+  return Tensor(dims, s, t`Cat);
+end intrinsic;
+
+intrinsic Assign( ~t::TenSpcElt, ind::[RngIntElt], k::. )
+{Returns the given tensor where the entry in t from the sequence ind is replaced by k. 
+Equivalent to t[ind] = k;}
+  t := Assign(t, ind, k);
 end intrinsic;
 
 intrinsic InducedTensor( t::TenSpcElt, grid::[SetEnum] ) -> TenSpcElt

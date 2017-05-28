@@ -102,3 +102,13 @@ intrinsic '.'( H::Hmtp, i::RngIntElt ) -> Map
   require i in [0..#M-1] : "Integer should be in range [0.." cat IntegerToString(#M-1) cat "].";
   return M[#M-i];
 end intrinsic;
+
+//intrinsic InducedHomotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> BoolElt
+//{Decides if the linear maps M on coordinates v,...,1 induce a linear map on the 0th coordinate, inducing a homotopism.}
+//  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
+//  require #t`Domain eq #M : "Must be one map for each coordinate in domain.";
+//  C1 := t`Codomain;
+//  C2 := s`Codomain;
+//  
+//  return true;
+//end intrinsic;

@@ -8,6 +8,17 @@ __VerifyHomotopism := function( B, C, H )
   Dom := Domain(B);
   v := #Dom+1;
   Bas := CartesianProduct(< Basis(d) : d in Dom >);
+  y := <>;
+  for x in Bas do
+    for i in [1..#x] do
+      if x[i] notin Domain(H.(v-i)) then
+        return false;
+      else
+        Append(~y, x[i] @ H.(v-i));
+      end if;
+    end for;
+    
+  end for;
   return forall{ x : x in Bas | (< x[i] @ H.(v-i) : i in [1..#x] > @ C) eq ((x @ B) @ H.0) };
 end function;
 
