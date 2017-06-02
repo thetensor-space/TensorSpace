@@ -484,13 +484,7 @@ end intrinsic;
 intrinsic IsNondegenerate( M::TenSpcElt ) -> BoolElt
 {Decides if M is nondegenerate.}
   Rad := Radical(M);
-  isit := forall{ R : R in Rad | #R eq 1 };
-  if isit then
-    id := [* hom< M`Domain[i] -> M`Domain[i] | [ <x,x> : x in Generators(M`Domain[i]) ] > : i in [1..#M`Domain] *];
-    H := __GetHomotopism( M, M, id : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
-    M`Nondegenerate := <M,H>;
-  end if;
-  return isit;
+  return forall{ R : R in Rad | R eq sub< R | R!0 > };
 end intrinsic;
 
 intrinsic FullyNondegenerateTensor( M::TenSpcElt ) -> TenSpcElt, Hmtp
@@ -515,16 +509,7 @@ end intrinsic;
 
 intrinsic IsFullyNondegenerate( M::TenSpcElt ) -> BoolElt
 {Decides if M is fully nondegenerate.}
-  R := Radical(M);
-  isit := forall{ i : i in [1..(M`Valence-1)] | R[i] eq sub< R[i] | > }; // CHECK THIS...
-  if not isit then
-    return false;
-  end if;
-  isit := Codomain(M) eq Image(M);
-  if isit and not assigned M`FullyNondeg then
-    M`FullyNondeg := M;
-  end if;
-  return isit;
+  return IsNondegenerate(M) and (Codomain(M) eq Image(M));
 end intrinsic;
 
 intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
