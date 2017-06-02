@@ -1,3 +1,10 @@
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
+
 /*
   This file contains low-level definitions the bimap types: BmpU, BmpV, BmpUElt, 
   and BmpVElt.

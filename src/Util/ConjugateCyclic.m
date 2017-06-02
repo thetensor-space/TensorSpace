@@ -1,3 +1,9 @@
+/* 
+    Copyright 2016, Peter A. Brooksbank, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
 /*
  *
  * A polynomial time algorithm to solve cyclic algebra conjugacy and

@@ -1,7 +1,11 @@
-/*
-  Global variables
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
 */
-__VERSION := "1.1";
+
+
+/*  Global variables  */
+__VERSION := "1.1.1";
 __SANITY_CHECK := false;
 __LIST := { ModTupFld, ModFld, ModMatFld }; // suitable types we can do most computations with.
 __FRAME := function( T ) // returns the 'domain' and the 'codomain'.
@@ -13,9 +17,7 @@ __FRAME := function( T ) // returns the 'domain' and the 'codomain'.
 end function;
 
 
-/*
-  Verbose names
-*/
+/*  Verbose names  */
 declare verbose Multilinear, 1; // turns verbose on for all functions below
 
 declare verbose Centroid, 1;

@@ -1,3 +1,9 @@
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
 /*
   Thsi file contains basic intrinsics for homotopisms (Hmtp).
 */

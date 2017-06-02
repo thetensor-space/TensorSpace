@@ -1,3 +1,8 @@
+/* 
+    Copyright 2016, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
 
 
 __find_albert_params := function( p, e )

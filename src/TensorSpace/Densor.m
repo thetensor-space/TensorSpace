@@ -1,3 +1,9 @@
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
 /*
   This file contains the constructor for the densor subspace of a tensor.
 */

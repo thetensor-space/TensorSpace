@@ -1,3 +1,9 @@
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
 /*
   This file contains invariants for tensors. They come in two flavors: linear
   algebra and polynomial-based invariants. Most of the invariants have been 

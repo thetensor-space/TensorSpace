@@ -1,3 +1,9 @@
+/* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
 /*
   This file contains all the low-level definitions for tensor categories (TenCat).
 */

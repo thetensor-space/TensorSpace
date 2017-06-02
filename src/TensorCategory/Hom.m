@@ -1,4 +1,10 @@
 /* 
+    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Distributed under GNU GPLv3.
+*/
+
+
+/* 
   This file contains all the homotopism constructors.
 */
 
@@ -17,7 +23,7 @@ __VerifyHomotopism := function( B, C, H )
         Append(~y, x[i] @ H.(v-i));
       end if;
     end for;
-    
+    // FIX
   end for;
   return forall{ x : x in Bas | (< x[i] @ H.(v-i) : i in [1..#x] > @ C) eq ((x @ B) @ H.0) };
 end function;
