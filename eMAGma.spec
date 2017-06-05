@@ -3,35 +3,36 @@
 	{
 	  GlobalVars.m
   	Types.m
-  	TensorCategory
-  	{
-    	TensorCat.m
-    	TensorCatDef.m
-    	TensorCatBasic.m
-    	Hom.m
-    	HomDef.m
-    	HomBasic.m
-  	}
-  	TensorSpace
-  	{
-    	TensorSpc.m
-    	TensorSpcDef.m
-    	TensorSpcBasic.m
-    	Densor.m
-  	}
-  	Tensor
-  	{
-    	Tensor.m
-    	TensorDef.m
-    	BimapDef.m
-    	TensorBasic.m
-    	Invariants.m
-  	}
   	Exceptional
   	{
   		General.m
-  		Octonion.m
 			Jordan.m
+  		Octonion.m
+  	}
+  	Tensor
+  	{
+    	BimapDef.m
+    	Invariants.m
+    	Tensor.m
+    	TensorBasic.m
+      TensorData.m
+    	TensorDef.m
+  	}
+  	TensorCategory
+  	{
+    	Hom.m
+    	HomBasic.m
+    	HomDef.m
+    	TensorCat.m
+    	TensorCatBasic.m
+    	TensorCatDef.m
+  	}
+  	TensorSpace
+  	{
+    	Densor.m
+    	TensorSpc.m
+    	TensorSpcBasic.m
+    	TensorSpcDef.m
   	}
   	Util
   	{

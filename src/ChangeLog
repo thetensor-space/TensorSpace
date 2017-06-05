@@ -2,6 +2,8 @@ June 5, 2017
   - Fixed bugs with HeisenbergGroup and HeisenbergGroupPC.
   - Added intrinsic SliceAsMatrices which essentially combines Slice and 
     AsMatrices.
+  - Fixed issues with pCentralTensor.
+  - Updated file structure.
 
 June 2, 2017
   - Changed license to GNU GPLv3

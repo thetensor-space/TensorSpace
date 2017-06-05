@@ -9,7 +9,7 @@
   objects from tensors.
 */
 
-import "../Tensor/TensorBasic.m" : __GetSlice, __GetForms;
+import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
 
 
 __GetInduction := function( X, i )
