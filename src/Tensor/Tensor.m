@@ -411,43 +411,113 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
 {Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
   require s gt 0 : "First index must be positive.";
   require t gt 0 : "Second index must be positive.";
-  pcs := pCentralSeries(G,p);
-  require s+t le #pcs : "The sum of the given indices is larger than the p-class.";
-  U1,f1 := GModule( G, pcs[s], pcs[s+1] );
-  U2,f2 := GModule( G, pcs[t], pcs[t+1] );
-  U3,f3 := GModule( G, pcs[s+t], pcs[s+t+1] );
-  V1 := VectorSpace( GF(p), Dimension(U1) );
-  V2 := VectorSpace( GF(p), Dimension(U2) );
-  V3 := VectorSpace( GF(p), Dimension(U3) );
-  g1 := hom< U1 -> V1 | [ < U1.i, V1.i > : i in [1..Dimension(U1)] ] >;
-  g2 := hom< U2 -> V2 | [ < U2.i, V2.i > : i in [1..Dimension(U2)] ] >;
-  g3 := hom< U3 -> V3 | [ < U3.i, V3.i > : i in [1..Dimension(U3)] ] >;
+  try
+    pcs := pCentralSeries(G,p);
+  catch err
+    error "Cannot compute the p-central series.";
+  end try;
+  // pad s with trivial subs if s, t require it.
+  if s gt #pcs then
+    pcs[s] := sub< G | >;
+  elif s+1 gt #pcs then
+    pcs[s+1] := sub< G | >;
+  elif t gt #pcs then
+    pcs[t] := sub< G | >;
+  elif t+1 gt #pcs then 
+    pcs[t+1] := sub< G | >;
+  elif s+t gt #pcs then
+    pcs[s+t] := sub< G | >;
+  elif s+t+1 gt #pcs then
+    pcs[s+t+1] := sub< G | >;
+  end if;
+  // take quotients in G to get to vector spaces.
+  if pcs[s] ne pcs[s+1] then
+    U1,f1 := GModule( G, pcs[s], pcs[s+1] );
+    V1 := VectorSpace( GF(p), Dimension(U1) );
+    g1 := hom< U1 -> V1 | [ < U1.i, V1.i > : i in [1..Dimension(U1)] ] >;
+    h1 := f1*g1;
+  else
+    V1 := VectorSpace( GF(p), 0 );
+    h1 := map< pcs[s] -> V1 | x :-> V1!0, y :-> pcs[s]!1 >;
+  end if;
+  if pcs[t] ne pcs[t+1] then
+    U2,f2 := GModule( G, pcs[t], pcs[t+1] );
+    V2 := VectorSpace( GF(p), Dimension(U2) );
+    g2 := hom< U2 -> V2 | [ < U2.i, V2.i > : i in [1..Dimension(U2)] ] >;
+    h2 := f2*g2;
+  else
+    V2 := VectorSpace( GF(p), 0 );
+    h2 := map< pcs[t] -> V2 | x :-> V2!0, y :-> pcs[t]!1 >;
+  end if;
+  if pcs[s+t] ne pcs[s+t+1] then
+    U3,f3 := GModule( G, pcs[s+t], pcs[s+t+1] );
+    V3 := VectorSpace( GF(p), Dimension(U3) );
+    h3 := hom< U3 -> V3 | [ < U3.i, V3.i > : i in [1..Dimension(U3)] ] >;
+  else
+    V3 := VectorSpace( GF(p), 0 );
+    h3 := map< pcs[s+t] -> V3 | x :-> V3!0, y :-> pcs[s+t]!1 >;
+  end if;
+  
   F := function(x)
-    return ( x[1] @@ g1 @@ f1, x[2] @@ g2 @@ f2 ) @ f3 @ g3;
+    return ( x[1] @@ h1, x[2] @@ h2 ) @ h3;
   end function;
   if s eq t then
     C := TensorCategory([1,1,1],{{0},{1,2}});
   else 
-    C := HomotopismCategory(2);
+    C := HomotopismCategory(3);
   end if;
-  return __GetTensor( [*V1, V2*], V3, F : Co := [* f1*g1, f2*g2, f3*g3 *], Cat := C ), f1*g1, f2*g2, f3*g3;
+  return __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C ), h1, h2, h3;
 end intrinsic;
 
-intrinsic pCentralTensor( G::GrpPC, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
+intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
 {Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
-  order := Factorization(#G);
+  if Type(G) eq GrpMat then
+    ord := LMGOrder(G);
+  else
+    try 
+      ord := #G;
+    catch err
+      error "Cannot compute the order of the group.";
+    end try;
+  end if;
+  order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
   return pCentralTensor(G,p,s,t);
 end intrinsic;
 
-intrinsic pCentralTensor( G::GrpPC ) -> TenSpcElt, Map, Map, Map
+//intrinsic pCentralTensor( G::GrpPC, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
+//{Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
+//  order := Factorization(#G);
+//  require #order eq 1 : "Group must be a p-group.";
+//  p := order[1][1];
+//  return pCentralTensor(G,p,s,t);
+//end intrinsic;
+
+intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, Map, Map, Map
 {Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
-  order := Factorization(#G);
+  if Type(G) eq GrpMat then
+    ord := LMGOrder(G);
+  else
+    try 
+      ord := #G;
+    catch err
+      error "Cannot compute the order of the group.";
+    end try;
+  end if;
+  order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
   return pCentralTensor(G,p,1,1);
 end intrinsic;
+
+//intrinsic pCentralTensor( G::GrpPC ) -> TenSpcElt, Map, Map, Map
+//{Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
+//  order := Factorization(#G);
+//  require #order eq 1 : "Group must be a p-group.";
+//  p := order[1][1];
+//  return pCentralTensor(G,p,1,1);
+//end intrinsic;
 
 intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt
 {Returns the tensor associated to the quotient (polynomial) ring Q.}

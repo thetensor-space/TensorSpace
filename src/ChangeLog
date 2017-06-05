@@ -1,3 +1,22 @@
+June 5, 2017
+  - Fixed bugs with HeisenbergGroup and HeisenbergGroupPC.
+  - Added intrinsic SliceAsMatrices which essentially combines Slice and 
+    AsMatrices.
+
+June 2, 2017
+  - Changed license to GNU GPLv3
+  - Fixed a bug in IsNondegenerate, reported by JBW.
+
+May 25, 2017
+  - Added intrinsic IsHomotopism. 
+
+May 19, 2017
+  - Added all intrinsics to documentation. 
+  - Homotopism bug fixed.
+
+May 18, 2017
+  - Updated documentation.
+
 May 9, 2017
   - Updated license, README, and added instrinsic 'eMAGmaVersion'.
   - Added functionality for tensors and tensor spaces whose frame contains a 

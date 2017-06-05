@@ -9,6 +9,8 @@
   objects from tensors.
 */
 
+import "../Tensor/TensorBasic.m" : __GetSlice, __GetForms;
+
 
 __GetInduction := function( X, i )
   t := X`DerivedFrom[1];
@@ -69,7 +71,44 @@ __WriteOverPrimeField := function( Forms )
   return SystemOfForms(N);
 end function;
 
-intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpMat
+__GetRepresentation := function( T : UseAlt := true )
+  sc := T`CoordImages;
+  U := T`Domain[1];
+  V := T`Domain[2];
+  W := T`Codomain;
+  a := Dimension(U);
+  b := Dimension(V);
+  c := Dimension(W);
+  K := BaseRing(U);
+  d := (a ne b) select 1+a+b+c else 1+a+c;
+  Z := ZeroMatrix(K, d, d);
+  I := IdentityMatrix(K, d);
+
+  if UseAlt then
+    gens := [ I + InsertBlock(InsertBlock(Z, Matrix(K, 1, a, Eltseq(U.i)), 1, 2), __GetForms(__GetSlice(sc, [a, b, c], [{i},{1..b},{1..c}]), [1, b, c], 1, 0)[1], d-b-c+1, d-c+1) : i in [1..a] ];
+  else
+    gens_U := [ I + InsertBlock(Z, Matrix(K, 1, a, Eltseq(u)), 1, 2) : u in Basis(U) ];
+    gens_V := [ I + InsertBlock(Z, X, 2, d-c+1) : X in __GetForms(sc, [a, b, c], 2, 0) ];
+    gens := gens_U cat gens_V;
+  end if;
+  G := sub< GL(d, K) | gens >;
+  return G;
+end function;
+
+/*
+Input a matrix M
+returns [  0   M ]
+        [ -M^t 0 ].
+*/
+__Scharlau := function( M );
+	k := Parent(M[1][1]);
+	return MatrixAlgebra(k,Nrows(M)+Ncols(M))!VerticalJoin( HorizontalJoin( ZeroMatrix( k, Nrows(M), Nrows(M) ), M ), HorizontalJoin( -Transpose(M), ZeroMatrix( k, Ncols(M), Ncols(M) ) ) );
+end function;
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                                  Intrinsics
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+intrinsic HeisenbergGroup( B::TenSpcElt : UseAlt := true ) -> GrpMat
 {Returns the matrix group of class 2 from the given tensor B.}
   require B`Valence eq 3 : "Tensor must have valence 3.";
   try
@@ -77,48 +116,32 @@ intrinsic HeisenbergGroup( B::TenSpcElt ) -> GrpMat
   catch err
     error "Cannot compute structure constants.";
   end try;
-  Forms := SystemOfForms(B);
-  K := BaseRing(B);
-  a := Dimension(Domain(B)[1]);
-  b := Dimension(Domain(B)[2]);
-  c := Dimension(Codomain(B));
-  
-  G := GL(1+a+c,K);
-  MS := RMatrixSpace(K,1+a+c,1+a+c);
-  I := MS!(G!1);
-  gens := [ G!(I + MS.(1+i)) : i in [1..a] ];
-  for i in [1..c] do
-    X := Transpose(Forms[i]);
-    for j in [1..b] do
-      v := X[j];
-      if v ne Parent(v)!0 then
-        col := Matrix(a,1,v);
-        gens cat:= [ G!(InsertBlock(I,col,2,1+a+i)) ];
-      end if;
-    end for;
-  end for;
-
-  H := sub< G | gens >;
-  return H;
+  return __GetRepresentation(B : UseAlt := UseAlt and IsAlternating(B));
 end intrinsic;
 
-intrinsic HeisenbergGroupPC( B::TenSpcElt ) -> GrpPC
-{Returns the pc-group of class 2 and exponent p from the given Zp tensor B.}
+intrinsic HeisenbergGroupPC( B::TenSpcElt : UseAlt := true ) -> GrpPC
+{Returns the pc-group of class 2 and exponent p from the given tensor B over a finite field.}
   require B`Valence eq 3 : "Tensor must have valence 3.";
   try
     _ := Eltseq(B);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  t := AlternatingTensor(B);
-  Forms := SystemOfForms(t);
+  Forms := SystemOfForms(B);
   K := BaseRing(Forms[1]);
+  require ISA(Type(K), FldFin) : "Base field must be finite.";
   p := Characteristic(K);
-  require p gt 0 : "Field must have nonzero characteristic.";
+
   if #K gt p then
     Forms := __WriteOverPrimeField(Forms);
   end if;
-  require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+  if UseAlt and IsAlternating(B) then
+    require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+  else
+    require Nrows(Forms[1]) + Ncols(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+    Forms := [ __Scharlau(X) : X in Forms ];
+  end if;
+
   d := Nrows(Forms[1]);
   e := #Forms;
   F := FreeGroup( d+e );

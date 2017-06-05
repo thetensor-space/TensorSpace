@@ -94,6 +94,7 @@ __GenerateCodomain := function( M, C )
   return S;
 end function;
 
+// t: tensor, C: tensor category
 __CopyTensorWithCat := function( t, C )
   F := function(x)
     return x @ t;
@@ -103,6 +104,79 @@ __CopyTensorWithCat := function( t, C )
     s`CoordImages := t`CoordImages;
   end if;
   return s;
+end function;
+
+// t: tensor, grid: sequence of sets (sets subset {1..dim(V_a)})
+//__GetSlice := function( t, grid )
+//  sc := Eltseq(t);
+//  Grid := CartesianProduct(grid);
+//  spaces := __FRAME(t);
+//  dims := [ Dimension(X) : X in spaces ];
+//  offsets := [ &*dims[i+1..#dims] : i in [1..#dims-1] ] cat [1];
+//  perm := Eltseq(t`Permutation);
+//	indices := [ 1 + (&+[offsets[i]*(coord[i]-1): i in [1..#dims]]) : coord in Grid ];
+//	return sc[indices];
+//end function;
+
+// s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], grid: sequence of subsets of {1..dim(V_a)}. 
+__GetSlice := function( s, dims, grid )
+  Grid := CartesianProduct(grid);
+  offsets := [ &*dims[i+1..#dims] : i in [1..#dims-1] ] cat [1];
+	indices := [ 1 + (&+[offsets[i]*(coord[i]-1): i in [1..#dims]]) : coord in Grid ];
+	return s[indices];
+end function;
+
+// t: tensor, m: max, n: min (m,n in {0..t`Valence-1})
+//__GetForms := function(t, m, n : op := false)
+//  m := t`Valence-m;
+//  n := t`Valence-n;
+//  K := BaseRing(t);
+//  spaces := __FRAME(t);
+//  dims := [ Dimension(X) : X in spaces ];
+//  if dims[m] eq dims[n] then
+//    M := MatrixAlgebra(K,dims[m]);
+//  else
+//    M := RMatrixSpace(K,dims[m],dims[n]);
+//  end if;
+//  Forms := [];
+//  CP := CartesianProduct( < [1..dims[k]] : k in Remove(Remove([1..#dims],n),m) > );
+//  for cp in CP do
+//    x := [ {y} : y in Insert(Insert([ k : k in cp ],m,0),n,0) ];
+//    x[m] := {1..dims[m]};
+//    x[n] := {1..dims[n]};
+//    if op then
+//      Append(~Forms, Transpose(M!__GetSlice(t,x)));
+//    else
+//      Append(~Forms, M!__GetSlice(t,x));
+//    end if;
+//  end for;
+//  return Forms;
+//end function;
+
+// s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], m: max, n: min (m,n in {0..vav})
+__GetForms := function( s, dims, m, n : op := false )
+  v := #dims;
+  m := v-m;
+  n := v-n;
+  K := Parent(s[1]);
+  if dims[m] eq dims[n] then
+    M := MatrixAlgebra(K,dims[m]);
+  else
+    M := RMatrixSpace(K,dims[m],dims[n]);
+  end if;
+  Forms := [];
+  CP := CartesianProduct( < [1..dims[k]] : k in Remove(Remove([1..#dims],n),m) > );
+  for cp in CP do
+    grid := [ {y} : y in Insert(Insert([ k : k in cp ],m,0),n,0) ];
+    grid[m] := {1..dims[m]};
+    grid[n] := {1..dims[n]};
+    if op then
+      Append(~Forms, Transpose(M!__GetSlice(s, dims, grid)));
+    else
+      Append(~Forms, M!__GetSlice(s, dims, grid));
+    end if;
+  end for;
+  return Forms;
 end function;
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -292,15 +366,10 @@ intrinsic Slice( t::TenSpcElt, grid::[SetEnum] ) -> SeqEnum
   catch err
     error "Cannot compute structure constants.";
   end try;
-  Grid := CartesianProduct(grid);
   spaces := __FRAME(t);
-  require forall{ i : i in [1..#grid] | grid[i] subset {1..Dimension(spaces[i])} } : "Unknown value in grid.";
-  K := BaseRing(t);
   dims := [ Dimension(X) : X in spaces ];
-  offsets := [ &*dims[i+1..#dims] : i in [1..#dims-1] ] cat [1];
-  perm := Eltseq(t`Permutation);
-	indices := [ 1 + (&+[offsets[i]*(coord[i]-1): i in [1..#dims]]) : coord in Grid ];
-	return sc[indices];
+  require forall{ i : i in [1..#grid] | grid[i] subset {1..dims[i]} } : "Unknown value in grid.";
+  return __GetSlice(sc, dims, grid);
 end intrinsic;
 
 intrinsic Assign( t::TenSpcElt, ind::[RngIntElt], k::. ) -> TenSpcElt
@@ -378,64 +447,68 @@ end intrinsic;
 
 intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
 {Returns the sequence of matrices.}
-  v := #t`Domain;
   require i ne j : "Arguments 2 and 3 must be distinct.";
-  require i in {0..v} : "Unknown argument 2.";
-  require j in {0..v} : "Unkonwn arguemnt 3.";
+  require i in {0..t`Valence-1} : "Unknown argument 2.";
+  require j in {0..t`Valence-1} : "Unkonwn arguemnt 3.";
   try 
-    _ := StructureConstants(t);
+    sc := StructureConstants(t);
   catch e
     error "Cannot compute structure constants of tensor.";
   end try;
-  K := BaseRing(t);
-  a := v-i+1;
-  b := v-j+1;
-  m := Minimum([a,b]);
-  n := Maximum([a,b]);
   spaces := __FRAME(t);
   dims := [ Dimension(X) : X in spaces ];
-  if dims[m] eq dims[n] then
-    M := MatrixAlgebra(K,dims[m]);
-  else
-    M := RMatrixSpace(K,dims[m],dims[n]);
-  end if;
-  Forms := [];
-  CP := CartesianProduct( < [1..dims[k]] : k in Remove(Remove([1..#dims],n),m) > );
-  for cp in CP do
-    x := [ {y} : y in Insert(Insert([ k : k in cp ],m,0),n,0) ];
-    x[m] := {1..dims[m]};
-    x[n] := {1..dims[n]};
-    if m eq b then
-      Append(~Forms, Transpose(M!Slice(t,x)));
-    else
-      Append(~Forms, M!Slice(t,x));
-    end if;
-  end for;
+  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := j eq Minimum([i, j]));
+end intrinsic;
 
-  return Forms;
+intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j::RngIntElt ) -> SeqEnum
+{Performs the slice of t with the given grid and returns the tensor as matrices with i and j.}
+  if t`Cat`Contra and #grid+1 eq t`Valence then
+    grid cat:= [{1}];
+  end if;
+  require #grid eq t`Valence : "Grid inconsistent with frame.";
+  try
+    sc := StructureConstants(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  require forall{ k : k in [1..#grid] | grid[k] subset {1..dims[k]} } : "Unknown value in grid.";
+  require i ne j : "Arguments 3 and 4 must be distinct.";
+  require i in {0..t`Valence-1} : "Unknown argument 3.";
+  require j in {0..t`Valence-1} : "Unkonwn arguemnt 4.";
+  return __GetForms(__GetSlice(sc, dims, grid), [ #S : S in grid ], i, j);
 end intrinsic;
 
 intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
 {Returns the system of forms for the given 2-tensor.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
-  return AsMatrices(t,2,1);
+  try 
+    sc := StructureConstants(t);
+  catch e
+    error "Cannot compute structure constants of tensor.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  return __GetForms(sc, dims, 2, 1);
 end intrinsic;
 
 intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
 {Foliates along the ith component.}
   try 
-    _ := StructureConstants(t);
+    sc := StructureConstants(t);
   catch e
     error "Cannot compute structure constants of tensor.";
   end try;
   spaces := Frame(t);
-  l := [ {1..Dimension(X)} : X in spaces ];
+  dims := [ Dimension(X) : X in spaces ];
+  l := [ {1..d} : d in dims ];
   j := t`Valence-i;
   F := [];
-  for i in [1..Dimension(spaces[j])] do
+  for i in [1..dims[j]] do
     slice := l;
     slice[j] := {i};
-    Append(~F,Slice(t,slice));
+    Append(~F, __GetSlice(sc, dims, slice));
   end for;
   return Matrix(F);
 end intrinsic;
