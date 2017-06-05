@@ -1474,13 +1474,16 @@ bilinear tensor induced by $B$.
 
 \index{HeisenbergGroup}\index{HeisenbergGroupPC}
 \begin{intrinsics}
-HeisenbergGroup(B) : TenSpcElt -> GrpMat
-HeisenbergGroupPC(B) : TenSpcElt -> GrpPC
+HeisenbergGroup(B : parameters) : TenSpcElt -> GrpMat
+    UseAlt : BoolElt : true
+HeisenbergGroupPC(B : parameters) : TenSpcElt -> GrpPC
+    UseAlt : BoolElt : true
 \end{intrinsics}
 
-Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given 
-by the alternating bilinear tensor induced by $B$. 
-The intrinsic {\tt HeisenbergGroupPC} uses the {\tt pQuotient} functions to convert a finitely presented group into a polycyclic group.
+Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given by the bilinear tensor $B: U \times V \rightarrowtail W$ over a finite field. 
+If $B$ is alternating and {\tt UseAlt} is set to {\tt true}, then the group returned is an extension of $V$ by $W$, so $|G| = |V|\cdot |W|$. 
+On the other hand, if either $B$ is not alternating or {\tt UseAlt} is set to {\tt false}, then the group returned is an extension of $U\oplus V$ by $W$, so $|G| = |U|\cdot |V| \cdot |W|$.  
+The intrinsic {\tt HeisenbergGroupPC} uses the {\tt pQuotient} functions to convert a finitely presented group into a polycyclic group, so this can only return groups of order $\leq p^{256}$. 
 
 
 \begin{example}[Ten\_Heisenberg]
