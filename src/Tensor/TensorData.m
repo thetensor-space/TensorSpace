@@ -200,7 +200,7 @@ intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
   end try;
   spaces := __FRAME(t);
   dims := [ Dimension(X) : X in spaces ];
-  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := j eq Minimum([i, j]));
+  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := i eq Minimum([i, j]));
 end intrinsic;
 
 intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j::RngIntElt ) -> SeqEnum

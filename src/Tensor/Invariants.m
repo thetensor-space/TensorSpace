@@ -12,6 +12,7 @@
 
 
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
+import "TensorData.m" : __GetForms;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "../Util/ConjugateCyclic.m" : __IsCyclic;
@@ -266,7 +267,7 @@ __LeftScalarsOfBimap := function( t )
   M := ZeroMatrix(K,a^2+c^2,a*b*c);
 
   // Put the A blocks in
-  Fa := HorizontalJoin( AsMatrices( t,2,1 ) );
+  Fa := HorizontalJoin( __GetForms(S, [a,b,c], 2, 1) );
   ipos := c^2+1;
   jpos := 1;
   for i in [1..a] do
@@ -277,7 +278,7 @@ __LeftScalarsOfBimap := function( t )
   delete Fa;
 
   // Put the B blocks in
-  Fb := AsMatrices(t,0,1);
+  Fb := __GetForms(S, [a,b,c], 1, 0 : op := true);
   jpos := 1;
   for i in [1..a] do
     ipos := 1;
@@ -335,7 +336,7 @@ __RightScalarsOfBimap := function( t )
   M := ZeroMatrix(K,b^2+c^2,a*b*c);
 
   // Put the A blocks in
-  Fa := -HorizontalJoin( AsMatrices( t,1,2 ) );
+  Fa := -HorizontalJoin( __GetForms(S, [a,b,c], 2, 1 : op := true) );
   ipos := c^2+1;
   jpos := 1;
   for i in [1..b] do
@@ -346,7 +347,7 @@ __RightScalarsOfBimap := function( t )
   delete Fa;
 
   // Put the B blocks in
-  Fb := AsMatrices(t,0,2);
+  Fb := __GetForms(S, [a,b,c], 2, 0 : op := true);
   jpos := 1;
   for i in [1..b] do
     ipos := 1;
@@ -401,7 +402,7 @@ __CentroidOfBimap := function(t)
     vprint Centroid, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(2*a*b*c);
   end if;
 
-  M := ZeroMatrix(K,a^2+b^2+c^2,2*a*b*c);
+  M := ZeroMatrix(K, a^2+b^2+c^2, 2*a*b*c);
 
   // Adjoint blocks:
   // Put the A blocks in
@@ -432,7 +433,7 @@ __CentroidOfBimap := function(t)
 
   // Left Scalars:
   // Put the A blocks in
-  Fa := HorizontalJoin( AsMatrices( t,2,1 ) );
+  Fa := HorizontalJoin( __GetForms(S, [a,b,c], 2, 1) );
   ipos := b^2+1;
   jpos := a*b*c+1;
   for i in [1..a] do
@@ -440,10 +441,10 @@ __CentroidOfBimap := function(t)
     ipos +:= a;
     jpos +:= b*c;
   end for;
-  delete Fa;
+  delete Fa; 
 
   // Put the B blocks in
-  Fb := AsMatrices(t,0,1);
+  Fb := __GetForms(S, [a,b,c], 1, 0 : op := true);
   jpos := a*b*c+1;
   for i in [1..a] do
     ipos := a^2+b^2+1;
@@ -454,7 +455,7 @@ __CentroidOfBimap := function(t)
       jpos +:= b;
     end for;
   end for;
-  delete Fb;
+  delete Fb; 
 
   // add block for the fuse
   w := [b^2,0,a^2+b^2];
