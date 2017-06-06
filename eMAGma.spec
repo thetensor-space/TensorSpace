@@ -17,6 +17,7 @@
     	TensorBasic.m
       TensorData.m
     	TensorDef.m
+      TensorRandom.m
   	}
   	TensorCategory
   	{

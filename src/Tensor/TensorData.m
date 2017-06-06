@@ -238,6 +238,7 @@ end intrinsic;
 
 intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
 {Foliates along the ith component.}
+  require i in {0..#t`Domain} : "Unknown argument 2.";
   try 
     sc := StructureConstants(t);
   catch e

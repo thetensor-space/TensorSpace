@@ -486,14 +486,6 @@ intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map
   return pCentralTensor(G,p,s,t);
 end intrinsic;
 
-//intrinsic pCentralTensor( G::GrpPC, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
-//{Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
-//  order := Factorization(#G);
-//  require #order eq 1 : "Group must be a p-group.";
-//  p := order[1][1];
-//  return pCentralTensor(G,p,s,t);
-//end intrinsic;
-
 intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, Map, Map, Map
 {Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
   if Type(G) eq GrpMat then
@@ -510,14 +502,6 @@ intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, Map, Map, Map
   p := order[1][1];
   return pCentralTensor(G,p,1,1);
 end intrinsic;
-
-//intrinsic pCentralTensor( G::GrpPC ) -> TenSpcElt, Map, Map, Map
-//{Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
-//  order := Factorization(#G);
-//  require #order eq 1 : "Group must be a p-group.";
-//  p := order[1][1];
-//  return pCentralTensor(G,p,1,1);
-//end intrinsic;
 
 intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt
 {Returns the tensor associated to the quotient (polynomial) ring Q.}
