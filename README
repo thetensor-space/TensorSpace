@@ -10,18 +10,18 @@ authors.
 
 ==== Copying ===================================================================
 
-    This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify it 
+  under the terms of the GNU General Public License as published by the Free 
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
 
-    This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful, but WITHOUT 
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+  details.
 
-    You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License along with
+  this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 ==== Package Contents ==========================================================
@@ -29,17 +29,16 @@ authors.
   1. Spec file is "./eMAGma.spec"
   2. Source Code is contained in the folder "src"
   3. Examples are included in the folder "example"
-  4. Documentation is included as "Multilinear.pdf" in "doc"
-  5. Example files are demonstrated in "Multilinear.pdf" and their file names 
+  4. Documentation is included as "eMAGma.pdf" in "doc"
+  5. Example files are demonstrated in "eMAGma.pdf" and their file names 
      coincide with their example title in the text.
 
 
 ==== Installation ==============================================================
 
-    Installation is not necessary with Magma.  Instead, attach the spec file 
-  during a Magma run and then the intrinsics will be available to use.  To 
-  attach the spec file run the following, where <location> is the directory 
-  containing the eMAGma directory,
+    Attach the spec file during a Magma run and the intrinsics will be available
+  to use.  To attach the spec file run the following, where <location> is the 
+  directory containing the eMAGma directory,
 
     > AttachSpec("<location>/eMAGma/eMAGma.spec");
 
