@@ -101,13 +101,37 @@ Tensor category of valence 3 (<-,->,==) ({ 1 },{ 2 },{ 0 })
 \end{code}
 \end{example}
 
+\begin{example}[BBCrossProduct]
+
+We will construct the cross product $\times : \mathbb{R}^3\times \mathbb{R}^3\rightarrowtail \mathbb{R}^3$ and verify that ${\bf i}\times {\bf j} = {\bf k}$.
+However, to do this test, we will input integer sequences (specifically {\tt [RngIntElt]}), and we will still be able to evaluate.
+\begin{code}
+> K := RealField(5);
+> V := VectorSpace(K, 3);
+> CP := function(x)
+function>   return V![x[1][2]*x[2][3] - x[1][3]*x[2][2], \
+function|return>     x[1][3]*x[2][1] - x[1][1]*x[2][3], \
+function|return>     x[1][1]*x[2][2] - x[1][2]*x[2][1] ];
+function> end function;
+> T := Tensor([V, V, V], CP);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 3 over Real field of precision 5
+U1 : Full Vector space of degree 3 over Real field of precision 5
+U0 : Full Vector space of degree 3 over Real field of precision 5
+> 
+> // test that i x j = k
+> <[1,0,0], [0,1,0]> @ T eq V.3;
+true
+\end{code}
+\end{example}
 
 \index{Tensor!black-box}
 \begin{intrinsics}
-Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
-Tensor(D, C, F) : List, Any, UserProgram -> TenSpcElt, TenSpcElt, Hmtp
-Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
-Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt, TenSpcElt, Hmtp
+Tensor(D, C, F) : SeqEnum, Any, UserProgram -> TenSpcElt, List
+Tensor(D, C, F) : List, Any, UserProgram -> TenSpcElt, List
+Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt, List
+Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt, List
 \end{intrinsics}
 
 Returns a tensor $T$ and a list of maps from the given frame into vector spaces of the returned frame.
@@ -115,7 +139,7 @@ $T$ is a tensor over vector spaces---essentially forgetting all other structure.
 The user-defined function $F$ should take as input a tuple of elements of $D$ and return an element of $C$.
 If no tensor category is provided, the Albert's homotopism category is used.
 
-\begin{example}[TenTripleProduct]
+\begin{example}[BBTripleProduct]
 Tensors make it easy to create algebras that do not fit into traditional categories, such as algebras with triple products.
 Here, we create a triple product $\langle \,\rangle : \mathbb{M}_{2\times 3}(K)\times \mathbb{M}_{2\times 3}(K)\times\mathbb{M}_{2\times 3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$, given by $\langle A, B, C\rangle = AB^tC$.
 
@@ -180,18 +204,41 @@ Observe that the tuples have mixed entries, one from $K^6$ and two others from $
 true
 \end{code}
 
-To confirm this we can create a new tensor for the left 
-triple-associators and see that its image is $0$.
+To confirm this product is left associative, we can create a new tensor for the left triple-associator and see that its image is $0$.
+We will create a $6$-tensor $\{ \, \} : \prod_{k=1}^5 \mathbb{M}_{2\times 3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$ where
+\[ \{ X_1,\dots, X_5\} = \langle \langle X_1, X_2, X_3 \rangle, X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. \]
+Therefore, if im$(\{ \, \})=0$, then $\langle \,\rangle$ is left associative. 
 
 \begin{code}
-> my_left_asct := func<X|<<X[1],X[2],X[3]>@T,X[4],X[5]>@T\
->     - <X[1],<X[4],X[3],X[2]>@T,X[5]>@T >;
-> LT := Tensor([U: i in [0..5]], my_left_asct);
+> l_asct := func< X | Eltseq(<<X[1], X[2], X[3]> @ T, X[4], X[5]> @ T \
+>     - <X[1], <X[4], X[3], X[2]> @ T, X[5]> @ T) >;
+> LT := Tensor([* U : i in [0..5] *], l_asct);
+> LT;
+Tensor of valence 6, U5 x U4 x U3 x U2 x U1 >-> U0
+U5 : Full Vector space of degree 6 over GF(541)
+U4 : Full Vector space of degree 6 over GF(541)
+U3 : Full Vector space of degree 6 over GF(541)
+U2 : Full Vector space of degree 6 over GF(541)
+U1 : Full Vector space of degree 6 over GF(541)
+U0 : Full Vector space of degree 6 over GF(541)
+> 
 > I := Image(LT);
+> I;
+Vector space of degree 6, dimension 0 over GF(541)
+Generators:
+
+> 
 > Dimension(I);
 0
 \end{code}
+
+Observe that in {\tt l\_asct} the function {\tt Eltseq} is called. 
+This is because {\tt T} returns vectors in $K^6$ which is not naturally coercible by Magma into $\mathbb{M}_{2\times 3}(K)$. 
+On the other hand, sequences can be coerced into $\mathbb{M}_{2\times 3}(K)$. 
 \end{example}
+
+
+
 
 \subsection{Tensors with structure constant sequences}
 Most computations with tensors $T$ will be carried out using structure constants
@@ -223,6 +270,7 @@ inside the tensor.
 
 \item Magma does not separate structure constant indices that are contravariant.  Instead contravariant variables are signaled by tensor categories.  So Ricci styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as $T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor
 category changed to mark $\{q..1\}$ as contravariant. Intrinsics are provided to facilitate this approach.
+See Chapter~\ref{ch:tensor-categories} for more details on tensor categories.
 \end{itemize}
 \medskip
 
@@ -240,6 +288,57 @@ If $R$ is not provided then the parent ring of the first element of $S$ is used.
 $R$ must be a commutative unital ring.
 The default tensor category $Cat$ is the homotopism category.
 
+
+\begin{example}[SCTensors]
+
+We will create structure constants sequence with all 0s and one 1 that occurs in the first entry.
+First, we will input this along with the dimensions of the tensor we are after, $2\times 2\times 2$. 
+However, since we did not specify a ring, it is assumed to be the parent ring of the first entry of the structure constants sequence.
+In this example, the ring is $\mathbb{Z}$. 
+
+\begin{code}
+> sc := [ 0 : i in [1..8] ];
+> sc[1] := 1;
+> Tensor([2, 2, 2], sc);
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full RSpace of degree 2 over Integer Ring
+U1 : Full RSpace of degree 2 over Integer Ring
+U0 : Full RSpace of degree 2 over Integer Ring
+\end{code}
+
+We do not want the underlying ring to be $\mathbb{Z}$, so we will input the ring we want: GF$(64)$.
+\begin{code}
+> K := GF(64);
+> T := Tensor(K, [2, 2, 2], sc);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(2^6)
+U1 : Full Vector space of degree 2 over GF(2^6)
+U0 : Full Vector space of degree 2 over GF(2^6)
+> 
+> Image(T);
+Vector space of degree 2, dimension 1 over GF(2^6)
+Generators:
+(     1      0)
+Echelonized basis:
+(     1      0)
+\end{code}
+
+We can recover the structure constants by calling {\tt StructureConstants} or {\tt Eltseq}.
+We will also test that the tensor evaluates inputs correctly.
+\begin{code}
+> StructureConstants(T);
+[ 1, 0, 0, 0, 0, 0, 0, 0 ]
+> 
+> <[1, 0], [K.1^3, 0]> @ T;
+( K.1^3      0)
+> 
+> <[K.1^29, 1], [0, K.1^2]> @ T;
+(     0      0)
+\end{code}
+\end{example}
+
+
 \index{StructureConstants}\index{Eltseq}
 \begin{intrinsics}
 StructureConstants(T) : TenSpcElt -> SeqEnum
@@ -249,11 +348,95 @@ Eltseq(T) : TenSpcElt -> SeqEnum
 Returns the sequence of structure constants of the given tensor $T$. 
 
 
+\begin{example}[SCFromBBTensors]
+
+We will construct the natural Lie module action for $\mathfrak{sl}_2$, but we will construct it as a \emph{left} module. 
+To do this, we construct a function that takes elements from $\mathfrak{sl}_2\times V$ and returns an element that Magma can coerce into $V$. 
+We run a quick test to make sure our function runs on the trivial example; this is the only check the intrinsic runs on black-box tensors. 
+Since $\mathfrak{sl}_2$ and $V$ are part of different universes in Magma, we must use the {\tt List} environment when constructing this black-box tensor. 
+
+\begin{code}
+> sl2 := MatrixLieAlgebra("A1", GF(7));
+> V := VectorSpace(GF(7), 2);
+> left_action := func< x | x[2]*Transpose(Matrix(x[1])) >;
+> left_action(<sl2!0, V!0>);
+(0 0)
+> 
+> sl2 := MatrixLieAlgebra("A1", GF(7));
+> V := VectorSpace(GF(7), 2);
+> left_action := func< x | x[2]*Transpose(Matrix(x[1])) >;
+> left_action(<sl2!0, V!0>);
+(0 0)
+> 
+> T := Tensor([* sl2, V, V *], left_action);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 3 over GF(7)
+U1 : Full Vector space of degree 2 over GF(7)
+U0 : Full Vector space of degree 2 over GF(7)
+\end{code}
+
+Now we will extract the structure constants from this Lie module action. 
+We will then construct a tensor with these structure constants and compare it with our first tensor above.
+
+\begin{code}
+> StructureConstants(T);
+[ 1, 0, 0, 6, 0, 0, 1, 0, 0, 1, 0, 0 ]
+> 
+> S := Tensor([3, 2, 2], Eltseq(T));
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 3 over GF(7)
+U1 : Full Vector space of degree 2 over GF(7)
+U0 : Full Vector space of degree 2 over GF(7)
+> 
+> T eq S;
+true
+\end{code}
+\end{example}
+
+
+\begin{example}[SCStored]
+
+The structure constants are convenient data structure for nearly all the algorithms in eMAGma. 
+In fact, most computations require structure constants, so we store the structure constants sequence with the tensor. 
+This means that after the initial structure constant sequence computation, every time {\tt StructureConstants} or {\tt Eltseq} is called, Magma retreives what was previously computed. 
+
+We will demonstrate this on a large black-box example, so some time is spent computing the structure constants. 
+Of course, the exact timing will vary by machine.
+We will construct a product of two subalgebras of $\mathbb{M}_{20}(\mathbb{F}_3)$, namely $* : \mathfrak{sl}_{20}(\mathbb{F}_3)\times \mathbb{M}_4(\mathbb{F}_3)\rightarrowtail \mathbb{M}_{20}(\mathbb{F}_3)$.
+
+\begin{code}
+> sl20 := MatrixLieAlgebra("A19", GF(3));
+> M4 := MatrixAlgebra(GF(3), 4);
+> Prod := func< x | Matrix(x[1])*DiagonalJoin(<x[2] : i in [1..5]>) >;
+> T := Tensor([* sl20, M4 *], MatrixAlgebra(GF(3), 20), Prod);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 399 over GF(3)
+U1 : Full Vector space of degree 16 over GF(3)
+U0 : Full Vector space of degree 400 over GF(3)
+\end{code}
+
+We record the time it takes to initially compute the structure constants sequence, and then we record the time when we call the function again.
+\begin{code}
+> time sc := StructureConstants(T);
+Time: 58.670
+> 
+> time sc := StructureConstants(T);
+Time: 0.000
+\end{code}
+\end{example}
+
+
+
+
+
 \subsection{Bilinear tensors}
 A special case of structure constants for bilinear maps $U_2\times U_1\rightarrowtail U_0$
-is to format the data as lists $[M_1,\dots, M_a]$ of matrices.
+is to format the data as lists of matrices $[M_1,\dots, M_a]$.
 This can be considered as a left (resp. right) representation
-$U_2\to \hom_K(U_1,U_0)$, (resp.$U_1\to \hom_K(U_2,U_0)$).  
+$U_2\to \hom_K(U_1,U_0)$, (resp. $U_1\to \hom_K(U_2,U_0)$).  
 Or it can be treated as {\em systems of bilinear forms} 
 $[M_1,\dots,M_a]$ where the matrices are the Gram matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$.
 Here the associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is 

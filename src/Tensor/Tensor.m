@@ -100,27 +100,27 @@ __BlackBoxSanity := function(S,F)
   try
     x := < X!0 : X in D >;
   catch err
-    return false,"Modules do not contain a zero.";
+    return false, "Frame does not contian additive abelian groups.";
   end try;
   try
     y := F(x);
   catch err
-    return false,"Cannot evaluate function.";
+    return false, "Cannot evaluate function.";
   end try;
   if IsCoercible(C,y) then
-    return true,_;
+    return true, _;
   else
-    return false,"Given codomain not contained in function's codomain.";
+    return false, "Given codomain not contained in function's codomain.";
   end if;
 end function;
 
-// Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a homotopism.
+// Returns the tensor on vector spaces (forgets all other structure of the domain and codomain) along with a list of maps.
 // returns Bool, TenSpcElt, Hmtp, MonStgElt.
 __TensorOnVectorSpaces := function(M)
   // if M is already a tensor over vector spaces, do nothing.
   if forall{ X : X in Frame(M) | Type(X) eq ModTupFld } then
-    Maps := [* map< X -> X | x:->x, y:->y > : X in __FRAME(M) *];
-    return true, M, __GetHomotopism(M,M,Maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra)), _;
+    maps := [* map< X -> X | x:->x, y:->y > : X in __FRAME(M) *];
+    return true, M, maps, _;
   end if;
 
   D := M`Domain;
@@ -170,9 +170,8 @@ __TensorOnVectorSpaces := function(M)
     N`Derivations := M`Derivations;
   end if;
   N`Permutation := M`Permutation;
-  H := __GetHomotopism( M, N, maps : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
 
-  return true, N, H, _;
+  return true, N, maps, _;
 end function;
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -190,9 +189,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F : Cat := Cat );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( D::SeqEnum, C::., F::UserProgram ) -> TenSpcElt, List
@@ -202,9 +201,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
@@ -216,9 +215,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( S::SeqEnum, F::UserProgram ) -> TenSpcElt, List
@@ -228,9 +227,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
@@ -242,9 +241,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F : Cat := Cat );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( D::List, C::., F::UserProgram ) -> TenSpcElt, List
@@ -254,9 +253,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
@@ -268,9 +267,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 intrinsic Tensor( S::List, F::UserProgram ) -> TenSpcElt, List
@@ -280,9 +279,9 @@ A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F );
-  passed, S, H, err := __TensorOnVectorSpaces( T );
+  passed, S, maps, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, H`Maps;
+  return S, maps;
 end intrinsic;
 
 // ==============================================================================
@@ -337,7 +336,7 @@ end intrinsic;
 
 intrinsic Tensor( D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
 {Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the homotopism category.}
-  return Tensor(Universe(D),D,S,HomotopismCategory(#D));
+  return Tensor(Universe(S),D,S,HomotopismCategory(#D));
 end intrinsic;
 
 // ==============================================================================
@@ -349,9 +348,9 @@ intrinsic AssociatorTensor( A::Alg ) -> TenSpcElt, Map
     return (x[1]*x[2])*x[3] - x[1]*(x[2]*x[3]);
   end function;
   T :=  __GetTensor( [* A, A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..4] *], Cat := TensorCategory( [1,1,1,1], {{0..3}}) );
-  passed, S, H, err := __TensorOnVectorSpaces(T);
+  passed, S, maps, err := __TensorOnVectorSpaces(T);
   require passed : err;
-  return S, Maps(H)[1];
+  return S, maps[1];
 end intrinsic;
 
 intrinsic Polarization( f::MPolElt ) -> TenSpcElt, MPolElt
@@ -391,29 +390,29 @@ intrinsic Polarization( f::RngUPolElt ) -> TenSpcElt
   return __GetTensor( [V,V], V, polar );
 end intrinsic;
 
-intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Hmtp
+intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Map
 {Returns the tensor given by commutator in A.}
   F := function(x)
     return x[1]*x[2] - x[2]*x[1];
   end function;
   T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
-  passed, S, H, err := __TensorOnVectorSpaces(T);
+  passed, S, maps, err := __TensorOnVectorSpaces(T);
   require passed : err;
-  return S, Maps(H)[1];
+  return S, maps[1];
 end intrinsic;
 
-intrinsic Tensor( A::Alg ) -> TenSpcElt, Hmtp
+intrinsic Tensor( A::Alg ) -> TenSpcElt, Map
 {Returns the tensor from A x A to A given by the product.}
   F := function(x)
     return x[1]*x[2];
   end function;
   T := __GetTensor( [*A, A*], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory([1,1,1],{{0,1,2}}) );
-  passed, S, H, err := __TensorOnVectorSpaces(T);
+  passed, S, maps, err := __TensorOnVectorSpaces(T);
   require passed : err;
-  return S, Maps(H)[1];
+  return S, maps[1];
 end intrinsic;
 
-intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
+intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, List
 {Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
   require s gt 0 : "First index must be positive.";
   require t gt 0 : "Second index must be positive.";
@@ -472,10 +471,10 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   else 
     C := HomotopismCategory(3);
   end if;
-  return __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C ), h1, h2, h3;
+  return __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C ), [* h1, h2, h3 *];
 end intrinsic;
 
-intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map, Map, Map
+intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, List
 {Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
   if Type(G) eq GrpMat then
     ord := LMGOrder(G);
@@ -492,7 +491,7 @@ intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Map
   return pCentralTensor(G,p,s,t);
 end intrinsic;
 
-intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, Map, Map, Map
+intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, List
 {Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
   if Type(G) eq GrpMat then
     ord := LMGOrder(G);

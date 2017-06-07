@@ -5,7 +5,7 @@ This software was created by Joshua Maglione and James B. Wilson, Copyright
 2016, 2017. Distributed under GNU GPLv3.
 
 If you want a copy of the software under a different license, please contact the
-authors.
+authors. 
 
 
 ==== Copying ===================================================================
@@ -48,4 +48,13 @@ authors.
   Current version: 1.1.
   Latest versions can be downloaded on GitHub at:
     https://github.com/algeboy/eMAGma
+
+
+==== Contributions =============================================================
+
+    We encourage anyone who wants to contribute to fork the eMAGma repo and get
+  started. If you want to contribute but do not know how, check out the issues 
+  or projects on the github page. Alternatively, you can contact the authors who
+  are happy to help get you involved. 
+
 

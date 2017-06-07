@@ -76,8 +76,6 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
     error "Tensor does not have a base ring.";
   end try;
   M := t;
-//  passed, M, _, err := __TensorOnVectorSpaces(t); // needed?
-//  require passed : err;
   v := M`Valence;
   d := Dimension(M`Codomain);
   B := < Basis(X) : X in M`Domain >;  
@@ -87,6 +85,7 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
     x := Coordinates(M`Codomain,< B[i][cp[i]] : i in [1..#cp] > @ M);
     sc cat:= x;
   end for;
+  ChangeUniverse(~sc, K); 
   t`CoordImages := sc;
   if not assigned t`Element then
     t`Element := RSpace(K,#sc)!sc;

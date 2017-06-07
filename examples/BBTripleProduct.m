@@ -21,12 +21,14 @@ A, B;
 <A, X[4], X[5]> @ T eq <X[1], B, X[5]> @ T;
 
 
-V := VectorSpace(K, 6);
-my_left_asct := func<X|<<X[1],X[2],X[3]>@T,X[4],X[5]>@T\
-    - <X[1],<X[4],X[3],X[2]>@T,X[5]>@T >;
-LT := Tensor([* U, V, U, V, U, V *], my_left_asct);
+
+l_asct := func< X | Eltseq(<<X[1], X[2], X[3]> @ T, X[4], X[5]> @ T \
+    - <X[1], <X[4], X[3], X[2]> @ T, X[5]> @ T) >;
+LT := Tensor([* U : i in [0..5] *], l_asct);
 LT;
 
 I := Image(LT);
 I;
+
+Dimension(I);
 
