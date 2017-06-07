@@ -19,13 +19,16 @@ __GetTensorCategory := function( a, P : Con := false )
 end function;
 
 __TensorCatSanity := function( F, C )
-  v := #F-1;
+  v := #F;
+  if #F ne C`Valence then
+    return false, "Valences do not match.";
+  end if;
   parts := [ P : P in C`Repeats | #P gt 1 ];
   for P in parts do
     if not forall{ p : p in P | p @ C`Arrows eq Minimum(P) @ C`Arrows } then
       return false, "Arrows do not match repeated modules.";
     end if;
-    if not forall{ p : p in P | Dimension(F[v-p+1]) eq Dimension(F[v-Minimum(P)+1]) } then
+    if not forall{ p : p in P | Dimension(F[v-p]) eq Dimension(F[v-Minimum(P)]) } then
       return false, "Repeated modules are not isomorphic.";
     end if;
   end for;

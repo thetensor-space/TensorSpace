@@ -70,13 +70,22 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 intrinsic '@'( x::Tup, t::TenSpcElt ) -> .
 {x @ t}
-  if IsCoercible( Domain(t`Map), x ) then
-    x := Domain(t`Map)!x;
-  else
+  // if x is not obviously coercible into the domain of t, then attempt to coerce.
+  if not IsCoercible(Domain(t`Map), x) then
     require assigned t`Coerce : "Argument not in the domain.";
-    require forall{ i : i in [1..#x] | IsCoercible( Domain(t`Coerce[i]), x[i] ) } : "Argument not in the domain.";
-    x := < (Domain(t`Coerce[i])!x[i]) @ t`Coerce[i] : i in [1..#x] >;
+    y := < D!0 : D in t`Domain >;
+    for i in [1..#x] do
+      if IsCoercible(t`Domain[i], x[i]) then
+        y[i] := t`Domain[i]!x[i];
+      elif IsCoercible(Domain(t`Coerce[i]), x[i]) then
+        y[i] := (Domain(t`Coerce[i])!x[i]) @ t`Coerce[i];
+      else
+        require false : "Argument not in the domain.";
+      end if;
+    end for;
+    x := y;
   end if;
+  x := Domain(t`Map)!x;
   return x @ t`Map;
 end intrinsic;
 

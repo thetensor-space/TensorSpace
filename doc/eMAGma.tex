@@ -12,7 +12,7 @@
 \address{Colorado State University}
 \email{james.wilson@colostate.edu}
 
-\version{1.1}
+\version{1.1.0}
 \date{\today}
 \copyrightyear{2016}
 
@@ -90,6 +90,21 @@ SetVerbose(MonStgElt, RngIntElt) : ->
 
 We have included an intrinsic to check which version of eMAGma you have attached in Magma.
 
+\begin{example}[VerbosePrinting]
+We demonstrate the verbose printing available for eMAGma. 
+Currently, we only have verbose printing when we solve linear systems. 
+To turn on all the printing statements, set {\tt "eMAGma"} to {\tt 1}. 
+
+\begin{code}
+> SetVerbose("eMAGma", 1);
+> 
+> t := RandomTensor(GF(2), [32, 32, 32]);
+> D := DerivationAlgebra(t);
+Setting up linear system: 3072 by 32768
+Solving up linear system: 3072 by 32768
+\end{code}
+\end{example}
+
 \index{eMAGmaVersion}
 \begin{intrinsics}
 eMAGmaVersion() : -> MonStgElt
@@ -97,20 +112,30 @@ eMAGmaVersion() : -> MonStgElt
 
 Returns the version number for the eMAGma package attached in Magma.
 
-\chapter{Tensors}
+\begin{example}[Version]
+We verify that we have attached the current version of the eMAGma package.
+Even though {\tt eMAGmaVersion} has no arguments, {\tt ()} is still required.
+
+\begin{code}
+> eMAGmaVersion();
+1.1.0
+\end{code}
+\end{example}
+
+\chapter{Tensors}\label{ch:tensors}
 
 \input{tensors.tex}
 \input{alg-invariants.tex}
 
-\chapter{Tensor spaces}
+\chapter{Tensor spaces}\label{ch:tensor-spaces}
 
 \input{tensor-spc-cat.tex}
 
-\chapter{Exceptional tensors}
+\chapter{Exceptional tensors}\label{ch:exceptional}
 
 \input{exceptional.tex}
 
-\chapter{Some examples}
+\chapter{Some examples}\label{ch:examples}
 
 \input{longer-exs.tex}
 

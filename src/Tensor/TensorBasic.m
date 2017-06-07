@@ -184,49 +184,42 @@ intrinsic BaseField( t::TenSpcElt ) -> Fld
   return K;
 end intrinsic;
 
-intrinsic Image( t::TenSpcElt ) -> ModTupRng, Map
+intrinsic Image( t::TenSpcElt ) -> ModTupRng
 {Returns the image of t as a subspace of the codomain.}
   if assigned t`Image then
-    return t`Image[1],t`Image[2];
+    return t`Image;
   end if;
-
-  try
-    passed, s, H, err := __TensorOnVectorSpaces(t);
-  catch err
-    error "Cannot extract vector space structure.";
-  end try;
-  require passed : err;
 
   try
     sc := Eltseq(t);
   catch err
-    gens := [ g : g in CartesianProduct( < Basis(X) : X in s`Domain > ) ];
+    gens := [ g : g in CartesianProduct( < Basis(X) : X in t`Domain > ) ];
     i := 1;
-    S := sub< s`Codomain | >;
-    while i le #gens and Dimension(S) lt Dimension(s`Codomain) do
-      S := sub< s`Codomain | S, gens[i] >;
+    S := sub< t`Codomain | >;
+    while i le #gens and Dimension(S) lt Dimension(t`Codomain) do
+      S := sub< t`Codomain | S, gens[i] >;
       i +:= 1;
     end while;
     S := sub< S | Basis(S) >;// Magma work-around : remove superfluous generators
-    t`Image := < S, H`Maps[#H`Maps] >;
-    return S, H`Maps[#H`Maps];
+    t`Image := S;
+    return S;
   end try;
 
-  d := Dimension(s`Codomain);
+  d := Dimension(t`Codomain);
   if d eq 0 then
-    t`Image := < s`Codomain, H`Maps[#H`Maps] >;
-    return s`Codomain, H`Maps[#H`Maps];
+    t`Image := t`Codomain;
+    return t`Codomain;
   end if;
   i := 1;
   total := #sc div d;
-  S := sub< s`Codomain | >;
-  while i le total and Dimension(S) lt Dimension(s`Codomain) do
-    S := sub< s`Codomain | S, s`Codomain!sc[(i-1)*d+1..i*d] >;
+  S := sub< t`Codomain | >;
+  while i le total and Dimension(S) lt Dimension(t`Codomain) do
+    S := sub< t`Codomain | S, t`Codomain!sc[(i-1)*d+1..i*d] >;
     i +:= 1;
   end while;
   S := sub< S | Basis(S) >;// Magma work-around : remove superfluous generators
-  t`Image := < S, H`Maps[#H`Maps] >;
-  return S, H`Maps[#H`Maps];
+  t`Image := S;
+  return S;
 end intrinsic;
 
 intrinsic NondegenerateTensor( M::TenSpcElt ) -> TenSpcElt, Hmtp

@@ -163,6 +163,8 @@ __TensorOnVectorSpaces := function(M)
   N`Centroids := M`Centroids;
   if assigned M`Coerce then
     N`Coerce := [* M`Coerce[i] * maps[i] : i in [1..#maps] *];
+  else
+    N`Coerce := maps;
   end if;
   if assigned M`Derivations then
     N`Derivations := M`Derivations;
@@ -179,104 +181,108 @@ end function;
 // ==============================================================================
 //                                  Black-box
 // ==============================================================================
-intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
 {Returns the tensor from the Cartesian product of the sequence D into C given by F with tensor category Cat. 
-The UserProgram F must take as input a tuple in D.}
-  require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
-  passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
-  require passed : err;
+The UserProgram F must take as input a tuple in D.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __TensorCatSanity([* X : X in D *], Cat);
   require passed : err;
+  passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
+  require passed : err;
   T := __GetTensor( D, C, F : Cat := Cat );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( D::SeqEnum, C::., F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( D::SeqEnum, C::., F::UserProgram ) -> TenSpcElt, List
 {Returns the tensor from the Cartesian product of the sequence D into C given by F. 
-The UserProgram F must take as input a tuple in D.}
+The UserProgram F must take as input a tuple in D.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( S::SeqEnum, F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
 {Returns the tensor from the sequence S evaluated by F with tensor category Cat. 
-The UserProgram F must take as input a tuple in the domain.}
-  require #S eq Cat`Valence : "Given modules do not match category valence.";
-  passed, err := __BlackBoxSanity(S, F);
-  require passed : err;
+The UserProgram F must take as input a tuple in the domain.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __TensorCatSanity(S, Cat);
+  require passed : err;
+  passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( S::SeqEnum, F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( S::SeqEnum, F::UserProgram ) -> TenSpcElt, List
 {Returns the tensor from the sequence S evaluated by F. 
-The UserProgram F must take as input a tuple in the domain.}
+The UserProgram F must take as input a tuple in the domain.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( D::List, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
 {Returns the tensor from the Cartesian product of the list D into C given by F with tensor category Cat. 
-The UserProgram F must take as input a tuple in D.}
-  require #D+1 eq Cat`Valence : "Given modules do not match category valence.";
-  passed, err := __BlackBoxSanity(D cat [*C*], F);
-  require passed : err;
+The UserProgram F must take as input a tuple in D.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __TensorCatSanity(D cat [*C*], Cat);
+  require passed : err;
+  passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F : Cat := Cat );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( D::List, C::., F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( D::List, C::., F::UserProgram ) -> TenSpcElt, List
 {Returns the tensor from the Cartesian product of the list D into C given by F. 
-The UserProgram F must take as input a tuple in D.}
+The UserProgram F must take as input a tuple in D.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(D cat [*C*], F);
   require passed : err;
   T := __GetTensor( D, C, F );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( S::List, F::UserProgram, Cat::TenCat ) -> TenSpcElt, List
 {Returns the tensor from the list S evaluated by F with tensor category Cat. 
-The UserProgram F must take as input a tuple in the domain.}
-  require #S eq Cat`Valence : "Given modules do not match category valence.";
-  passed, err := __BlackBoxSanity(S, F);
-  require passed : err;
+The UserProgram F must take as input a tuple in the domain.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __TensorCatSanity(S, Cat);
+  require passed : err;
+  passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F : Cat := Cat );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
-intrinsic Tensor( S::List, F::UserProgram ) -> TenSpcElt, TenSpcElt, Hmtp
+intrinsic Tensor( S::List, F::UserProgram ) -> TenSpcElt, List
 {Returns the tensor from the list S evaluated by F. 
-The UserProgram F must take as input a tuple in the domain.}
+The UserProgram F must take as input a tuple in the domain.
+A list of maps from the given frame to the returned frame is also returned.}
   passed, err := __BlackBoxSanity(S, F);
   require passed : err;
   T := __GetTensor( S[1..#S-1], S[#S], F );
   passed, S, H, err := __TensorOnVectorSpaces( T );
   require passed : err;
-  return S, T, H;
+  return S, H`Maps;
 end intrinsic;
 
 // ==============================================================================
@@ -325,12 +331,12 @@ intrinsic Tensor( D::[RngIntElt], S::[RngElt], Cat::TenCat ) -> TenSpcElt
 end intrinsic;
 
 intrinsic Tensor( R::Rng, D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
-{Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the tensor category Cat.}
+{Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the homotopism category.}
   return Tensor(R,D,S,HomotopismCategory(#D));
 end intrinsic;
 
 intrinsic Tensor( D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
-{Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the tensor category Cat.}
+{Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the homotopism category.}
   return Tensor(Universe(D),D,S,HomotopismCategory(#D));
 end intrinsic;
 

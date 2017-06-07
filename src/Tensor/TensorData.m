@@ -75,8 +75,9 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
   catch err
     error "Tensor does not have a base ring.";
   end try;
-  passed, M, _, err := __TensorOnVectorSpaces(t); // needed?
-  require passed : err;
+  M := t;
+//  passed, M, _, err := __TensorOnVectorSpaces(t); // needed?
+//  require passed : err;
   v := M`Valence;
   d := Dimension(M`Codomain);
   B := < Basis(X) : X in M`Domain >;  
