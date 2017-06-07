@@ -178,7 +178,7 @@
   \null\vfil
   \begingroup
     \centering 
-    \copyright \@copyrightyear\; \authors \par
+    Copyright \@copyrightyear\; \authors \par
   \endgroup
   \endgroup}
 

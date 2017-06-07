@@ -18,9 +18,4 @@ end function;
 
 
 /*  Verbose names  */
-declare verbose Multilinear, 1; // turns verbose on for all functions below
-
-declare verbose Centroid, 1;
-declare verbose DerivationAlgebra, 1;
-declare verbose DerivationClosure, 1;
-declare verbose Nucleus, 1;
+declare verbose eMAGma, 1; 

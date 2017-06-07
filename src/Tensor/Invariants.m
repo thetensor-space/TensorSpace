@@ -34,10 +34,7 @@ __SCentroid := function( M, S )
   V := RSpace( R, &+[ d^2 : d in dims ] + d^2 );
   mat := [];
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d*#S);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Centroid, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d*#S);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d*#S);
 
   for x in B do
     for k in [1..d] do
@@ -59,10 +56,7 @@ __SCentroid := function( M, S )
   end for;
   M := Matrix(mat);
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Centroid, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
 
   T := NullspaceOfTranspose( M );
   MA := MatrixAlgebra( R, &+(dims) + d );
@@ -79,10 +73,7 @@ __Derivations := function( M )
   V := RSpace( R, &+[ d^2 : d in dims ] + d^2 );
   mat := [];
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint DerivationAlgebra, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d);
 
   for x in B do
     for k in [1..d] do
@@ -103,10 +94,7 @@ __Derivations := function( M )
   end for;
   M := Matrix(mat);
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint DerivationAlgebra, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
 
   S := NullspaceOfTranspose( M );
   MA := MatrixLieAlgebra( R, &+(dims) + d );
@@ -125,10 +113,7 @@ __12Nucleus := function( M )
   V := RSpace( R, d1^2 + d2^2 );
   mat := [];
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(#I*Dimension(M`Codomain));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(#I*Dimension(M`Codomain));
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(#I*Dimension(M`Codomain));
 
   for x in I do
     for k in [1..Dimension(M`Codomain)] do
@@ -148,10 +133,7 @@ __12Nucleus := function( M )
   end for;
   M := Matrix(mat);
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
 
   T := NullspaceOfTranspose( M );
   blocks := [ __VectorToBlocks( T.i, [d1,d2] ) : i in [1..Dimension(T)] ];
@@ -190,10 +172,7 @@ __AdjointOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2) cat " by " cat IntegerToString(a*b*c);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2) cat " by " cat IntegerToString(a*b*c);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2) cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+b^2,a*b*c);
 
@@ -240,10 +219,7 @@ __AdjointOfBimap := function( t )
     end while;
   end if;
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
   MA := MatrixAlgebra(K,a+b);
@@ -259,10 +235,7 @@ __LeftScalarsOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(a^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Setting up linear system: " cat IntegerToString(a^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+c^2) cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+c^2,a*b*c);
 
@@ -309,10 +282,7 @@ __LeftScalarsOfBimap := function( t )
     end while;
   end if;
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
   MA := MatrixAlgebra(K,a+c);
@@ -328,10 +298,7 @@ __RightScalarsOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(b^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Setting up linear system: " cat IntegerToString(b^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(b^2+c^2) cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,b^2+c^2,a*b*c);
 
@@ -378,10 +345,7 @@ __RightScalarsOfBimap := function( t )
     end while;
   end if;
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Nucleus, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
   MA := MatrixAlgebra(K,b+c);
@@ -397,10 +361,7 @@ __CentroidOfBimap := function(t)
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(2*a*b*c);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Centroid, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(2*a*b*c);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(2*a*b*c);
 
   M := ZeroMatrix(K, a^2+b^2+c^2, 2*a*b*c);
 
@@ -483,10 +444,7 @@ __CentroidOfBimap := function(t)
     end while;
   end if;
 
-  vprint Multilinear, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint Centroid, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  end if;
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   /* Eventually fix this to not have to multiply matrices. */
   D := DiagonalMatrix(K,[1 : i in [1..b^2]] cat [-1 : i in [1..a^2]] cat [1 : i in [1..c^2]]);
@@ -504,10 +462,7 @@ __DerivationsOfBimap := function(t)
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint Multilinear, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  if GetVerbose("Multilinear") eq 0 then
-    vprint DerivationAlgebra, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
-  end if;
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+b^2+c^2,a*b*c);
 
@@ -575,10 +530,7 @@ __DerivationsOfBimap := function(t)
     end while;
   end if;
 
-  vprint Multilinear, 1 : "Solving up linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  if GetVerbose("Multilinear") eq 0 then
-    vprint DerivationAlgebra, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
-  end if;
+  vprint eMAGma, 1 : "Solving up linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   /* Eventually fix this to not have to multiply matrices. */
   D := DiagonalMatrix(K,[1 : i in [1..a^2+b^2]] cat [-1 : i in [1..c^2]]);
@@ -630,7 +582,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
   B := Basis(D);
   V := VectorSpace(BaseRing(t),#B);
   phi := map< D -> V | x:-> &+[ Coordinates( D, x )[j]*V.j : j in [1..#B] ], y:-> &+[ Coordinates( V, y )[j]*B[j] : j in [1..#B] ] >;
-  vprint Multilinear, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
+  vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
   if __SANITY_CHECK then
