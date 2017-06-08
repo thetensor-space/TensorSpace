@@ -19,6 +19,10 @@
 
 \makeindex
 
+% Show subsections in TOC
+\setcounter{tocdepth}{2}
+\def\l@subsection{\@tocline{2}{0pt}{2pc}{5pc}{}} % redefined so subsections indent further
+
 % Version number of the package
 \newcommand{\version}[1]{\def \@versionnumber{#1}}
 \renewcommand{\copyrightyear}[1]{\def \@copyrightyear{#1}}
@@ -44,6 +48,7 @@
   }
   {
     \end{framed}
+    \bigskip
   }
 \numberwithin{examplecounter}{chapter}
 

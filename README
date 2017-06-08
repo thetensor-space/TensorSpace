@@ -24,6 +24,14 @@ authors.
   this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+==== Contributions =============================================================
+
+    We encourage anyone who wants to contribute to fork the eMAGma repo and get
+  started. If you want to contribute but do not know how, check out the issues 
+  or projects on the github page. Alternatively, you can contact the authors who
+  are happy to help get you involved. 
+
+
 ==== Package Contents ==========================================================
 
   1. Spec file is "./eMAGma.spec"
@@ -48,13 +56,5 @@ authors.
   Current version: 1.1.
   Latest versions can be downloaded on GitHub at:
     https://github.com/algeboy/eMAGma
-
-
-==== Contributions =============================================================
-
-    We encourage anyone who wants to contribute to fork the eMAGma repo and get
-  started. If you want to contribute but do not know how, check out the issues 
-  or projects on the github page. Alternatively, you can contact the authors who
-  are happy to help get you involved. 
 
 

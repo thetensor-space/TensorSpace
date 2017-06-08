@@ -457,6 +457,62 @@ Returns the bilinear tensor given by the list of matrices.  The interpretation
 of the matrices as structure constants is specified by the coordinates $s$ and $t$
 which must be positions in $\{2,1,0\}$.  Optionally a tensor category $C$ can be assigned.
 
+
+\begin{example}[SymplecticForm]
+
+We will construct a symplectic bilinear form on $V=K^8$. 
+It would be cumbersome to construct this tensor as a black-box tensor or by providing the structure constants sequence. 
+Instead, we will provide a (Gram) matrix. 
+\begin{code}
+> K := GF(17);
+> MS := KMatrixSpace(K, 2, 2);
+> J := KroneckerProduct(IdentityMatrix(K, 4), MS![0, 1, -1, 0]);
+> J;
+[ 0  1  0  0  0  0  0  0]
+[16  0  0  0  0  0  0  0]
+[ 0  0  0  1  0  0  0  0]
+[ 0  0 16  0  0  0  0  0]
+[ 0  0  0  0  0  1  0  0]
+[ 0  0  0  0 16  0  0  0]
+[ 0  0  0  0  0  0  0  1]
+[ 0  0  0  0  0  0 16  0]
+> 
+> T := Tensor(J, 2, 1);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 8 over GF(17)
+U1 : Full Vector space of degree 8 over GF(17)
+U0 : Full Vector space of degree 1 over GF(17)
+> 
+> IsAlternating(T);
+true
+\end{code}
+
+Now we will construct the symplectic form using the black-box construction and verify that the two tensors are the same. 
+\begin{code}
+> V := VectorSpace(K, 8);
+> symp := func< x | x[1]*J*Matrix(8, 1, Eltseq(x[2])) >;
+> S := Tensor([V, V], VectorSpace(K, 1), symp);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 8 over GF(17)
+U1 : Full Vector space of degree 8 over GF(17)
+U0 : Full Vector space of degree 1 over GF(17)
+> 
+> SystemOfForms(S);
+[
+    [ 0  1  0  0  0  0  0  0]
+    [16  0  0  0  0  0  0  0]
+    [ 0  0  0  1  0  0  0  0]
+    [ 0  0 16  0  0  0  0  0]
+    [ 0  0  0  0  0  1  0  0]
+    [ 0  0  0  0 16  0  0  0]
+    [ 0  0  0  0  0  0  0  1]
+    [ 0  0  0  0  0  0 16  0]
+]
+\end{code}
+\end{example}
+
 \index{AsMatrices}\index{SystemOfForms}
 \begin{intrinsics}
 AsMatrices(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> SeqEnum
@@ -467,73 +523,61 @@ For a tensor $T$ with frame $[K^{d_v},\dots,K^{d_0}]$,
 returns a list $[M_1,\dots,M_d]$, $d=(d_v\cdots d_0)/d_s d_t$, 
 of $(d_s\times d_t)$-matrices in $K$ representing the tensor
 as an element of $\hom_K(K^{d_s}\otimes_K K^{d_t},K^d)$.
-For {\tt SystemOfForms}, $T$ must have valence $2$ and the implied values
+For {\tt SystemOfForms}, $T$ must have valence $3$ and the implied values
 are $s=2$ and $t=1$.
 
-\begin{example}[Ten\_StrConst]
+
+\begin{example}[TrilinearAsMats]
+
+We construct the associator of $\mathfrak{sl}_2(\mathbb{Q})$ where $\{ \, \} : \prod_{k=1}^3\mathfrak{sl}_2\rightarrowtail \mathfrak{sl}_2$ given by
+\[ \{ x,y,z \} = [[x,y],z] - [x,[y,z]]. \]
+It can be hard to understand some of the features of this trilinear map by only looking at the structure constants sequence. 
+The function {\tt AsMatrices} slices the sequence asnd presents the data as a sequence of matrices.
 \begin{code}
-> T := Tensor(GF(3), [2,2,2], [1,0,0,1,0,1,-1,0]);
+> K := Rationals();
+> L := LieAlgebra("A1", K);
+> T := AssociatorTensor(L);
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 2 over GF(3)
-U1 : Full Vector space of degree 2 over GF(3)
-U0 : Full Vector space of degree 2 over GF(3)
-> StructureConstants(T);
-[ 1, 0, 0, 1, 0, 1, 2, 0 ]
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 3 over Rational Field
+U2 : Full Vector space of degree 3 over Rational Field
+U1 : Full Vector space of degree 3 over Rational Field
+U0 : Full Vector space of degree 3 over Rational Field
+>
+> Eltseq(T);
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2,
+0, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 2, 0, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0,
+2, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 ]
 \end{code}
 
-Systems of forms offer some visually useful information such as
-symmetry.
-The choice of coordinates influences the resulting list of matrices.
+Calling {\tt AsMatrices(T, 3, 1)} returns a sequence of nine matrices, but we only show the first four.
+As explained in the documentation above, this sequence of matrices can be interpreted as the system of bilinear forms for the 3-tensor $\circ_{31} : V_3 \times V_1 \rightarrowtail \Hom_K(V_2,V_0)$ given by
+\[ x\circ_{31} z = \{ x, -,z \} = [[x,-],z] - [x,[-,z]].\]
 
 \begin{code}
-> AsMatrices(T,1,0);
+> AsMatrices(T, 3, 1)[1..4];
 [
-    [1 0]
-    [0 1],
+    [ 0  0  2]
+    [ 0  0  0]
+    [-2  0  0],
 
-    [0 1]
-    [2 0]
-]
-> SystemOfForms (T);
-[
-    [1 0]
-    [0 2],
+    [ 0  0  0]
+    [ 0  0  2]
+    [ 0 -2  0],
 
-    [0 1]
-    [1 0]
+    [0 0 0]
+    [0 0 0]
+    [0 0 0],
+
+    [ 0  1  0]
+    [-1  0  0]
+    [ 0  0  0]
 ]
-> IsSymmetric (T);
-true
 \end{code}
 \end{example}
 
-\begin{example}[Ten\_SysForms]
-Systems of forms will always produce tensors of valance 2.  In particular
-two tensors with a common structure constant sequence can be treated differently by
-changing the dimensions that frame the data.  Thus a tensor is more than a list of coefficients.
 
-\begin{code}
-> F := [ RandomMatrix(GF(2),2,3) : i in [1..4] ];
-> T := Tensor(F,2,1);
-> T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 2 over GF(2)
-U1 : Full Vector space of degree 3 over GF(2)
-U0 : Full Vector space of degree 4 over GF(2)
-> T2 := Tensor([2,2,2,2],[1..16]);
-> F2 := AsMatrices(T2,3,2);
-> T3 := Tensor(F2,2,1);
-> Eltseq(T2) eq Eltseq(T3);
-true
-> T2 eq T3 ;
-false
-> Valence(T2);
-3
-> Valence(T3);
-2
-\end{code}
-\end{example}
 
 \subsection{Tensors from algebraic objects}
 A natural source of tensors is an algebraic object with a distributive 

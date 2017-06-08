@@ -72,7 +72,6 @@ end intrinsic;
 intrinsic ExceptionalJordanCSA( K::Fld ) -> AlgGen
 {The split exceptional Albert Jordan algebra over specified field with split octonions.}
 	require not ( Characteristic(K) eq 2 ) : "Quadratic Jordan algebras are not supported.";
-
 	return ExceptionalJordanCSA( SplitOctonionAlgebra(K) );
 end intrinsic;
 
@@ -102,8 +101,8 @@ intrinsic JordanSpinAlgebra( F::TenSpcElt ) -> AlgGen
 end intrinsic;
 
 
-intrinsic JordanSpinAlgebra( form::. ) -> AlgGen
+intrinsic JordanSpinAlgebra( f::Mtrx ) -> AlgGen
 {Zorn's special Jordan algebra of spin type for given symmetric form.}
-	return JordanSpinAlgebra( Tensor([form], 2,1));
+	return JordanSpinAlgebra( Tensor([f], 2,1));
 end intrinsic;
 
