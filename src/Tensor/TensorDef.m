@@ -10,6 +10,21 @@
 
 
 import "Tensor.m" : __GetTensor;
+import "TensorBasic.m" : __HasBasis;
+
+// given a vector, a tensor, and a coordinate (in [1..v-1]),
+// returns 3 things: can be coerced into V_(v-1), the coreced elt, error message.
+__CoerceIntoDomain := function( x, t, i )
+  if IsCoercible(t`Domain[i], x) then // easy case
+    return true, (t`Domain[i])!x, _;
+  else
+    if assigned t`Coerce and IsCoercible(Domain(t`Coerce[i]), x) then
+      return true, (Domain(t`Coerce[i])!x) @ t`Coerce[i], _;
+    else
+      return false, _, "Cannot coerce coordinate: " cat IntegerToString(t`Valence-i) cat ".";
+    end if;
+  end if;
+end function;
 
 // ------------------------------------------------------------------------------
 //                                      Print
@@ -70,23 +85,40 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 intrinsic '@'( x::Tup, t::TenSpcElt ) -> .
 {x @ t}
-  // if x is not obviously coercible into the domain of t, then attempt to coerce.
-  if not IsCoercible(Domain(t`Map), x) then
-    require assigned t`Coerce : "Argument not in the domain.";
-    y := < D!0 : D in t`Domain >;
+  // first check if any of the entries are spaces. 
+  spaces := [ __HasBasis(y) : y in x ];
+
+  if &or(spaces) then // there exists a subspace
+    y := <>;
     for i in [1..#x] do
-      if IsCoercible(t`Domain[i], x[i]) then
-        y[i] := t`Domain[i]!x[i];
-      elif IsCoercible(Domain(t`Coerce[i]), x[i]) then
-        y[i] := (Domain(t`Coerce[i])!x[i]) @ t`Coerce[i];
+      if spaces[i] then
+        Append(~y, Basis(x[i]));
       else
-        require false : "Argument not in the domain.";
+        Append(~y, [x[i]]);
       end if;
     end for;
-    x := y;
+    CP := CartesianProduct(y);
+    B := [];
+    for y in CP do
+      z := <>;
+      for i in [1..#y] do
+        passed, v, err := __CoerceIntoDomain(y[i], t, i); // a try & catch might be faster?
+        require passed : err;
+        Append(~z, v);
+      end for;
+      Append(~B, z @ t`Map);
+    end for;
+    S := sub< t`Codomain | B >;
+    return S;
+  else // only "vectors" in x
+    y := <>;
+    for i in [1..#x] do
+      passed, v, err := __CoerceIntoDomain(x[i], t, i); // a try & catch might be faster?
+      require passed : err;
+      Append(~y, v);
+    end for;
+    return y @ t`Map;
   end if;
-  x := Domain(t`Map)!x;
-  return x @ t`Map;
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -156,23 +188,4 @@ intrinsic '+'( t::TenSpcElt, s::TenSpcElt ) -> TenSpcElt
   return __GetTensor( Domain(t), Codomain(t), F : Par := Parent(t), Co := coerce, Cat := t`Cat );
 end intrinsic;
 
-intrinsic '*'( r::RngElt, t::TenSpcElt ) -> TenSpcElt
-{r*t}
-  R := BaseRing(t);
-  require IsCoercible(R,r) : "Arguments are not compatible.";
-  M := t`Map;
-  F := function(x)
-    return (R!r)*(x @ M);
-  end function;
-  if assigned t`Coerce then
-    coerce := t`Coerce;
-  else
-    coerce := false;
-  end if;
-  if assigned t`Parent then
-    parent := t`Parent;
-  else
-    parent := false;
-  end if;
-  return __GetTensor( Domain(t), Codomain(t), F : Par := parent, Co := coerce, Cat := t`Cat );
-end intrinsic;
+// scalar multiplication is overloaded with the infix evaluation in "BimapDef.m"

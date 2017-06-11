@@ -18,9 +18,7 @@ __HasBasis := function( X )
   try 
     B := Basis(X);
   catch e
-    if assigned e`Object then
-      return false;
-    end if;
+    return false;
   end try;
   return true;
 end function;

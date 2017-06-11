@@ -18,6 +18,9 @@
 \RequirePackage{verbatim}
 
 \makeindex
+\numberwithin{section}{chapter}
+\numberwithin{subsection}{section}
+%\numberwithin{subsubsection}{subsection}
 
 % Show subsections in TOC
 \setcounter{tocdepth}{2}

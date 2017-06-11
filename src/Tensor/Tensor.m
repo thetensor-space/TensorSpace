@@ -371,6 +371,11 @@ intrinsic Polarization( f::MPolElt ) -> TenSpcElt, MPolElt
   return __GetTensor( [* V : i in [1..d] *], W, F : Cat := TensorCategory([1 : i in [0..d]],{{1..d},{0}}) ), p;
 end intrinsic;
 
+intrinsic Polarisation( f::MPolElt ) -> TenSpcElt, MPolElt
+{Returns the tensor, given by the polarisation of the homogeneous polynomial f, along with the polarisation of f.}
+  return Polarization(f);
+end intrinsic;
+
 intrinsic Polarization( f::RngUPolElt ) -> TenSpcElt
 {Returns the tensor, given by the polarization of the univariate polynomial f.}
   E := BaseRing( f );
@@ -390,10 +395,26 @@ intrinsic Polarization( f::RngUPolElt ) -> TenSpcElt
   return __GetTensor( [V,V], V, polar );
 end intrinsic;
 
+intrinsic Polarisation( f::RngUPolElt ) -> TenSpcElt
+{Returns the tensor, given by the polarisation of the univariate polynomial f.}
+  return Polarization(f);
+end intrinsic;
+
 intrinsic CommutatorTensor( A::Alg ) -> TenSpcElt, Map
-{Returns the tensor given by commutator in A.}
+{Returns the tensor given by commutator, [a,b] = ab - ba, in A.}
   F := function(x)
     return x[1]*x[2] - x[2]*x[1];
+  end function;
+  T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
+  passed, S, maps, err := __TensorOnVectorSpaces(T);
+  require passed : err;
+  return S, maps[1];
+end intrinsic;
+
+intrinsic AnticommutatorTensor( A::Alg ) -> TenSpcElt, Map
+{Returns the tensor given by anticommutator, [a,b] = ab + ba, in A.}
+  F := function(x)
+    return x[1]*x[2] + x[2]*x[1];
   end function;
   T := __GetTensor( [* A, A *], A, F : Co := [* map< A->A | x :-> x, y:->y > : i in [1..3] *], Cat := TensorCategory( [1,1,1], {{0,1,2}} ) );
   passed, S, maps, err := __TensorOnVectorSpaces(T);
@@ -421,6 +442,7 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   catch err
     error "Cannot compute the p-central series.";
   end try;
+
   // pad s with trivial subs if s, t require it.
   if s gt #pcs then
     pcs[s] := sub< G | >;
@@ -435,6 +457,7 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   elif s+t+1 gt #pcs then
     pcs[s+t+1] := sub< G | >;
   end if;
+
   // take quotients in G to get to vector spaces.
   if pcs[s] ne pcs[s+1] then
     U1,f1 := GModule( G, pcs[s], pcs[s+1] );
@@ -457,7 +480,8 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   if pcs[s+t] ne pcs[s+t+1] then
     U3,f3 := GModule( G, pcs[s+t], pcs[s+t+1] );
     V3 := VectorSpace( GF(p), Dimension(U3) );
-    h3 := hom< U3 -> V3 | [ < U3.i, V3.i > : i in [1..Dimension(U3)] ] >;
+    g3 := hom< U3 -> V3 | [ < U3.i, V3.i > : i in [1..Dimension(U3)] ] >;
+    h3 := f3*g3;
   else
     V3 := VectorSpace( GF(p), 0 );
     h3 := map< pcs[s+t] -> V3 | x :-> V3!0, y :-> pcs[s+t]!1 >;
@@ -508,7 +532,7 @@ intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, List
   return pCentralTensor(G,p,1,1);
 end intrinsic;
 
-intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt
+intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt, Map
 {Returns the tensor associated to the quotient (polynomial) ring Q.}
   f := Modulus(Q);
   R := PreimageRing(Q);
@@ -524,7 +548,16 @@ intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt
     vec := Eltseq(poly) cat [ 0 : i in [1..d-Degree(poly)-1] ];
     return V!vec;
   end function;
-  return Tensor( [* V, V, V *], F, TensorCategory([1,1,1],{{0,1,2}}) ); // add a coerce?
+  coerce := function(x)
+    v := V!0;
+    u := Eltseq(x);
+    for i in [1..#u] do
+      v[i] +:= u[i];
+    end for;
+    return v;
+  end function;
+  f := map< Q -> V | x :-> coerce(x), y :-> (&+[ y[i]*R.1^(i-1) : i in [1..d] ]) @ pi >;
+  return __GetTensor( [* V, V *], V, F : Cat := TensorCategory([1,1,1],{{0,1,2}}), Co := [* f, f, f *] ), f; // add a coerce?
 end intrinsic;
 
 // ==============================================================================

@@ -793,8 +793,8 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   isit,X := __IsCyclic(S);
   require isit : "Centroid is not a commutative local ring.";
   
-  passed, t, H2, err := __TensorOnVectorSpaces(t);
-  require passed : err;
+//  passed, t, H2, err := __TensorOnVectorSpaces(t);  // Not needed?
+//  require passed : err;
   D := t`Domain;
   C := t`Codomain;
   dims := [ Dimension(X) : X in D ] cat [ Dimension(C) ];
@@ -858,9 +858,9 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   if assigned t`Coerce then
     s`Coerce := [* t`Coerce[i] * Maps[i] : i in [1..#t`Coerce] *];
   end if;
-  if assigned H2 then
-    H := H2*H;
-  end if;
+//  if assigned H2 then // Not needed? See above.
+//    H := H2*H;
+//  end if;
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (TensorOverCentroid)";

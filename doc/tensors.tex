@@ -206,8 +206,8 @@ true
 
 To confirm this product is left associative, we can create a new tensor for the left triple-associator and see that its image is $0$.
 We will create a $6$-tensor $\{ \, \} : \prod_{k=1}^5 \mathbb{M}_{2\times 3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$ where
-\[ \{ X_1,\dots, X_5\} = \langle \langle X_1, X_2, X_3 \rangle, X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. \]
-Therefore, if im$(\{ \, \})=0$, then $\langle \,\rangle$ is left associative. 
+\[ \lla X_1,\dots, X_5\rra = \langle \langle X_1, X_2, X_3 \rangle, X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. \]
+Therefore, if im$(\lla \, \rra)=0$, then $\langle \,\rangle$ is left associative. 
 
 \begin{code}
 > l_asct := func< X | Eltseq(<<X[1], X[2], X[3]> @ T, X[4], X[5]> @ T \
@@ -529,8 +529,8 @@ are $s=2$ and $t=1$.
 
 \begin{example}[TrilinearAsMats]
 
-We construct the associator of $\mathfrak{sl}_2(\mathbb{Q})$ where $\{ \, \} : \prod_{k=1}^3\mathfrak{sl}_2\rightarrowtail \mathfrak{sl}_2$ given by
-\[ \{ x,y,z \} = [[x,y],z] - [x,[y,z]]. \]
+We construct the associator of $\mathfrak{sl}_2(\mathbb{Q})$ where $\langle \, \rangle : \prod_{k=1}^3\mathfrak{sl}_2\rightarrowtail \mathfrak{sl}_2$ given by
+\[ \langle x,y,z \rangle = [[x,y],z] - [x,[y,z]]. \]
 It can be hard to understand some of the features of this trilinear map by only looking at the structure constants sequence. 
 The function {\tt AsMatrices} slices the sequence asnd presents the data as a sequence of matrices.
 \begin{code}
@@ -553,7 +553,7 @@ U0 : Full Vector space of degree 3 over Rational Field
 
 Calling {\tt AsMatrices(T, 3, 1)} returns a sequence of nine matrices, but we only show the first four.
 As explained in the documentation above, this sequence of matrices can be interpreted as the system of bilinear forms for the 3-tensor $\circ_{31} : V_3 \times V_1 \rightarrowtail \Hom_K(V_2,V_0)$ given by
-\[ x\circ_{31} z = \{ x, -,z \} = [[x,-],z] - [x,[-,z]].\]
+\[ x\circ_{31} z = \langle x, -,z \rangle = [[x,-],z] - [x,[-,z]].\]
 
 \begin{code}
 > AsMatrices(T, 3, 1)[1..4];
@@ -580,56 +580,238 @@ As explained in the documentation above, this sequence of matrices can be interp
 
 
 \subsection{Tensors from algebraic objects}
-A natural source of tensors is an algebraic object with a distributive 
-property.
-Each tensor is assigned a category relevant to its origin. 
+A natural and important source of tensors come from algebraic object with a distributive property.
+One main source is from algebras, where $*:A\times A\rightarrowtail A$ is given by multiplication in $A$. 
+Like with the previous sections on tensor constructions, all tensors will be constructed over vector spaces. 
+The user can still input elements from the original algebra, but map(s) will also be returned.
+Furthermore, each tensor is assigned a category relevant to its origin, see Chapter~\ref{ch:tensor-categories} for more details on tensor categories. 
 
 
 \index{Tensor!algebra}\index{Tensor!polynomial ring}
 \begin{intrinsics}
-Tensor(A) : Alg -> TenSpcElt
-Tensor(A) : RngUPolRes -> TenSpcElt
+Tensor(A) : Alg -> TenSpcElt, Map
+Tensor(A) : RngUPolRes -> TenSpcElt, Map
 \end{intrinsics}
 
 Returns the bilinear tensor given by the product in $A$.
 
-\index{CommutatorTensor}
+\begin{example}[D4LieAlgebra]
+
+We want to get the Lie bracket from $D_4(11)$. 
+Tensors created from algebras will have a homotopism category, but with $U_2=U_1=U_0$. 
+This forces the operators acting to be the same on all the coordinates; in other words, $\Omega=\End(U_2)$ instead of $\Omega=\End(U_2)\times\End(U_1)\times\End(U_0)$. 
+\begin{code}
+> D := DerivationAlgebra(T);
+> L := LieAlgebra("D4", GF(11));
+> T := Tensor(L);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 28 over GF(11)
+U1 : Full Vector space of degree 28 over GF(11)
+U0 : Full Vector space of degree 28 over GF(11)
+> IsAlternating(T);
+true
+> TensorCategory(T);
+Tensor category of valence 3 (->,->,->) ({ 0, 1, 2 })
+\end{code}
+
+If we compute the derivation algebra of $L$, our operators will act in the same way on each coordinate.
+This is the standard definition of the derivation algebra of a ring.
+\begin{code}
+> D := DerivationAlgebra(T);
+> Dimension(D);
+28
+> SemisimpleType(D);
+D4
+\end{code}
+
+Now we will change the category to the standard homotopism category, where we do \emph{not} ``fuse'' $U_2$, $U_1$, and $U_0$. 
+\begin{code}
+> ChangeTensorCategory(~T, HomotopismCategory(3));
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 28 over GF(11)
+U1 : Full Vector space of degree 28 over GF(11)
+U0 : Full Vector space of degree 28 over GF(11)
+> TensorCategory(T);
+Tensor category of valence 3 (->,->,->) ({ 1 },{ 2 },{ 0 })
+\end{code}
+
+We compare the same computation of derivation algebra. 
+This time, the theory tells us that there will be a solvable radical.
+In this example, Rad$(D)=K^2$. 
+\begin{code}
+> D := DerivationAlgebra(T);
+> Dimension(D);
+30
+> R := SolvableRadical(D);
+> SemisimpleType(D/R);
+D4
+\end{code}
+\end{example}
+
+\begin{example}[WittAlgebra]
+
+The Witt algebra, over a finite field of characteristic $p$, is isomorphic to the derivation algebra of $K[x]/(x^p)$.
+The Witt algebra is a simple Lie algebra with dimension $p$ and a trivial Killing form.
+First, we will construct the tensor from the ring $\mathbb{F}_5[x]/(x^5)$.
+Note that, like with algebras, the tensor category will ``fuse'' $U_2$, $U_1$, and $U_0$, so that the operators act the same way on every coordinate.
+\begin{code}
+> p := 5;
+> R<x> := PolynomialRing(GF(p));
+> I := ideal< R | x^p >;
+> Q := quo< R | I >;
+> Q;
+Univariate Quotient Polynomial Algebra in $.1 over Finite field of size
+5 with modulus $.1^5
+> T := Tensor(Q);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 5 over GF(5)
+U1 : Full Vector space of degree 5 over GF(5)
+U0 : Full Vector space of degree 5 over GF(5)
+> TensorCategory(T);
+Tensor category of valence 3 (->,->,->) ({ 0, 1, 2 })
+\end{code}
+
+Now we will construct a Lie representation of the Witt algebra from the tensor {\tt T}. 
+\begin{code}
+> D := DerivationAlgebra(T);
+> IsSimple(D);
+true
+> Dimension(D);
+5
+> KillingForm(D);
+[0 0 0 0 0]
+[0 0 0 0 0]
+[0 0 0 0 0]
+[0 0 0 0 0]
+[0 0 0 0 0]
+\end{code}
+\end{example}
+
+
+\index{CommutatorTensor}\index{AnticommutatorTensor}
 \begin{intrinsics}
-CommutatorTensor(A) : Alg -> TenSpcElt
+CommutatorTensor(A) : Alg -> TenSpcElt, Map
+AnticommutatorTensor(A) : Alg -> TenSpcElt, Map
 \end{intrinsics}
 
-Returns the bilinear commutator map $[a,b]=ab-ba$ of the algebra $A$.
+Returns the bilinear commutator map $[a,b]=ab-ba$ or the anticommutator map $\langle a,b\rangle = ab+ba$ of the algebra $A$.
+This should not be used to get the tensor given by the Lie or Jordan product in a Lie or Jordan algebra; instead use {\tt Tensor}.
+
+\begin{example}[CommutatorFromAlgebra]
+
+We will construct the commutator tensor from $\mathbb{M}_4(\mathbb{Q})$. 
+\begin{code}
+> A := MatrixAlgebra(Rationals(), 4);
+> C := CommutatorTensor(A);
+> C;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 16 over Rational Field
+U1 : Full Vector space of degree 16 over Rational Field
+U0 : Full Vector space of degree 16 over Rational Field
+> IsAlternating(C); // [X, X] = 0?
+true
+\end{code}
+
+With this tensor, we will compute the dimension of the centralizer of the diagonal matrix $M$ with diagonal entries $(1,1,-1,-1)$ in $\mathbb{M}_4(\mathbb{Q})$. 
+To do this, we will subtract the dimension of the image of $[M, A]$ from the dimension of $A$. 
+
+\begin{code}
+> M := A![1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,-1];
+> M;
+[ 1  0  0  0]
+[ 0  1  0  0]
+[ 0  0 -1  0]
+[ 0  0  0 -1]
+> Dimension(A) - Dimension(<M, A> @ C);
+8
+\end{code}
+\end{example}
+
+\begin{example}[MatrixJordanAlgebra]
+This time, we will obtain a Jordan product from $\mathbb{M}_4(\mathbb{Q})$. 
+That is, we will construct the bilinear map $* : \mathbb{M}_4(\mathbb{Q})\times \mathbb{M}_4(\mathbb{Q})\rightarrowtail \mathbb{M}_4(\mathbb{Q})$ where $A*B = \frac{1}{2}(AB+BA)$. 
+\begin{code}
+> A := MatrixAlgebra(Rationals(), 4);
+> J := AnticommutatorTensor(A);
+> J;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 16 over Rational Field
+U1 : Full Vector space of degree 16 over Rational Field
+U0 : Full Vector space of degree 16 over Rational Field
+> SystemOfForms(J)[1];
+[2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+> A.1*J*A.1;
+(2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+\end{code}
+
+From the documentation on {\tt AnticommutatorTensor}, we have to scale our tensor above {\tt J} by $1/2$ to get what we want.
+Of course this won't affect the proceeding tests though.
+\begin{code}
+> T := (1/2)*J;
+> A.1*T*A.1;
+(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+\end{code}
+
+Now we will confirm that {\tt T} is a Jordan product. 
+First, we check that {\tt T} is commutative, and then we check that it satisfies the Jordan identity: $(xy)(xx)=x(y(xx))$.
+\begin{code}
+> IsSymmetric(T);
+true
+> JordanID := func< x, y | (x*T*y)*T*(x*T*x) - x*T*(y*T*(x*T*x)) >;
+> forall{ <x,y> : x in Basis(A), y in Basis(A) | \
+>     JordanIdentity(x, y) eq Codomain(T)!0 };
+true
+\end{code}
+\end{example}
 
 \index{AssociatorTensor}
 \begin{intrinsics}
-AssociatorTensor(A) : Alg -> TenSpcElt
+AssociatorTensor(A) : Alg -> TenSpcElt, Map
 \end{intrinsics}
 
 Returns the trilinear associator map $[a,b,c]=(ab)c-a(bc)$ of the algebra $A$.
 
-\begin{example}[Ten\_Alg]
-\begin{code}
-> A := MatrixAlgebra(Rationals(),5);
-> AC := CommutatorTensor(A);
-> IsAlternating(AC); // [X, X] = 0?
-true
-\end{code}
+\begin{example}[AssociatorFromAlgebra]
 
 Do three random octonions associate? Hardly ever.
 
 \begin{code}
-> O := OctonionAlgebra(GF(541),-1,-1,-1);
+> O := OctonionAlgebra(GF(1223),-1,-1,-1);
 > T := AssociatorTensor(O);
-> <Random(O),Random(O),Random(O)> @ T eq 0;
+> T;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 8 over GF(1223)
+U2 : Full Vector space of degree 8 over GF(1223)
+U1 : Full Vector space of degree 8 over GF(1223)
+U0 : Full Vector space of degree 8 over GF(1223)
+> <Random(O),Random(O),Random(O)> @ T eq O!0;
 false
 \end{code}
 
-But $(aa)b=a(ab)$ always, as octonions are alternative algebras.
+However, for all $a,b\in\mathbb{O}$, $(aa)b=a(ab)$ as octonions are alternative algebras.
 
 \begin{code}
 > a := Random(O); 
 > b := Random(O); 
-> <a,a,b> @ T eq 0;
+> <a,a,b> @ T eq O!0;
 true
 > IsAlternating(T);
 true
@@ -639,29 +821,29 @@ true
 
 \index{pCentralTensor}
 \begin{intrinsics}
-pCentralTensor(G, p, s, t) : 
-    Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt, Map, Map, Map
-pCentralTensor(G, s, t) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt, Map, Map, Map
-pCentralTensor(G) : GrpPC -> TenSpcElt, Map, Map, Map
+pCentralTensor(G, p, s, t) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt, List
+pCentralTensor(G, s, t) : Grp, RngIntElt, RngIntElt -> TenSpcElt, List
+pCentralTensor(G) : Grp -> TenSpcElt, List
 \end{intrinsics}
 
-Returns the bilinear map of commutation from the associated graded Lie \
-algebra of the lower exponent-$p$ central
+Returns the bilinear map of commutation from the associated graded Lie algebra of the lower exponent-$p$ central
 series $\eta$ of $G$.  The bilinear map pairs $\eta_s/\eta_{s+1}$ with $
 \eta_{t}/\eta_{t+1}$ into $\eta_{s+t}/\eta_{s+t+1}$.  If $s=t$ the tensor 
 category is set to force $U_2=U_1$; 
 otherwise it is the general homotopism category.
-In addition, maps from the subgroups into the vector spaces are returned. 
+In addition, maps from the subgroups into the vector spaces are returned as a list. 
 If $p$, $s$, and $t$ are not given, it is assumed $G$ is a $p$-group and $s=t=1$.
 
-\begin{example}[Ten\_Grp]
+\begin{example}[TensorPGroup]
 Groups have a single binary operation. So even when groups are built from
-rings it can be difficult to recover the ring from the group operations.  Tensors
-supply one approach for that task.
+rings it can be difficult to recover the ring from the group operations. 
+Tensors supply one approach for that task.
+We will get the $p$-central tensor of $G=\SL(3,125)$; however, we will lose the fact that there is a field $\mathbb{F}_{125}$. 
+The tensor we will get back is $[,] : K^6\times K^6 \rightarrowtail K^3$, where $K=\mathbb{F}_5$. 
 
 \begin{code}
 > P := ClassicalSylow(SL(3,125),5);
-> Q := PCGroup(P); // Loose track of GF (125).
+> Q := PCGroup(P); // Loose track of GF(125).
 > Q;
 GrpPC : Q of order 1953125 = 5^9
 PC-Relations:
@@ -674,40 +856,56 @@ PC-Relations:
     Q.6^Q.1 = Q.6 * Q.9^4, 
     Q.6^Q.2 = Q.6 * Q.7^3 * Q.8^3, 
     Q.6^Q.3 = Q.6 * Q.8^3 * Q.9^3
-> T := pCentralTensor(Q,1,1);
-> F := Centroid(T); // Recover GF (125)
+> T := pCentralTensor(Q);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 6 over GF(5)
+U1 : Full Vector space of degree 6 over GF(5)
+U0 : Full Vector space of degree 3 over GF(5)
+\end{code}
+
+Knowing that $G$ is defined over $\mathbb{F}_{125}$, we know that the commutator is really just the alternating form $\cdot : \mathbb{F}_{125}^2\times \mathbb{F}_{125}^2\rightarrowtail \mathbb{F}_{125}$.
+This information can be extracted from the centroid of {\tt T} above, and we can rewrite {\tt T} over the field $\mathbb{F}_{125}$.
+\begin{code}
+> F := Centroid(T); // Recover GF(125)
 > Dimension(F);
 3
 > IsSimple(F);
 true
 > IsCommutative(F);
 true
+> S := TensorOverCentroid(T);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(5^3)
+U1 : Full Vector space of degree 2 over GF(5^3)
+U0 : Full Vector space of degree 1 over GF(5^3)
 \end{code}
 \end{example}
-
 
 \index{Polarisation}\index{Polarization}
 \begin{intrinsics}
 Polarisation(f) : MPolElt -> TenSpcElt, MPolElt
+Polarisation(f) : RngUPolElt -> TenSpcElt, MPolElt
 Polarization(f) : MPolElt -> TenSpcElt, MPolElt
+Polarization(f) : RngUPolElt -> TenSpcElt, MPolElt
 \end{intrinsics}
 
-Returns the polarization of the homogeneous multivariate polynomial 
-$f$ as a tensor and as a multivariate polynomial.  Polarization does not
-normalize by $1/d!$, where $d$ is the degree of $f$.  
+Returns the polarization of the homogeneous multivariate polynomial (or univariate polynomial) $f$ as a tensor and as a multivariate polynomial. 
+Polarization does \emph{not} normalize by $1/d!$, where $d$ is the degree of $f$.  
 
-\begin{example}[Ten\_Polar]
+\begin{example}[TensorPolarization]
 We polarize the polynomial $f(x,y)=x^2y$. 
 Because $f$ is homogeneous of degree 3 with 2 variables, we expect that the polarization will have 6 variables and that the corresponding mulilinear form will be $K^2\times K^2\times K^2\rightarrowtail K$.
 The polarization of $f$ is given by $P(x_1,x_2,y_1,y_2,z_1,z_2 ) = 2 (x_1y_1z_2 + x_1y_2z_1 + x_2y_1z_1)$.
 
 \begin{code}
-> K<x,y> := PolynomialRing(Rationals(),2);
+> R<x,y> := PolynomialRing(Rationals(),2);
 > T, p := Polarization(x^2*y);
 > p;
 2*$.1*$.3*$.6 + 2*$.1*$.4*$.5 + 2*$.2*$.3*$.5
 > T;
-Tensor of valence 3, U3 x U2 x U1 >-> U0
+Tensor of valence 4, U3 x U2 x U1 >-> U0
 U3 : Full Vector space of degree 2 over Rational Field
 U2 : Full Vector space of degree 2 over Rational Field
 U1 : Full Vector space of degree 2 over Rational Field

@@ -10,6 +10,7 @@
   and BmpVElt.
 */
 
+import "Tensor.m" : __GetTensor;
 
 // ------------------------------------------------------------------------------
 //                                      Print
@@ -343,8 +344,20 @@ end intrinsic;
 //                            Muliplication : x * B * y
 // ------------------------------------------------------------------------------
 intrinsic '*'( x::., B::TenSpcElt ) -> TenSpcElt
-{x * B}
-  require B`Valence le 3 : "Operation only defined for valence 3 tensors.";
+{x * B} 
+  // if x is a scalar, then scale the tensor
+  if IsCoercible(BaseRing(B), x) then
+    M := B`Map;
+    F := function(y)
+      return (BaseRing(B)!x)*(y @ M);
+    end function;
+    coerce := (assigned B`Coerce) select B`Coerce else false;
+    parent := (assigned B`Parent) select B`Parent else false;
+    return __GetTensor( Domain(B), Codomain(B), F : Par := parent, Co := coerce, Cat := B`Cat );
+  end if;
+
+  // at this point, x is not an obvious scalar.
+  require B`Valence le 3 : "Arguments not compatible.";
   if B`Valence eq 2 then
     try
       return <x> @ B;
@@ -366,7 +379,7 @@ intrinsic '*'( x::., B::TenSpcElt ) -> TenSpcElt
   F := function(y)
     return < x,y[1] > @ B;
   end function;
-  L := Tensor( [V,W], F );
+  L := Tensor( [* V, W *], F );
   if assigned B`Coerce then
     L`Coerce := B`Coerce[2..3];
   end if;
