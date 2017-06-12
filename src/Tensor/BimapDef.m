@@ -347,15 +347,16 @@ intrinsic '*'( x::., B::TenSpcElt ) -> TenSpcElt
 {x * B} 
   // if x is a scalar, then scale the tensor
   if IsCoercible(BaseRing(B), x) then
+"Scalar mult.";
     M := B`Map;
     F := function(y)
       return (BaseRing(B)!x)*(y @ M);
     end function;
     coerce := (assigned B`Coerce) select B`Coerce else false;
     parent := (assigned B`Parent) select B`Parent else false;
-    return __GetTensor( Domain(B), Codomain(B), F : Par := parent, Co := coerce, Cat := B`Cat );
+    return __GetTensor( B`Domain, B`Codomain, F : Par := parent, Co := coerce, Cat := B`Cat );
   end if;
-
+"Bimap eval.";
   // at this point, x is not an obvious scalar.
   require B`Valence le 3 : "Arguments not compatible.";
   if B`Valence eq 2 then

@@ -1099,103 +1099,151 @@ Treating the tensor space as a $K$-module, we have the standard operations.
 \index{$+$}\index{$*$!as module}
 \begin{intrinsics}
 S + T : TenSpcElt, TenSpcElt -> TenSpcElt
+S - T : TenSpcElt, TenSpcElt -> TenSpcElt
 k * T : RngElt, TenSpcElt -> TenSpcElt
+-T : TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the sum or scalar multiple of tensors as module elements of the tensor 
-space. The corresponding multilinear maps are the sum or scalar multiple of the 
-multilinear maps.
+Returns the sum, difference, scalar multiple, or additive inverse of the given tensor(s) as module elements of the tensor space. 
+The corresponding multilinear maps are the sum, difference, scalar multiple, or additive inverse of the multilinear maps.
 
-%\index{TensorOnVectorSpaces}
-%\begin{intrinsics}
-%TensorOnVectorSpaces(T) : TenSpcElt -> TenSpcElt, Hmtp
-%\end{intrinsics}
+\begin{example}[ModuleOperations]
 
-%Returns the tensor on vector spaces and an isotopism from the given tensor. 
-%This is a forgetful functor that forces all domain and codomain terms to be 
-%vector spaces.
+As tensors are elements of a tensor space, it inherits module operations. 
+We will demonstrate them all here.
+First, here are the tensors we will operate with.
+\begin{code}
+> K := Rationals();
+> T := Tensor(K, [2, 2, 2], [1..8]);
+> S := Tensor(K, [2, 2, 2], &cat[[2, -1] : i in [1..4]]);
+> SystemOfForms(T);
+[
+    [1 3]
+    [5 7],
+
+    [2 4]
+    [6 8]
+]
+> SystemOfForms(S);
+[
+    [2 2]
+    [2 2],
+
+    [-1 -1]
+    [-1 -1]
+]
+\end{code}
+
+Now we perform the module operations.
+\begin{code}
+> SystemOfForms(-T);
+[
+    [-1 -3]
+    [-5 -7],
+
+    [-2 -4]
+    [-6 -8]
+]
+> SystemOfForms((1/3)*S);
+[
+    [2/3 2/3]
+    [2/3 2/3],
+
+    [-1/3 -1/3]
+    [-1/3 -1/3]
+]
+> SystemOfForms(T+S);
+[
+    [3 5]
+    [7 9],
+
+    [1 3]
+    [5 7]
+]
+> SystemOfForms(T-2*S);
+[
+    [-3 -1]
+    [ 1  3],
+
+    [ 4  6]
+    [ 8 10]
+]
+\end{code}
+\end{example}
 
 \index{AssociatedForm}
 \begin{intrinsics}
 AssociatedForm(T) : TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-For a tensor $T$ with multilinear maps $U_v\times \cdots \times U_1\rightarrowtail U_0$,
+For a tensor $T$ with multilinear maps $U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$,
 creates the associated multilinear form
-$U_v\times\cdots\times U_1\times U_0^*\rightarrowtail K$.  The valence is increased
-by $1$.
+$U_{\vav}\times\cdots\times U_1\times U_0^*\rightarrowtail K$. 
+The valence is increased by $1$.
 
 \index{Compress}
 \begin{intrinsics}
 Compress(T) : TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the compression of the tensor. This removes all 1-dimensional spaces 
-in the domain.
+Returns the compression of the tensor. This removes all 1-dimensional spaces in the domain.
 
-\begin{example}[Ten\_VS\_Cmp]
-We construct the tensor of a Lie algebra given by multiplication. 
-We apply the forgetful functor to forget the algebra structure and and just leave vector spaces.
-However, we can still evaluate Lie algebra elements with this new tensor on vector spaces.
+\begin{example}[CompressAssocForm]
 
+We will construct the associated form of the tensor from the Lie algebra $B_3(5)$. 
+The codomain of the original tensor gets moved (and dualed) to the domain. 
 \begin{code}
-> L := LieAlgebra("D4",GF(5));
+> L := LieAlgebra("B3", GF(5));
 > T := Tensor(L); 
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Lie Algebra of dimension 28 with base ring GF(5)
-U1 : Lie Algebra of dimension 28 with base ring GF(5)
-U0 : Lie Algebra of dimension 28 with base ring GF(5)
-> <L.2,L.11> @ T;
-(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-> 
-> S := TensorOnVectorSpaces(T);
-> S;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 28 over GF(5)
-U1 : Full Vector space of degree 28 over GF(5)
-U0 : Full Vector space of degree 28 over GF(5)
-> V := Domain(S)[1];
-> <L.2,L.11> @ S eq <V.2,V.11> @ S;
-true
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 21 over GF(5)
+U1 : Full Vector space of degree 21 over GF(5)
+U0 : Full Vector space of degree 21 over GF(5)
+> AF := AssociatedForm(T);
+> AF;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 21 over GF(5)
+U2 : Full Vector space of degree 21 over GF(5)
+U1 : Full Vector space of degree 21 over GF(5)
+U0 : Full Vector space of degree 1 over GF(5)
+> <L.2, L.11> @ T;
+(0 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+> <L.2, L.11, L.2> @ AF;
+(4)
+> <L.2, L.11, L> @ AF;
+Full Vector space of degree 1 over GF(5)
+Generators:
+(4)
 \end{code}
 
-Now we compute the associated form to $S$ to get a trilinear map. 
-We shuffle it by the permutation $(0,3)$ and compress it.
+We shuffle the associated form by the permutation $(0,3)$ and compress it.
 The result is just the shuffle of the original bilinear map $S$ by $(0,2,1)$.
 
 \begin{code}
-> AF := AssociatedForm(S);
-> AF;
-Tensor of valence 3, U3 x U2 x U1 >-> U0
-U3 : Full Vector space of degree 28 over GF(5)
-U2 : Full Vector space of degree 28 over GF(5)
-U1 : Full Vector space of degree 28 over GF(5)
-U0 : Full Vector space of degree 1 over GF(5)
-> Eltseq(AF) eq Eltseq(S);
-true
-> 
-> <L.2,L.11,L.1> @ AF;
-(1)
-> <L.2,L.11,L.2 > @ AF;
-(0)
-> 
-> U := Shuffle(AF,[3,1,2,0]);
-> U;
-Tensor of valence 3, U3 x U2 x U1 >-> U0
+> S := Shuffle(AF, [3,1,2,0]);
+> S;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
 U3 : Full Vector space of degree 1 over GF(5)
-U2 : Full Vector space of degree 28 over GF(5)
-U1 : Full Vector space of degree 28 over GF(5)
-U0 : Full Vector space of degree 28 over GF(5)
-> 
-> Cmp := Compress(U);
-> Shf := Shuffle(S,[2,0,1]);
-> Cmp eq Shf;
+U2 : Full Vector space of degree 21 over GF(5)
+U1 : Full Vector space of degree 21 over GF(5)
+U0 : Full Vector space of degree 21 over GF(5)
+> C := Compress(S);
+> C;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 21 over GF(5)
+U1 : Full Vector space of degree 21 over GF(5)
+U0 : Full Vector space of degree 21 over GF(5)
+> C eq Shuffle(T, [2, 0, 1]);
 true
 \end{code}
 \end{example}
 
-\subsection{General properties}~
+\subsection{General properties}
+
+We provide basic intrinsics to get data stored in the {\tt TenSpcElt} object in Magma.
+Most of these functions are already stored as attributes. 
+The ones that are not initially stored at construction are stored immediately after the initial computation, such as {\tt Image}.
 
 \index{Parent!tensor}
 \begin{intrinsics}
@@ -1234,6 +1282,64 @@ Frame(T) : TenSpcElt -> List
 Returns the modules in the frame of $T$; this is the concatenation of
 the domain modules and the codomain.
 
+\index{BaseRing!tensor}\index{BaseField!tensor}
+\begin{intrinsics}
+BaseRing(T) : TenSpcElt -> Rng
+BaseField(T) : TenSpcElt -> Fld
+\end{intrinsics}
+
+Returns the base ring or field of the tensor.
+
+\begin{example}[BasicProps]
+
+We demonstrate how to get basic properties of a tensor and what to expect as an output.
+We will construct a tensor $*:\mathbb{M}_{2\times 3}(\mathbb{Q})\times \mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ given by multiplication.
+Nearly all of this information is displayed when printing a tensor.
+\begin{code}
+> K := Rationals();
+> U2 := KMatrixSpace(K, 2, 3);
+> U1 := VectorSpace(K, 3);
+> U0 := VectorSpace(K, 2);
+> mult := func< x | Eltseq(x[1]*Matrix(3,1,Eltseq(x[2]))) >;
+> T := Tensor([* U2, U1, U0 *], mult);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 6 over Rational Field
+U1 : Full Vector space of degree 3 over Rational Field
+U0 : Full Vector space of degree 2 over Rational Field
+> 
+> Parent(T);
+Tensor space of dimension 36 over Rational Field with valence 3
+U2 : Full Vector space of degree 6 over Rational Field
+U1 : Full Vector space of degree 3 over Rational Field
+U0 : Full Vector space of degree 2 over Rational Field
+> 
+> Domain(T);
+[*
+    Full Vector space of degree 6 over Rational Field,
+
+    Full Vector space of degree 3 over Rational Field
+*]
+> 
+> Codomain(T);
+Full Vector space of degree 2 over Rational Field
+> 
+> Valence(T);
+3
+> 
+> Frame(T);
+[*
+    Full Vector space of degree 6 over Rational Field,
+
+    Full Vector space of degree 3 over Rational Field,
+
+    Full Vector space of degree 2 over Rational Field
+*]
+> BaseRing(T);
+Rational Field
+\end{code}
+\end{example}
+
 \index{TensorCategory!tensor}
 \begin{intrinsics}
 TensorCategory(T) : TenSpcElt -> TenCat
@@ -1257,79 +1363,39 @@ IsContravariant(T) : TenSpcElt -> BoolElt
 
 Decides if the underlying category of $T$ is covariant or contravariant.
 
-\begin{example}[Ten\_Prop1]
-We demonstrate how to extract basic properties of a tensor.
+\begin{example}[TensorCatProps]
 
+We will construct a tensor from a right module, $*:\mathbb{Q}^2 \times \mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
 \begin{code}
-> T := RandomTensor(GF(3),[3,4,5,6]);
+> K := Rationals();
+> U := KMatrixSpace(K, 2, 2);
+> V := VectorSpace(K, 2);
+> mult := func< x | x[1]*x[2] >;
+> T := Tensor([* V, U, V *], mult);
 > T;
-Tensor of valence 3, U3 x U2 x U1 >-> U0
-U3 : Full Vector space of degree 3 over GF(3)
-U2 : Full Vector space of degree 4 over GF(3)
-U1 : Full Vector space of degree 5 over GF(3)
-U0 : Full Vector space of degree 6 over GF(3)
-> Valence(T);
-3
-> 
-> BaseRing(T);
-Finite field of size 3
-> 
-> Frame(T);
-[*
-    Full Vector space of degree 3 over GF(3),
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 2 over Rational Field
+\end{code}
 
-    Full Vector space of degree 4 over GF(3),
-
-    Full Vector space of degree 5 over GF(3),
-
-    Full Vector space of degree 6 over GF(3)
-*]
-> 
-> Domain(T);
-[*
-    Full Vector space of degree 3 over GF(3),
-
-    Full Vector space of degree 4 over GF(3),
-
-    Full Vector space of degree 5 over GF(3)
-*]
-> 
-> Codomain(T);
-Full Vector space of degree 6 over GF(3)
-> 
-> Parent(T); // Universal tensor space
-Tensor space of dimension 360 over GF(3) with valence 3
-U3 : Full Vector space of degree 3 over GF(3)
-U2 : Full Vector space of degree 4 over GF(3)
-U1 : Full Vector space of degree 5 over GF(3)
-U0 : Full Vector space of degree 6 over GF(3)
-> 
+Because this tensor comes from a module, we want the tensor category to reflect this.
+Currently, the tensor category is the default homotopism category.
+We will keep everything about the category the same, except we will fuse coordinates 2 and 0.
+These changes could easily go unnoticed if no operators are constructed.
+\begin{code}
 > TensorCategory(T);
-Tensor category of Valence 3 (->,->,->,->) ({ 1 },{ 2 },{ 0 },{ 3 })
-> 
-> Cat := TensorCategory([-1,-1,1,1],{{i} : i in [0..3]});
+Tensor category of valence 3 (->,->,->) ({ 1 },{ 2 },{ 0 })
+> Cat := TensorCategory([1, 1, 1], {{2,0},{1}});
+> Cat;
+Tensor category of valence 3 (->,->,->) ({ 1 },{ 0, 2 })
 > ChangeTensorCategory(~T, Cat);
 > TensorCategory(T);
-Tensor category of Valence 3 (<-,<-,->,->) ({ 1 },{ 2 },{ 0 },{ 3 })
+Tensor category of valence 3 (->,->,->) ({ 1 },{ 0, 2 })
+> IsCovariant(T);
+true
 \end{code}
 \end{example}
-
-\index{Image!tensor}
-\begin{intrinsics}
-Image(T) : TenSpcElt -> ModTupRng, Map
-\end{intrinsics}
-
-Returns the (categorical) image of the tensor along with a map to the vector space.
-Thus, if the type of the codomain of $T$ is not {\tt ModTupRng}, the returned map
-is an isomorphism from the codomain of $T$ to the free $R$-module $R^{d_0}$. 
-
-\index{BaseRing!tensor}\index{BaseField!tensor}
-\begin{intrinsics}
-BaseRing(T) : TenSpcElt -> Rng
-BaseField(T) : TenSpcElt -> Fld
-\end{intrinsics}
-
-Returns the base ring or field of the tensor.
 
 \index{NondegenerateTensor}
 \begin{intrinsics}
@@ -1346,6 +1412,57 @@ IsNondegenerate(T) : TenSpcElt -> BoolElt
 
 Decides whether $T$ is a nondegenerate multilinear map.
 
+
+\begin{example}[Nondegeneracy]
+
+An important property for tensors is nondegeneracy: all radicals are trivial.
+First we create a tensor with degeneracy.
+\begin{code}
+> K := GF(541);
+> V := VectorSpace(K, 10);
+> U := VectorSpace(K, 5);
+> mult := function(x)
+function>   M := Matrix(3, 3, Eltseq(x[1])[2..10]);
+function>   v := VectorSpace(K, 3)!(Eltseq(x[2])[[1,3,5]]);
+function>   return Eltseq(v*M) cat [0,0];
+function> end function;
+> T := Tensor([V, U, U], mult);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(541)
+U1 : Full Vector space of degree 5 over GF(541)
+U0 : Full Vector space of degree 5 over GF(541)
+\end{code}
+
+In this example, both $U_{\widehat{2}}^\perp$ and $U_{\widehat{1}}^\perp$ are nontrivial.
+We will construct the associated nondegenerate tensor {\tt S}, which is given by $U_2/U_{\widehat{2}}^\perp \times U_1/U_{\widehat{1}}^\perp \rightarrowtail U_0$. 
+\begin{code}
+> IsNondegenerate(T);
+false
+> S, H := NondegenerateTensor(T);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 9 over GF(541)
+U1 : Full Vector space of degree 3 over GF(541)
+U0 : Full Vector space of degree 5 over GF(541)
+> H;
+Maps from U2 x U1 >-> U0 to V2 x V1 >-> V0.
+U2 -> V2: Mapping from: Full Vector space of degree 10 over GF(541) to 
+Full Vector space of degree 9 over GF(541)
+U1 -> V1: Mapping from: Full Vector space of degree 5 over GF(541) to 
+Full Vector space of degree 3 over GF(541)
+U0 -> V0: Mapping from: Full Vector space of degree 5 over GF(541) to 
+Full Vector space of degree 5 over GF(541)
+\end{code}
+\end{example}
+
+\index{Image!tensor}
+\begin{intrinsics}
+Image(T) : TenSpcElt -> ModTupRng
+\end{intrinsics}
+
+Returns the image of the tensor along with a map to the vector space.
+
 \index{FullyNondegenerateTensor}
 \begin{intrinsics}
 FullyNondegenerateTensor(T) : TenSpcElt -> TenSpcElt, Hmtp
@@ -1360,6 +1477,75 @@ IsFullyNondegenerate(T) : TenSpcElt -> BoolElt
 \end{intrinsics}
 
 Decides whether $T$ is a fully nondegenerate multilinear map.
+
+\begin{example}[FullyNondegenerate]
+
+We use the same tensor as the previous example illustrating the use of {\tt NondegenerateTensor}.
+\begin{code}
+> K := GF(541);
+> V := VectorSpace(K, 10);
+> U := VectorSpace(K, 5);
+> mult := function(x)
+function>   M := Matrix(3, 3, Eltseq(x[1])[2..10]);
+function>   v := VectorSpace(K, 3)!(Eltseq(x[2])[[1,3,5]]);
+function>   return Eltseq(v*M) cat [0,0];
+function> end function;
+> T := Tensor([V, U, U], mult);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(541)
+U1 : Full Vector space of degree 5 over GF(541)
+U0 : Full Vector space of degree 5 over GF(541)
+\end{code}
+
+Here, we want to construct a fully nondegenerate tensor. 
+Of course, the tensor form the previous example is not fully nondegenerate as it is not degenerate, but we check that the image is not isomorphic to the codomain.
+\begin{code}
+> IsFullyNondegenerate(T);
+false
+> Image(T);
+Vector space of degree 5, dimension 3 over GF(541)
+Generators:
+(  1   0   0   0   0)
+(  0   1   0   0   0)
+(  0   0   1   0   0)
+Echelonized basis:
+(  1   0   0   0   0)
+(  0   1   0   0   0)
+(  0   0   1   0   0)
+\end{code}
+
+Now we will construct the associated fully nondegenerate tensor: $U_2/U_{\widehat{2}}^\perp\times U_1/U_{\widehat{1}}^\perp\rightarrowtail U_2*U_1$.
+Notice that the morphism between the original tensor and the fully nondegenerate tensor is a cohomotopism.
+\begin{code}
+> S, H := FullyNondegenerateTensor(T);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 9 over GF(541)
+U1 : Full Vector space of degree 3 over GF(541)
+U0 : Vector space of degree 5, dimension 3 over GF(541)
+Generators:
+(  1   0   0   0   0)
+(  0   1   0   0   0)
+(  0   0   1   0   0)
+Echelonized basis:
+(  1   0   0   0   0)
+(  0   1   0   0   0)
+(  0   0   1   0   0)
+> H;
+Maps from U2 x U1 >-> U0 to V2 x V1 >-> V0.
+U2 -> V2: Mapping from: Full Vector space of degree 10 over GF(541) to
+Full Vector space of degree 9 over GF(541)
+U1 -> V1: Mapping from: Full Vector space of degree 5 over GF(541) to
+Full Vector space of degree 3 over GF(541)
+U0 <- V0: Mapping from: Full Vector space of degree 5 over GF(541) to
+Full Vector space of degree 5 over GF(541)
+Composition of Mapping from: Full Vector space of degree 5 over GF(541)
+to Full Vector space of degree 5 over GF(541) and
+Mapping from: Vector space of degree 5, dimension 3 over GF(541) to Full
+Vector space of degree 5 over GF(541)
+\end{code}
+\end{example}
 
 \index{IsAlternating!tensor}\index{IsAntisymmetric!tensor}
 \begin{intrinsics}
@@ -1382,75 +1568,62 @@ IsSymmetric(T) : TenSpcElt -> BoolElt
 
 Decides whether $T$ is a symmetric tensor.
 
-\begin{example}[Ten\_Prop2]
-We demonstrate how to extract basic properties of a tensor.
+\begin{example}[SymmetricPolar]
 
+We will construct the multilinear form given by polarizing the homogeneous polynomial $f(x,y,z)=x^3+y^3+z^3+xyz$. 
+Since $f$ is a symmetric polynomial, its multilinear form is also symmetric. 
 \begin{code}
-> J := Matrix(GF(9),[[0,1,-1],[1,-1,-1],[-1,-1,1]]);
-> M := DiagonalJoin(J,ZeroMatrix(GF(9),3,3));
-> M;
-[    0     1     2     0     0     0]
-[    1     2     2     0     0     0]
-[    2     2     1     0     0     0]
-[    0     0     0     0     0     0]
-[    0     0     0     0     0     0]
-[    0     0     0     0     0     0]
-> 
-> T := Tensor([M,-M],2,1);
+> K := Rationals();
+> R<x,y,z> := PolynomialRing(K, 3);
+> f := x^3 + y^3 + z^3 + x*y*z;
+> T, p := Polarization(f);
+> p;
+6*$.1*$.4*$.7 + $.1*$.5*$.9 + $.1*$.6*$.8 + $.2*$.4*$.9 + 
+    6*$.2*$.5*$.8 + $.2*$.6*$.7 + $.3*$.4*$.8 + $.3*$.5*$.7 + 
+    6*$.3*$.6*$.9
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 6 over GF(3^2)
-U1 : Full Vector space of degree 6 over GF(3^2)
-U0 : Full Vector space of degree 2 over GF(3^2)
-> 
-> Image(T);
-Vector space of degree 2, dimension 1 over GF(3^2)
-Generators:
-(    1     2)
-Echelonized basis:
-(    1     2)
-Mapping from: Full Vector space of degree 2 over GF(3^2) to 
-Full Vector space of degree 2 over GF(3^2) given by a rule
-> 
-> Radical(T);
-<
-    Vector space of degree 6, dimension 3 over GF(3^2)
-    Echelonized basis:
-    (    0     0     0     1     0     0)
-    (    0     0     0     0     1     0)
-    (    0     0     0     0     0     1),
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 3 over Rational Field
+U2 : Full Vector space of degree 3 over Rational Field
+U1 : Full Vector space of degree 3 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+\end{code} %$ 
 
-    Vector space of degree 6, dimension 3 over GF(3^2)
-    Echelonized basis:
-    (    0     0     0     1     0     0)
-    (    0     0     0     0     1     0)
-    (    0     0     0     0     0     1)
->
+The resulting homogeneous polynomial from polarizing is 
+\[ p(x_1,x_2,x_3,y_1,y_2,y_3,z_1,z_2,z_3) =\sum_{\sigma\in S_3} (x_{1^\sigma}y_{2^\sigma}z_{3^\sigma} + 3x_{1^\sigma}y_{1^\sigma}z_{1^\sigma}).\]
+\begin{code}
+> IsSymmetric(T);
+true
+> AsMatrices(T, 3, 1) eq AsMatrices(T, 2, 1);
+true
+> AsMatrices(T, 3, 1) eq AsMatrices(T, 3, 2);
+true
+> AsMatrices(T, 3, 1);
+[
+    [6 0 0]
+    [0 0 1]
+    [0 1 0],
+
+    [0 0 1]
+    [0 6 0]
+    [1 0 0],
+
+    [0 1 0]
+    [1 0 0]
+    [0 0 6]
+]
 \end{code}
 
-The tensor we built above is degenerate because it has a nontrivial radical. 
-We will construct the nondegenerate tensor as well as the fully nondegenerate tensor.
-
+Because the underlying field is $\mathbb{Q}$ and because {\tt T} is symmetric, we know that {\tt T} is not alternating nor antisymmetric.
 \begin{code}
-> ND := NondegenerateTensor(T);
-> ND;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 3 over GF(3^2)
-U1 : Full Vector space of degree 3 over GF(3^2)
-U0 : Full Vector space of degree 2 over GF(3^2)
-> 
-> FN := FullyNondegenerateTensor(T);
-> FN;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 3 over GF(3^2)
-U1 : Full Vector space of degree 3 over GF(3^2)
-U0 : Vector space of degree 2, dimension 1 over GF(3^2)
-Generators:
-(    1     2)
-Echelonized basis:
-(    1     2)
+> IsAlternating(T);
+false
+> IsAntisymmetric(T);
+false
 \end{code}
 \end{example}
+
+
 
 \subsection{As multilinear maps}
 Regarding tensors as multilinear maps, we allow for composition and evaluation.
