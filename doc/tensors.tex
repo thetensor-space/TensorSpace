@@ -268,7 +268,7 @@ than structure constants.
 are not provided, Magma may compute and store a structure constant representation
 inside the tensor.
 
-\item Magma does not separate structure constant indices that are contravariant.  Instead contravariant variables are signaled by tensor categories.  So Ricci styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as $T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor
+\item We do not separate structure constant indices that are contravariant.  Instead contravariant variables are signaled by tensor categories.  So Ricci styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as $T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor
 category changed to mark $\{q..1\}$ as contravariant. Intrinsics are provided to facilitate this approach.
 See Chapter~\ref{ch:tensor-categories} for more details on tensor categories.
 \end{itemize}
@@ -945,22 +945,150 @@ SymmetricTensor(T) : TenSpcElt -> TenSpcElt
 Returns the symmetric tensor induced by the given tensor. If the tensor is 
 already symmetric, then the given tensor is returned.
 
+\begin{example}[AlternatingTensor]
+
+Tensors coming from Lie algebras are alternating.
+If we call {\tt AlternatingTensor} on a tensor from a Lie algebra, nothing will be changed.
+\begin{code}
+> L := LieAlgebra("A3", GF(3));
+> T := Tensor(L);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 15 over GF(3)
+U1 : Full Vector space of degree 15 over GF(3)
+U0 : Full Vector space of degree 15 over GF(3)
+> AlternatingTensor(T) eq T;
+true
+\end{code}
+\end{example}
+
+\begin{example}[MakeSymmetric]
+
+We will make the tensor coming from the product in $\mathbb{M}_3(\mathbb{Q})$ symmetric.
+\begin{code}
+> A := MatrixAlgebra(Rationals(), 3);
+> T := Tensor(A);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 9 over Rational Field
+U1 : Full Vector space of degree 9 over Rational Field
+U0 : Full Vector space of degree 9 over Rational Field
+> SystemOfForms(T)[1];
+[1 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+\end{code}
+
+We see that the first matrix in the sequence of bilinear forms of {\tt T} is not symmetric, so {\tt T} is not symmetric (of course matrix multiplcation is not commutative also). 
+We will construct a symmetric version of {\tt T} and inspect the first matrix of the bilinear forms.
+\begin{code}
+> S := SymmetricTensor(T);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 9 over Rational Field
+U1 : Full Vector space of degree 9 over Rational Field
+U0 : Full Vector space of degree 9 over Rational Field
+> SystemOfForms(S)[1];
+[2 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0]
+[0 1 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0]
+\end{code}
+\end{example}
+
+
 \index{Shuffle}
 \begin{intrinsics}
 Shuffle(T, g) : TenSpcElt, GrpPermElt -> TenSpcElt
 Shuffle(T, g) : TenSpcElt, SeqEnum -> TenSpcElt
 \end{intrinsics}
 
-For a tensor $T$ in $\hom(U_v,\dots,\hom(U_1,U_0)\cdots)$, 
-generates a the representation of $T$ in $\hom(U_{v^g},\dots,\hom(U_{1^g},U_{0^g})\dots)$.
-In order to be defined, $g$ must permute $\{0..v\}$ and both the image and 
-pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
-For cotensors, $g$ must permute $\{1..v\}$.
+For a tensor $T$ in $\hom(U_{\vav},\dots,\hom(U_1,U_0)\cdots)$, 
+generates a representation of $T$ in 
+\[ \hom(U_{v^g},\dots,\hom(U_{1^g},U_{0^g})\dots). \]
+In order to be defined, $g\in\text{Sym}(\{0..v\})$. 
+If $0^g\ne 0$, then both the image and pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
+For cotensors, $g\in\text{Sym}(\{1..v\})$.
+Sequences $[a_1,\dots,a_{\vav+1}]$ will be interpreted as 
+\[ \begin{array}{cccc} 0 & 1 & \cdots & \vav \\ \downarrow & \downarrow & & \downarrow \\ a_1 & a_2 & \cdots & a_{\vav+1}. \end{array}\]
+
+\begin{example}[ShuffleToTranspose]
+
+We will shuffle the alternating form $\mathbb{Q}^2\times\mathbb{Q}^2\rightarrowtail \mathbb{Q}$ as a means of performing a transpose on the Gram matrix.
+To do this, we need to shuffle by the transposition $(1, 2)$ in Sym$(\{0,1,2\})$. 
+\begin{code}
+> T := Tensor(Rationals(), [2, 2, 1], [0, 1, -1, 0]);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over Rational Field
+U1 : Full Vector space of degree 2 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+> SystemOfForms(T);
+[
+    [ 0  1]
+    [-1  0]
+]
+> 
+> S := Shuffle(T, [0,2,1]);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over Rational Field
+U1 : Full Vector space of degree 2 over Rational Field
+U0 : Full Vector space of degree 1 over Rational Field
+> SystemOfForms(S);
+[
+    [ 0 -1]
+    [ 1  0]
+]
+\end{code}
+\end{example}
+
+\begin{example}[Shuffling]
+
+We will generate a random 5-tensor and shuffle it with $(0,2,4,1,3)$.
+\begin{code}
+> T := RandomTensor(GF(2), [5,4,3,2,1]);
+> T;
+Tensor of valence 5, U4 x U3 x U2 x U1 >-> U0
+U4 : Full Vector space of degree 5 over GF(2)
+U3 : Full Vector space of degree 4 over GF(2)
+U2 : Full Vector space of degree 3 over GF(2)
+U1 : Full Vector space of degree 2 over GF(2)
+U0 : Full Vector space of degree 1 over GF(2)
+> 
+> G := Sym({0..4});
+> g := G![2, 3, 4, 0, 1];
+> g;
+(0, 2, 4, 1, 3)
+> 
+> S := Shuffle(T, g);
+> S;
+Tensor of valence 5, U4 x U3 x U2 x U1 >-> U0
+U4 : Full Vector space of degree 2 over GF(2)
+U3 : Full Vector space of degree 1 over GF(2)
+U2 : Full Vector space of degree 5 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 3 over GF(2)
+\end{code}
+\end{example}
+
+
 
 
 \section{Operations with Tensors}
 
-Magma takes two perspectives for operations with tensors. 
+We take two perspectives for operations with tensors. 
 First, tensors determine multilinear maps and so behave as
 functions.  Second, tensors are elements of a tensor space and 
 so behave as elements in a module.  
@@ -1352,9 +1480,9 @@ Decides if the tensors are the same multilinear map.
 Tensors of valence $2$, also known as bilinear tensors, or
 as bilinear maps,  are commonly described as distributive products.
 For instance as the product of an algebra, the product of a ring on 
-a module, or an inner product.  Magma supports this interpretation 
+a module, or an inner product.  We supports this interpretation 
 by permitting an infix $x*y$ notation for the evaluation of bilinear
-tensors.  Magma supports this by creating special types 
+tensors.  We support this by creating special types 
 {\tt BmpU[Elt]}, {\tt BmpV[Elt]}, and {\tt BmpW[Elt]} for the frame
 of a bilinear tensor.
 
@@ -1515,7 +1643,7 @@ The data from a tensor is accessible in multiple ways.   For
 tensors given by structure constants this can be described as the 
 multidimensional analog of choosing a row or column of a matrix.
 Other operations are generalization of the transpose of a matrix.
-Magma does these operations with some care towards efficiency,
+We do these operations with some care towards efficiency,
 e.g. it may not physically move the values in a structure constant
 sequence but instead permute the lookup of the values.
 
