@@ -188,6 +188,11 @@ intrinsic Compress( t::TenSpcElt ) -> TenSpcElt
   return s;
 end intrinsic;
 
+intrinsic Compress( ~t::TenSpcElt )
+{Compress all 1-dimensional spaces in the domain.}
+  t := Compress(t);
+end intrinsic;
+
 intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
 {Returns the sequence of matrices.}
   require i ne j : "Arguments 2 and 3 must be distinct.";

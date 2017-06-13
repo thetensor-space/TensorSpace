@@ -11,6 +11,77 @@
 */
 
 import "Tensor.m" : __GetTensor;
+import "TensorBasic.m" : __HasBasis;
+import "../TensorCategory/TensorCat.m" : __GetTensorCategory;
+import "../TensorSpace/TensorSpc.m" : __GetTensorSpace;
+
+// meant for x*T or T*y
+__GetTensorAction := function(x, T, i)
+  // if x is a scalar, then scale the tensor.
+  if IsCoercible(BaseRing(T), x) then
+    M := T`Map;
+    F := function(y)
+      return (BaseRing(T)!x)*(y @ M);
+    end function;
+    coerce := (assigned T`Coerce) select T`Coerce else false;
+    parent := (assigned T`Parent) select T`Parent else false;
+    return __GetTensor( T`Domain, T`Codomain, F : Par := parent, Co := coerce, Cat := T`Cat );
+  end if;
+
+  // if T is a linear map, evaluate.
+  if T`Valence eq 2 then
+    try
+      return <x> @ T;
+    catch err
+      error "Argument not contained in the domain.";
+    end try;
+  end if;
+
+  // at this point, T is a 3-tensor.
+  // first get the correct category.
+  Cat := __GetTensorCategory(T`Cat`Arrows, T`Cat`Repeats : Con := T`Cat`Contra); 
+  Cat`Valence -:= 1;
+  j := (i eq 1) select 2 else 1;
+  Cat`Arrows := map< {1,0} -> {-1,0,1} | <0, 0@T`Cat`Arrows>, <1, j@T`Cat`Arrows> >;
+  assert exists(S){ S : S in Cat`Repeats | i in S };
+  Exclude(~Cat`Repeats, S);
+  if #S gt 1 then
+    Include(~Cat`Repeats, Exclude(S, i));
+  end if;
+  assert exists(S){ S : S in Cat`Repeats | j in S };
+  Exclude(~Cat`Repeats, S);
+  Include(~Cat`Repeats, Include(Exclude(S, j), 1));
+
+  // get underlying tensor space
+  coerce := (assigned T`Coerce) select T`Coerce[Remove([1..3],j)] else false;
+  parent := __GetTensorSpace(BaseRing(T), [*T`Domain[i], T`Codomain*], Cat : Co := coerce);
+
+  if __HasBasis(x) then // if x is a subspace, return sub tensor space.
+    S := sub< parent | <$$(b, T, i) : b in Basis(x)> >; // can't use SeqEnum... eventually fix.
+    return S;
+  else 
+    try
+      x := T`Domain[j]!x;
+    catch err
+      try
+        x := (Domain(T`Coerce[j])!x) @ T`Coerce[j];
+      catch err
+        error "Argument not contained in right domain.";
+      end try;
+    end try;
+    if i eq 1 then 
+      F := function(y)
+        return < y[1], x > @ T;
+      end function;
+    else
+      F := function(y)
+        return < x, y[1] > @ T;
+      end function;
+    end if;
+    L := __GetTensor( [*T`Domain[i]*], T`Codomain, F : Co := coerce, Cat := Cat );
+    return parent!L;
+  end if;
+end function;
 
 // ------------------------------------------------------------------------------
 //                                      Print
@@ -343,77 +414,14 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 //                            Muliplication : x * B * y
 // ------------------------------------------------------------------------------
-intrinsic '*'( x::., B::TenSpcElt ) -> TenSpcElt
-{x * B} 
-  // if x is a scalar, then scale the tensor
-  if IsCoercible(BaseRing(B), x) then
-"Scalar mult.";
-    M := B`Map;
-    F := function(y)
-      return (BaseRing(B)!x)*(y @ M);
-    end function;
-    coerce := (assigned B`Coerce) select B`Coerce else false;
-    parent := (assigned B`Parent) select B`Parent else false;
-    return __GetTensor( B`Domain, B`Codomain, F : Par := parent, Co := coerce, Cat := B`Cat );
-  end if;
-"Bimap eval.";
-  // at this point, x is not an obvious scalar.
-  require B`Valence le 3 : "Arguments not compatible.";
-  if B`Valence eq 2 then
-    try
-      return <x> @ B;
-    catch err
-      error "Argument not contained in the domain.";
-    end try;
-  end if;
-  try
-    x := B`Domain[1]!x;
-  catch err
-    try
-      x := (Domain(B`Coerce[1])!x) @ B`Coerce[1];
-    catch err
-      error "Argument not contained in left domain.";
-    end try;
-  end try;
-  V := B`Domain[2];
-  W := B`Codomain;
-  F := function(y)
-    return < x,y[1] > @ B;
-  end function;
-  L := Tensor( [* V, W *], F );
-  if assigned B`Coerce then
-    L`Coerce := B`Coerce[2..3];
-  end if;
-  return L;
+intrinsic '*'( x::., B::TenSpcElt ) -> .
+{x * B}
+  require B`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
+  return __GetTensorAction(x, B, 2);
 end intrinsic;
 
 intrinsic '*'( B::TenSpcElt, y::. ) -> .
 {B * y}
-  require B`Valence le 3 : "Operation only defined for valence 3 tensors.";
-  if B`Valence eq 2 then
-    try
-      return <y> @ B;
-    catch err
-      error "Argument not contained in the domain.";
-    end try;
-  end if;
-  try
-    y := B`Domain[2]!y;
-  catch err
-    try
-      y := (Domain(B`Coerce[2])!y) @ B`Coerce[2];
-    catch err
-      error "Argument not contained in right domain.";
-    end try;
-  end try;
-  U := B`Domain[1];
-  W := B`Codomain;
-  F := function(x)
-    return < x[1],y > @ B;
-  end function;
-  L := Tensor( [U,W], F );
-  if assigned B`Coerce then
-    L`Coerce := B`Coerce[[1,3]];
-  end if;
-  return L;
+  require B`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
+  return __GetTensorAction(y, B, 1);
 end intrinsic;

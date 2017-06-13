@@ -11,6 +11,7 @@
 
 import "Tensor.m" : __GetTensor;
 import "TensorBasic.m" : __HasBasis;
+import "BimapDef.m" : __GetTensorAction;
 
 // given a vector, a tensor, and a coordinate (in [1..v-1]),
 // returns 3 things: can be coerced into V_(v-1), the coreced elt, error message.
@@ -24,6 +25,23 @@ __CoerceIntoDomain := function( x, t, i )
       return false, _, "Cannot coerce coordinate: " cat IntegerToString(t`Valence-i) cat ".";
     end if;
   end if;
+end function;
+
+// Similar to __BlackBoxSanity, but reworked for testing composition.
+__CompositionSanity := function(S,F)
+  D := S[1..#S-1];
+  C := S[#S];
+  try
+    x := < X!0 : X in D >;
+  catch err
+    return false, "Codomain is not an additive abelian group.";
+  end try;
+  try
+    y := F(x);
+  catch err
+    return false, "Image of tensor not contained in domain of map.";
+  end try;
+  return true, _;
 end function;
 
 // ------------------------------------------------------------------------------
@@ -127,10 +145,42 @@ end intrinsic;
 intrinsic '*'( t::TenSpcElt, f::Map ) -> TenSpcElt
 {t * f} 
   require not t`Cat`Contra : "Tensor must be covariant.";
-  F := function(x)
-    return x @ t @ f;
-  end function;
-  return __GetTensor( t`Domain, Codomain(f), F );
+  C := Codomain(f);
+  require __HasBasis(C) : "Codomain of map is not a vector space.";
+  try 
+    _ := (Domain(f)!0) @ f;
+  catch err
+    error "Cannot evaluate given map.";
+  end try;
+  V := VectorSpace(BaseRing(C), Dimension(C));
+  if assigned t`Coerce then
+    coerce := t`Coerce;
+  else
+    coerce := false;
+  end if;
+  if Type(C) eq Type(V) and C eq V then
+    F := function(x)
+      return (x @ t) @ f;
+    end function;
+  else
+    LT := map< C -> V | x :-> V!Coordinates(C, x), y :-> &+[ y[i]*Basis(C)[i] : i in [1..#y]] >;
+    F := function(x)
+      return ((x @ t) @ f) @ LT;
+    end function;
+    if Type(coerce) ne BoolElt then
+      coerce[#coerce] *:= LT;
+    end if;
+  end if;
+  passed, err := __CompositionSanity(t`Domain cat [* V *], F);
+  require passed : err;
+  return __GetTensor( t`Domain, V, F : Cat := t`Cat, Co := coerce);
+end intrinsic;
+
+intrinsic '*'( T::TenSpcElt, S::TenSpcElt ) -> TenSpcElt
+{T * S}
+  require not T`Cat`Contra : "Tensor must be covariant.";
+  require S`Valence le 2 : "Argument 2 must have valence less than 2.";
+  return T * map< Codomain(T) -> Codomain(S) | x :-> <x> @ (S`Map) >;
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -165,6 +215,7 @@ intrinsic Parent( t::TenSpcElt ) -> TenSpc
       end if;
     end try;
   end try;
+  if assigned t`Coerce then P`Coerce := t`Coerce; end if;
   t`Parent := P;
   return P;
 end intrinsic;
@@ -211,45 +262,7 @@ end intrinsic;
 
 // This intrinsic is already in Magma, so we need to overwrite it. Ideally, we would delete it.
 // However, not including it in this package leaves the default one in Magma.
-intrinsic '*'( x::RngElt, B::TenSpcElt ) -> TenSpcElt
+intrinsic '*'( x::RngElt, B::TenSpcElt ) -> .
 {k*t}
-  // if x is a scalar, then scale the tensor
-  if IsCoercible(BaseRing(B), x) then
-    M := B`Map;
-    F := function(y)
-      return (BaseRing(B)!x)*(y @ M);
-    end function;
-    coerce := (assigned B`Coerce) select B`Coerce else false;
-    parent := (assigned B`Parent) select B`Parent else false;
-    return __GetTensor( B`Domain, B`Codomain, F : Par := parent, Co := coerce, Cat := B`Cat );
-  end if;
-
-  // at this point, x is not an obvious scalar.
-  require B`Valence le 3 : "Arguments not compatible.";
-  if B`Valence eq 2 then
-    try
-      return <x> @ B;
-    catch err
-      error "Argument not contained in the domain.";
-    end try;
-  end if;
-  try
-    x := B`Domain[1]!x;
-  catch err
-    try
-      x := (Domain(B`Coerce[1])!x) @ B`Coerce[1];
-    catch err
-      error "Argument not contained in left domain.";
-    end try;
-  end try;
-  V := B`Domain[2];
-  W := B`Codomain;
-  F := function(y)
-    return < x,y[1] > @ B;
-  end function;
-  L := Tensor( [* V, W *], F );
-  if assigned B`Coerce then
-    L`Coerce := B`Coerce[2..3];
-  end if;
-  return L;
+  return __GetTensorAction(x, B, 2);
 end intrinsic;

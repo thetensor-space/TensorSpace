@@ -20,21 +20,22 @@ declare attributes TenCat : Arrows, Contra, Repeats, Valence;
 
 /*
   Description of attributes:
-    Arrows. . . . . . . . . . The function from Repeats to {-1,0,1} detailing which spaces are dualized.
-    Contra. . . . . . . . . . True/false whether the category is contravariant.
-    Repeats . . . . . . . . . A partition of {0..v}.
-    Valence . . . . . . . . . The valence v.
+    Arrows . . . . . . . . The function from Repeats to {-1,0,1} detailing which spaces are dualized.
+    Contra . . . . . . . . True/false whether the category is contravariant.
+    Repeats. . . . . . . . A partition of {0..v}.
+    Valence. . . . . . . . The valence v.
 */
 
 // ------------------------------------------------------------------------------
 //                                  Tensor Space
 // ------------------------------------------------------------------------------
 declare type TenSpc[TenSpcElt]; // eventually inherit ModRng structure
-declare attributes TenSpc : Cat, Frame, Mod, Ring, UniMap, Valence;
+declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 
 /* 
   Description of attributes:
     Cat. . . . . . . . . . The category of the tensor space tensors.
+    Coerce . . . . . . . . If the space is created from some algebraic object, this will contain maps to the modules.
     Frame. . . . . . . . . The sequence of the modules in the frame.
     Mod. . . . . . . . . . The R-module T.
     Ring . . . . . . . . . The base ring.

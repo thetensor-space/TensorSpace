@@ -80,6 +80,11 @@ intrinsic '.'( T::TenSpc, i::RngIntElt ) -> TenSpcElt
   return t;
 end intrinsic;
 
+intrinsic Basis( T::TenSpc ) -> SeqEnum
+{Returns the basis of T.}
+  return [ T.i : i in [1..Dimension(T`Mod)] ];
+end intrinsic;
+
 intrinsic Generators( T::TenSpc ) -> SeqEnum
 {Returns the generators of T.}
   return [ T.i : i in [1..Dimension(T`Mod)] ];
@@ -254,7 +259,8 @@ intrinsic SubConstructor( T::TenSpc, L::Any ) -> TenSpc, Map
 
   dims := [ Dimension(X) : X in T`Frame ];
   M := sub< T`Mod | [ Eltseq(t) @@ T`UniMap : t in nL ] >;
-  S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
+  coerce := (assigned T`Coerce) select T`Coerce else false;
+  S := __GetTensorSpace( T`Ring, T`Frame, T`Cat : Co := coerce );
   S`Mod := M;
   S`UniMap := T`UniMap;
   return S;
@@ -319,7 +325,8 @@ intrinsic QuoConstructor( T::TenSpc, X::Any ) -> TenSpc, Map
     error "Entries do not generate a subtensor space.";
   end try;
   Q,pi := T`Mod/S`Mod;
-  U := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
+  coerce := (assigned T`Coerce) select T`Coerce else false;
+  U := __GetTensorSpace( T`Ring, T`Frame, T`Cat : Co := coerce );
   U`Mod := Q;
   U`UniMap := pi^-1 * T`UniMap;
   return U;

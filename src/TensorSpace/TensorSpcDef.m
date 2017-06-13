@@ -10,6 +10,17 @@
 
 
 import "../GlobalVars.m" : __FRAME;
+import "../Tensor/BimapDef.m" : __GetTensorAction;
+
+__GetTensorSpaceAction := function(x, S, i)
+  bas := < __GetTensorAction(x, t, i) : t in Basis(S) >;
+  if Type(bas[1]) eq TenSpcElt then
+    y := sub< Parent(bas[1]) | bas >;
+  else
+    y := sub< __FRAME(S)[#__FRAME(S)] | [ b : b in bas ] >;
+  end if;
+  return y;
+end function;
 
 // ------------------------------------------------------------------------------
 //                                      Print
@@ -58,12 +69,14 @@ end intrinsic;
 intrinsic IsCoercible( T::TenSpc, t::TenSpcElt ) -> BoolElt
 {Determines if t is coercible in T.}
   if Parent(t) eq T then // if already in
-    return true,t;
+    if assigned T`Coerce and (not assigned t`Coerce) then t`Coerce := T`Coerce; end if;
+    return true, t;
   end if;
   if assigned t`Element and IsCoercible(T`Mod,t`Element) then // if it has a corresponding element which is in the module
     t`Element := (T`Mod)!(t`Element);
     t`Parent := T;
-    return true,t;
+    if assigned T`Coerce and (not assigned t`Coerce) then t`Coerce := T`Coerce; end if;
+    return true, t;
   end if;
   try
     sc := Eltseq(t);
@@ -74,19 +87,19 @@ intrinsic IsCoercible( T::TenSpc, t::TenSpcElt ) -> BoolElt
   R := T`Ring;
 
   if t`Cat ne T`Cat then // check categories
-    return false,"Incompatible categories.";
+    return false, "Incompatible categories.";
   end if; 
   if [ Dimension(X) : X in Frame(t) ] ne D then // check frames
-    return false,"Incompatible frames.";
+    return false, "Incompatible frames.";
   end if;
   if not IsCoercible(R,sc[1]) then // check rings
-    return false,"Cannot coerce ring structures.";
+    return false, "Cannot coerce ring structures.";
   end if;
 
   if IsCoercible(Codomain(T`UniMap),sc) then
     e := (Codomain(T`UniMap)!sc) @@ T`UniMap;
     if e notin T`Mod then
-      return false,"Tensor not contained in tensor space.";
+      return false, "Tensor not contained in tensor space.";
     end if;
     s := Tensor(R,D,Eltseq(e@T`UniMap),T`Cat);
     s`Parent := T;
@@ -94,17 +107,21 @@ intrinsic IsCoercible( T::TenSpc, t::TenSpcElt ) -> BoolElt
    if exists{ i : i in [1..#__FRAME(s)] | not __FRAME(s)[i] cmpeq __FRAME(T)[i] } then // if it has a different frame, fix
       try
         M := [* map< __FRAME(T)[i] -> __FRAME(s)[i] | x :-> (__FRAME(s)[i])!Coordinates(__FRAME(T)[i],x) > : i in [1..#__FRAME(T)] *];
+        if assigned T`Coerce then
+          M := [* T`Coerce[i]*M[i] : i in [1..#Frame(T)] *];
+        end if;
         s`Coerce := M;
         s`Domain := __FRAME(T)[1..#__FRAME(T)-1];
         s`Codomain := __FRAME(T)[#__FRAME(T)];
-        return true,s;
+        return true, s;
       catch err
-        return false,"Incompatible";
+        return false, "Incompatible";
       end try;
     end if;
-    return true,s;
+    if assigned T`Coerce then s`Coerce := T`Coerce; end if;
+    return true, s;
   end if;
-  return false,"Incompatible.";
+  return false, "Incompatible.";
 end intrinsic;
 
 intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
@@ -113,22 +130,22 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
   R := T`Ring;
 
   if &*D ne #S then // check frames
-    return false,"Incompatible frames.";
+    return false, "Incompatible frames.";
   end if;
   if #S eq 0 then // check if T is 0-dimensional
     s := Tensor(R,D,[],T`Cat);
     s`Parent := T;
     s`Element := T`Mod!0;
-    return true,s;
+    return true, s;
   end if;
   if not IsCoercible(R,S[1]) then // check rings
-    return false,"Cannot coerce ring structures.";
+    return false, "Cannot coerce ring structures.";
   end if;
 
   if IsCoercible(Codomain(T`UniMap),S) then
     e := (Codomain(T`UniMap)!S) @@ T`UniMap;
     if e notin T`Mod then
-      return false,"Tensor not contained in tensor space.";
+      return false, "Tensor not contained in tensor space.";
     end if;
     s := Tensor(R,D,Eltseq(e@T`UniMap),T`Cat);
     s`Parent := T;
@@ -136,26 +153,30 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
    if exists{ i : i in [1..#__FRAME(s)] | not __FRAME(s)[i] cmpeq __FRAME(T)[i] } then // if it has a different frame, fix
       try
         M := [* map< __FRAME(T)[i] -> __FRAME(s)[i] | x :-> (__FRAME(s)[i])!Coordinates(__FRAME(T)[i],x) > : i in [1..#__FRAME(T)] *];
+        if assigned T`Coerce then
+          M := [* T`Coerce[i]*M[i] : i in [1..#Frame(T)] *];
+        end if;
         s`Coerce := M;
         s`Domain := __FRAME(T)[1..#__FRAME(T)-1];
         s`Codomain := __FRAME(T)[#__FRAME(T)];
-        return true,s;
+        return true, s;
       catch err
-        return false,"Incompatible";
+        return false, "Incompatible";
       end try;
     end if;
-    return true,s;
+    if assigned T`Coerce then s`Coerce := T`Coerce; end if;
+    return true, s;
   end if;
-  return false,"Incompatible.";
+  return false, "Incompatible.";
 end intrinsic;
 
 // Only used to do T!0 to get the trivial tensor.
 intrinsic IsCoercible( T::TenSpc, t::RngIntElt ) -> BoolElt
 {Determines if t is coercible in T.}
   if t eq 0 then
-    return true,T!(Eltseq(Codomain(T`UniMap)!0));
+    return true, T!(Eltseq(Codomain(T`UniMap)!0));
   end if;
-  return false,"Incompatible.";
+  return false, "Incompatible.";
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -194,4 +215,19 @@ intrinsic 'subset'( S::TenSpc, T::TenSpc ) -> BoolElt
     end try;
   end if;
   error "Cannot find covering space.";
+end intrinsic;
+
+// ------------------------------------------------------------------------------
+//                            Muliplication : x * S * y
+// ------------------------------------------------------------------------------
+intrinsic '*'( x::., S::TenSpc ) -> .
+{x * S}
+  require S`Valence le 3 : "Tensor space valence must be less than 4.";
+  return __GetTensorSpaceAction(x, S, 2);
+end intrinsic;
+
+intrinsic '*'( S::TenSpc, y::. ) -> .
+{S * y}
+  require S`Valence le 3 : "Tensor space valence must be less than 4.";
+  return __GetTensorSpaceAction(y, S, 1);
 end intrinsic;

@@ -13,7 +13,7 @@ import "../GlobalVars.m" : __LIST, __SANITY_CHECK;
 import "../Tensor/TensorBasic.m" : __HasBasis;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 
-__GetTensorSpace := function( R, L, C )
+__GetTensorSpace := function( R, L, C : Co := false )
   T := New(TenSpc);
   T`Cat := C;
   T`Valence := C`Valence;
@@ -26,6 +26,9 @@ __GetTensorSpace := function( R, L, C )
   end if;
   T`Mod := RSpace(R,&*[Dimension(M) : M in L]); // builds a universal copy.
   T`UniMap := hom< T`Mod -> T`Mod | x:->x, y:->y >;
+  if Type(Co) ne BoolElt then
+    T`Coerce := Co;
+  end if;
   return T;
 end function;
 

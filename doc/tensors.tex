@@ -1184,6 +1184,7 @@ The valence is increased by $1$.
 \index{Compress}
 \begin{intrinsics}
 Compress(T) : TenSpcElt -> TenSpcElt
+Compress(~T) : TenSpcElt
 \end{intrinsics}
 
 Returns the compression of the tensor. This removes all 1-dimensional spaces in the domain.
@@ -1633,34 +1634,292 @@ Regarding tensors as multilinear maps, we allow for composition and evaluation.
 x @ T : Tup, TenSpcElt -> Any
 \end{intrinsics}
 
-Evaluates the tensor $T$ at $x\in U_v\times \cdots \times U_1$.
+Evaluates the tensor $T$ at $x\in U_{\vav}\times \cdots \times U_1$.
+The entries can be elements from the vector space $U_i$ or sequences that Magma can naturally coerce into the vector space $U_i$.
+In some circumstances, tensors from algebraic objects, and in these cases, the entries can be contained in the original algebraic object as well. 
+
+\begin{example}[MultiMapEval]
+
+Here we create the 4-tensor $\langle \,\rangle$ of an algebra $A$ given by the Jacobi identity: 
+\[ (x,y,z)\mapsto (xy)z + (yz)x + (zx)y. \]
+Therefore, the algebra satisfies the Jacobi identity if $\langle A, A, A \rangle = 0$. 
+We will also change the tensor category so that all the coordinates are ``fused'' together.
+\begin{code}
+> A := MatrixAlgebra(GF(3), 3);
+> JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
+> Cat := TensorCategory([1 : i in [0..3]], {{0..3}});
+> T, Maps := Tensor([A : i in [0..3]], JacobiID, Cat);
+> T;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 9 over GF(3)
+U2 : Full Vector space of degree 9 over GF(3)
+U1 : Full Vector space of degree 9 over GF(3)
+U0 : Full Vector space of degree 9 over GF(3)
+> TensorCategory(T);
+Tensor category of valence 4 (->,->,->,->) ({ 0 .. 3 })
+\end{code}
+
+Even though our tensor originated over the algebra $A=\mathbb{M}_{3}(\mathbb{F}_3)$, the returned tensor is over vector spaces $\mathbb{F}_3^9$. 
+However, the tensor {\tt T} can still evaluate elements from $\mathbb{M}_3(\mathbb{F}_3)$ as well as $\mathbb{F}_3^9$. 
+Observe that the out of {\tt T} will be a vector regardless of the input. 
+The second output at construction, the {\tt List} of maps, can be used to map the vectors to $\mathbb{M}_3(\mathbb{F}_3)$. 
+\begin{code}
+> x := <A.1, A.2, A.2^2>;
+> x;
+<
+    [1 0 0]
+    [0 0 0]
+    [0 0 0],
+
+    [0 1 0]
+    [0 0 1]
+    [1 0 0],
+
+    [0 0 1]
+    [1 0 0]
+    [0 1 0]
+>
+> x @ T;
+(2 0 0 0 1 0 0 0 0)
+> 
+> phi := Maps[1];
+> x := <A.1 @ phi, A.2 @ phi, (A.2^2) @ phi>;
+> x;
+<(1 0 0 0 0 0 0 0 0), (0 1 0 0 0 1 1 0 0), (0 0 1 1 0 0 0 1 0)>
+> x @ T;
+(2 0 0 0 1 0 0 0 0)
+\end{code}
+
+Because {\tt @} takes {\tt Tup} as input, {\tt T} can evaluate mixed tuples as well: where some entries are contained in $\mathbb{M}_3(\mathbb{F}_3)$ and other entries are contained in $\mathbb{F}_3^9$. 
+\begin{code}
+> x := <A.1, A.2 @ phi, Eltseq(A.2^2)>;
+> x;
+<
+    [1 0 0]
+    [0 0 0]
+    [0 0 0],
+
+    (0 1 0 0 0 1 1 0 0),
+
+    [ 0, 0, 1, 1, 0, 0, 0, 1, 0 ]
+>
+> <Type(i) : i in x>;
+<AlgMatElt, ModTupFldElt, SeqEnum>
+> x @ T;
+(2 0 0 0 1 0 0 0 0)
+\end{code}
+\end{example}
 
 \index{$*$!as multilinear map}
 \begin{intrinsics}
 T * f : TenSpcElt, Map -> TenSpcElt
+T * S : TenSpcElt, TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
 Returns the tensor which is the composition of $T$ with the given map $f$.
+If a tensor $S$ is used instead of a {\tt Map}, $S$ must have valence $\leq 1$. 
 
 \index{eq!tensor}
 \begin{intrinsics}
 S eq T : TenSpcElt, TenSpcElt -> BoolElt
 \end{intrinsics}
 
-Decides if the tensors are the same multilinear map.
+Decides if the tensors are the same. 
+Two tensors are equivalent if, and only if, they have the same tensor category, base ring, frame, and structure constants. 
+
+\begin{example}[TensorComp]
+
+We start with the same tensor as the previous example: the tensor given by the Jacobi identity on the algebra $A=\mathbb{M}_3(\mathbb{F}_3)$. 
+\begin{code}
+> A := MatrixAlgebra(GF(3), 3);
+> JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
+> Cat := TensorCategory([1 : i in [0..3]], {{0..3}});
+> T, Maps := Tensor([A : i in [0..3]], JacobiID, Cat);
+> T;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 9 over GF(3)
+U2 : Full Vector space of degree 9 over GF(3)
+U1 : Full Vector space of degree 9 over GF(3)
+U0 : Full Vector space of degree 9 over GF(3)
+> TensorCategory(T);
+Tensor category of valence 4 (->,->,->,->) ({ 0 .. 3 })
+\end{code}
+
+The maps in {\tt Maps} are vector space isomorphisms and map $A$ to $V$. 
+Suppose $\phi: A\rightarrow V$ is a vector space isomorphism. 
+If we compose {\tt T} with $\phi^{-1}$, the returned tensor is \emph{still} over vector spaces.
+The codomain is \emph{not} $A$; this is because all tensors are over vector spaces.
+In fact, the returned tensor is exactly the same as {\tt T}.
+\begin{code}
+> phi := Maps[1];
+> T * (phi^-1);
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 9 over GF(3)
+U2 : Full Vector space of degree 9 over GF(3)
+U1 : Full Vector space of degree 9 over GF(3)
+U0 : Full Vector space of degree 9 over GF(3)
+> T * (phi^-1) eq T;
+true
+\end{code}
+
+Let $\mathcal{E}\subset A$ be an orthogonal frame---a set of primitive, orthogonal, idempotents. 
+We will compose {\tt T} with the linear transformation 
+\[ a \mapsto \sum_{e\in\mathcal{E}} eae.\]
+Because the codomain of {\tt T} is a vector space, we will precompose this map by $\phi^{-1}$. 
+\begin{code}
+> E := [A.1, A.2^-1*A.1*A.2, A.2^-2*A.1*A.2^2];
+> E;
+[
+    [1 0 0]
+    [0 0 0]
+    [0 0 0],
+
+    [0 0 0]
+    [0 1 0]
+    [0 0 0],
+
+    [0 0 0]
+    [0 0 0]
+    [0 0 1]
+]
+> f := map< A -> A | x :-> &+[ E[i]*x*E[i] : i in [1..3] ] >;
+> f;
+Mapping from: AlgMat: A to AlgMat: A given by a rule [no inverse]
+> S := T*(phi^-1*f);
+> S;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 9 over GF(3)
+U2 : Full Vector space of degree 9 over GF(3)
+U1 : Full Vector space of degree 9 over GF(3)
+U0 : Full Vector space of degree 9 over GF(3)
+> S eq T;
+false
+\end{code}
+
+We can also wrap {\tt f} as a 2-tensor and compose it with {\tt T}.
+\begin{code}
+> F := Tensor([A, A], func< x | x[1]@f >);
+> F;
+Tensor of valence 2, U1 >-> U0
+U1 : Full Vector space of degree 9 over GF(3)
+U0 : Full Vector space of degree 9 over GF(3)
+> T * F eq S;
+true
+\end{code}
+\end{example}
+
+
+
 
 \subsection{Operations with Bilinear maps}
-Tensors of valence $2$, also known as bilinear tensors, or
+Tensors of valence $3$, also known as bilinear tensors, or
 as bilinear maps,  are commonly described as distributive products.
 For instance as the product of an algebra, the product of a ring on 
-a module, or an inner product.  We supports this interpretation 
-by permitting an infix $x*y$ notation for the evaluation of bilinear
-tensors.  We support this by creating special types 
+a module, or an inner product.  We support these interpretations in two ways:
+by permitting an infix $x*B*y$ notation for a 3-tensor $B$, and a product $x*y$ notation for the evaluation of bilinear
+tensors.  For the latter, We do this by creating special types 
 {\tt BmpU[Elt]}, {\tt BmpV[Elt]}, and {\tt BmpW[Elt]} for the frame
 of a bilinear tensor.
+For bilinear maps, we refer to the modules in the frame as $U\times V\rightarrowtail W$. 
+
+\index{$*$!bilinear tensor (infix)}
+\begin{intrinsics}
+x * B : Any, TenSpcElt -> Any
+B * y : Any, TenSpcElt -> Any
+\end{intrinsics}
+
+Given a bilinear tensor $B$ framed by $[U, V, W]$, $x*B$ returns the action on the right as a linear map $L : V\rightarrow W$ given by $vL = x* v$ if $x$ is an element of $U$. 
+If $x$ is a subspace of $U$, then this returns a subspace of the tensor space $T$ with frame $V\rightarrowtail W$.
+For the left action use $B*y$ instead.
+If $B$ is valence 1, then the image of either $x$ or $y$ is returned.
+Therefore, the possible outputs are a tensor space {\tt TenSpc}, a tensor {\tt TenSpcElt}, or a vector {\tt ModTupFld}. 
+
+Related to this intrinsic is the following: using tensor spaces with the infix notation.
+
+\index{$*$!bilinear space (infix)}
+\begin{intrinsics}
+x * S : Any, TenSpc -> Any
+S * y : Any, TenSpc -> Any
+\end{intrinsics}
+
+Given a subspace of bilinear tensors, return the subspace generated by all $x*s$, for $s\in S$. 
+This is either a tensor space or a vector space. 
+
+\begin{example}[BimapInfix]
+
+We demonstrate the infix notation by constructing the tensor in $A=\mathbb{M}_2(\mathbb{Q})$ given by multiplication.
+\begin{code}
+> A := MatrixAlgebra(Rationals(), 2);
+> T := Tensor(A);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 4 over Rational Field
+\end{code}
+
+Like tensor evaluation, the infix notation will accept elements of a vector space (or objects that Magma can easily coerce into a vector space) or elements from the original algebraic object.
+For $M=\left(\begin{smallmatrix} 0 & 1 \\ 0 & 0 \end{smallmatrix}\right)$, we will use the infix notation to construct the 2-tensor $* : A\rightarrowtail A$, where $X\mapsto MX$. 
+\begin{code}
+> M := A![0, 1, 0, 0];
+> M;
+[0 1]
+[0 0]
+> S := M*T;
+> S;
+Tensor of valence 2, U1 >-> U0
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 4 over Rational Field
+> AsMatrices(S, 1, 0);
+[
+    [0 0 0 0]
+    [0 0 0 0]
+    [1 0 0 0]
+    [0 1 0 0]
+]
+\end{code}
+
+From the structure constants above, evaluating {\tt M*T} at {\tt V.3} should output {\tt W.1}.
+Furthermore, the image of {\tt M*T} is 2-dimensional in $W$.
+\begin{code}
+> M*T*[0, 0, 1, 0];
+(1 0 0 0)
+> M*T*VectorSpace(Rationals(), 4);
+Vector space of degree 4, dimension 2 over Rational Field
+Generators:
+(1 0 0 0)
+(0 1 0 0)
+Echelonized basis:
+(1 0 0 0)
+(0 1 0 0)
+\end{code}
+
+If we switch the order and multiply {\tt T} by $U$ on the left first, we will get a tensor space.
+Because that tensor space came from {\tt T}, which originally came from algebraic objects, we can use the returned tensor space to evaluate {\tt M}. 
+An arbitrary tensor space, however, would not evaluate {\tt M} unless it is an appropriate vector. 
+\begin{code}
+> S := VectorSpace(Rationals(), 4)*T;
+> S;
+Tensor space of dimension 4 over Rational Field with valence 2
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 4 over Rational Field
+> S*M;
+Vector space of degree 4, dimension 2 over Rational Field
+Generators:
+(0 1 0 0)
+(0 0 0 1)
+Echelonized basis:
+(0 1 0 0)
+(0 0 0 1)
+\end{code}
+\end{example}
 
 
-\index{$*$!bilinear (product)}
+
+The next style of notation we support is the product notation, $x*y$.
+In order to use this style, the user needs to coerce both $x$ and $y$ into the {\tt LeftDomain} and {\tt RightDomain} respectively. 
+
+\index{$*$!bilinear tensor (product)}
 \begin{intrinsics}
 x * y : BmpUElt, BmpVElt -> Any
 x * y : BmpU, BmpV -> Any
@@ -1670,37 +1929,6 @@ x * y : BmpU, BmpVElt -> Any
 
 If $x$ and $y$ are associated to the bilinear map $B$, these operations return 
 {\tt <x,y> @ B}.
-
-\index{$*$!bilinear (infix)}
-\begin{intrinsics}
-x * B : Any, TenSpcElt -> TenSpcElt
-B * y : Any, TenSpcElt -> TenSpcElt
-\end{intrinsics}
-
-Given a bilinear tensor $B$ framed by $[U_2,U_1,U_0]$,
-$x*B$ returns the action on the right as a 
-linear map $L : U_1\rightarrow U_0$ given 
-by $vL = x* v$ if $x$ is an element of $U_2$. 
-If $x$ is a subspace of $U_2$, then this returns a sequence of 
-maps one for each element in the basis for $x$.
-For the land-hand action use $B*y$ instead.
-If $B$ is valence 1, then the image of either $x$ or $y$ is returned.
-
-\index{Parent!bilinear}
-\begin{intrinsics}
-Parent(x) : BmpUElt -> BmpU
-Parent(x) : BmpVElt -> BmpV
-\end{intrinsics}
-
-Returns the parent space of the bilinear map element.
-
-\index{Parent!bilinear}
-\begin{intrinsics}
-Parent(X) : BmpU -> TenSpcElt
-Parent(X) : BmpV -> TenSpcElt
-\end{intrinsics}
-
-Returns the original bilinear map where these spaces came from.
 
 \index{LeftDomain}
 \begin{intrinsics}
@@ -1722,70 +1950,48 @@ setup for use with infix notation.
 \begin{intrinsics}
 IsCoercible(S,x) : BmpU, Any -> BoolElt, BmpUElt
 IsCoercible(S,x) : BmpV, Any -> BoolElt, BmpVElt
-S!x : BmpU, Any -> BoolElt, BmpUElt
-S!x : BmpV, Any -> BoolElt, BmpVElt
+S!x : BmpU, Any -> BmpUElt
+S!x : BmpU, Any -> BmpVElt
 \end{intrinsics}
 
 Decides if $x$ can be coerced into $S$, and if it can, it returns the coerced 
 element.
 
-\index{eq!bilinear}
-\begin{intrinsics}
-u1 eq u2 : BmpUElt, BmpUElt -> BoolElt
-v1 eq v2 : BmpUElt, BmpUElt -> BoolElt
-U1 eq U2 : BmpU, BmpU -> BoolElt
-V1 eq V2 : BmpV, BmpV -> BoolElt
-\end{intrinsics}
+\begin{example}[BimapProduct]
 
-Decides if the elements or spaces are equal.
-
-\begin{example}[Bimap\_Infix]
-We demonstrate the infix product using tensors of valence 2. 
-If $B : U_2\times U_1\rightarrowtail U_0$ is a tensor, then for $x\in U_2$, we get a valence 1 tensor $x*B : U_1\rightarrow U_0$.
-Similarly, for $y\in U_1$, we get $B*y : U_2\rightarrow U_0$. Furthermore, one can write $x*B*y$ to get $<x,y> @B$.
-
+We demonstrate the product notation for tensors of valence 3 using a tensor derived from a $p$-group. 
+Suppose $G$ is a $p$-group and $[,] : U\times V\rightarrowtail W$ is the tensor given by commutation where $U=V=G/\eta_2$ and $W=\eta_2/\eta_3$, where $\eta_i$ denotes the $i$th term of the exponent-$p$ central series of $G$.
 \begin{code}
-> B := RandomTensor(GF(5),[4,3,5]);
-> B;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 4 over GF(5)
-U1 : Full Vector space of degree 3 over GF(5)
-U0 : Full Vector space of degree 5 over GF(5)
-> [3,2,0,1]*B*[1,1,2];
-(2 1 1 3 4)
-> [1,0,0,0]*B;
-Tensor of valence 1, U1 >-> U0
-U1 : Full Vector space of degree 3 over GF(5)
-U0 : Full Vector space of degree 5 over GF(5)
-> B*[0,2,0];
-Tensor of valence 1, U1 >-> U0
-U1 : Full Vector space of degree 4 over GF(5)
-U0 : Full Vector space of degree 5 over GF(5)
-\end{code}
-\end{example}
-
-\begin{example}[Bimap\_Product]
-We demonstrate the product notation for tensors of valence 2 using a tensor derived from a group. 
-Suppose $G$ is a $p$-group and $B : U_2\times U_1\rightarrowtail U_0$ is the tensor given by commutation where $U_2=U_1=G/\Phi(G)$ and $U_0$ is the next factor of the exponent-$p$ central series of $G$.
-
-\begin{code}
-> G := SmallGroup(512,10^6);
-> B := pCentralTensor(G,2,1,1);
-> B;
-Tensor of valence 2, U2 x U1 >-> U0
+> G := SmallGroup(512, 10^6);
+> T := pCentralTensor(G);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
 U2 : Full Vector space of degree 5 over GF(2)
 U1 : Full Vector space of degree 5 over GF(2)
 U0 : Full Vector space of degree 4 over GF(2)
-> U := LeftDomain(B);   //U2
-> V := RightDomain(B);  //U1
-> U![0,1,0,1,0] * V![1,0,0,0,0];
-(1 0 0 1)
-> U!(G.2*G.4) * V!G.1;
+> U := LeftDomain(T);
+> V := RightDomain(T);
+> U;
+Bimap space U: Full Vector space of degree 5 over GF(2)
+> V;
+Bimap space V: Full Vector space of degree 5 over GF(2)
+\end{code}
+
+Like with the other styles of notation (infix and tuple), users can evaluate elements from the original algebraic object, vectors from the vector spaces, and even sequences that Magma can easily coerce into vector spaces. 
+To use the product notation, coerce elements into the {\tt LeftDomain} and {\tt RightDomain}.
+
+\begin{code}
+> x := U!(G.1*G.2*G.4);
+> y := V![1,0,0,0,0];
+> x;
+Bimap element of U: (1 1 0 1 0)
+> y;
+Bimap element of V: (1 0 0 0 0)
+> x*y;
 (1 0 0 1)
 \end{code}
 
-This notation can be used to evaluate subspaces.
-
+We can take this further and evaluate subspaces of $U$ or $V$.
 \begin{code}
 > H := sub< G | G.2,G.4 >;
 > U!H * V!G.1;
@@ -1796,7 +2002,7 @@ Generators:
 Echelonized basis:
 (1 0 0 0)
 (0 0 0 1)
-> U!H * V!G;
+> U!H * V;
 Vector space of degree 4, dimension 3 over GF(2)
 Generators:
 (1 0 0 0)
@@ -1810,6 +2016,67 @@ Echelonized basis:
 (0 0 0 1)
 \end{code}
 \end{example}
+
+
+\index{Parent!bilinear}
+\begin{intrinsics}
+Parent(x) : BmpUElt -> BmpU
+Parent(x) : BmpVElt -> BmpV
+\end{intrinsics}
+
+Returns the parent space of the bilinear map element.
+
+\index{Parent!bilinear}
+\begin{intrinsics}
+Parent(X) : BmpU -> TenSpcElt
+Parent(X) : BmpV -> TenSpcElt
+\end{intrinsics}
+
+Returns the original bilinear map where these spaces came from.
+
+\index{eq!bilinear}
+\begin{intrinsics}
+u1 eq u2 : BmpUElt, BmpUElt -> BoolElt
+v1 eq v2 : BmpUElt, BmpUElt -> BoolElt
+U1 eq U2 : BmpU, BmpU -> BoolElt
+V1 eq V2 : BmpV, BmpV -> BoolElt
+\end{intrinsics}
+
+Decides if the elements or spaces are equal.
+
+\begin{example}[BimapProduct2]
+
+We will construct the same tensor as the previous example.
+\begin{code}
+> G := SmallGroup(512, 10^6);
+> T := pCentralTensor(G);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 5 over GF(2)
+U1 : Full Vector space of degree 5 over GF(2)
+U0 : Full Vector space of degree 4 over GF(2)
+> U := LeftDomain(T);
+> V := RightDomain(T);
+> U;
+Bimap space U: Full Vector space of degree 5 over GF(2)
+> V;
+Bimap space V: Full Vector space of degree 5 over GF(2)
+\end{code}
+
+The product notation has some basic functions for comparing objects and retrieving information.
+\begin{code}
+> V!G.1 eq V![1,0,0,0,0];
+true
+> Parent(U);
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 5 over GF(2)
+U1 : Full Vector space of degree 5 over GF(2)
+U0 : Full Vector space of degree 4 over GF(2)
+> Parent(U) eq T;
+true
+\end{code}
+\end{example}
+
 
 \subsection{Manipulating tensor data}
 The data from a tensor is accessible in multiple ways.   For 
