@@ -530,19 +530,20 @@ false
 We view a tensor space as a $K$-module, so we have notions of generators, 
 dimension (if it is free), and cardinality.
 
-\index{Generators}
+\index{Generators}\index{Basis}
 \begin{intrinsics}
+Basis(T) : TenSpc -> SeqEnum
 Generators(T) : TenSpc -> SeqEnum
 \end{intrinsics}
 
-Returns a sequence of generators for the tensor space. 
+Returns a basis for the tensor space. 
 
 \index{.!tensor space}
 \begin{intrinsics}
 T.i : TenSpc, RngIntElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the $i$th generator of the tensor space $T$.
+Returns the $i$th basis tensor of the tensor space $T$.
 
 \index{NumberOfGenerators}\index{Ngens}
 \begin{intrinsics}
