@@ -6,6 +6,13 @@
 
 % Packages required
 \RequirePackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,      
+    urlcolor=blue,
+    citecolor=blue,
+}
 \RequirePackage[shortalphabetic]{amsrefs}
 \RequirePackage[margin=1in]{geometry}
 \RequirePackage{amsmath}

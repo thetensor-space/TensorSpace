@@ -111,8 +111,46 @@ intrinsic Slice( t::TenSpcElt, grid::[SetEnum] ) -> SeqEnum
   end try;
   spaces := __FRAME(t);
   dims := [ Dimension(X) : X in spaces ];
-  require forall{ i : i in [1..#grid] | grid[i] subset {1..dims[i]} } : "Unknown value in grid.";
+  require forall{ i : i in [1..#grid] | grid[i] subset ({1..dims[i]} join {-dims[i]..-1}) } : "Unknown value in grid.";
+  for i in [1..#grid] do
+    S := grid[i];
+    if exists{ s : s in S | s lt 0 } then
+      T := S meet {1..dims[i]};
+      T join:= { dims[i]+s+1 : s in S diff T };
+      grid[i] := T;
+    end if;
+  end for;
   return __GetSlice(sc, dims, grid);
+end intrinsic;
+
+intrinsic InducedTensor( t::TenSpcElt, grid::[SetEnum] ) -> TenSpcElt
+{Returns the tensor induced by the grid.}
+  if t`Cat`Contra and #grid+1 eq t`Valence then
+    grid cat:= [{1}];
+  end if;
+  require #grid eq t`Valence : "Grid inconsistent with frame.";
+  try
+    sc := StructureConstants(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  require forall{ i : i in [1..#grid] | grid[i] subset ({1..dims[i]} join {-dims[i]..-1}) } : "Unknown value in grid.";
+  for i in [1..#grid] do
+    S := grid[i];
+    if exists{ s : s in S | s lt 0 } then
+      T := S meet {1..dims[i]};
+      T join:= { dims[i]+s+1 : s in S diff T };
+      grid[i] := T;
+    end if;
+  end for;
+  seq := __GetSlice(sc, dims, grid);
+  dims := [#grid[i] : i in [1..#grid]];
+  if t`Cat`Contra and #grid eq t`Valence then
+    Prune(~dims);
+  end if;
+  return Tensor( BaseRing(t), dims, seq, t`Cat );
 end intrinsic;
 
 intrinsic Assign( t::TenSpcElt, ind::[RngIntElt], k::. ) -> TenSpcElt
@@ -139,14 +177,81 @@ Equivalent to t[ind] = k;}
   t := Assign(t, ind, k);
 end intrinsic;
 
-intrinsic InducedTensor( t::TenSpcElt, grid::[SetEnum] ) -> TenSpcElt
-{Returns the tensor induced by the grid.}
-  seq := Slice(t,grid);
-  dims := [#grid[i] : i in [1..#grid]];
-  if t`Cat`Contra and #grid eq t`Valence then
-    Prune(~dims);
+intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
+{Returns the sequence of matrices.}
+  require i ne j : "Arguments 2 and 3 must be distinct.";
+  require i in {0..t`Valence-1} : "Unknown argument 2.";
+  require j in {0..t`Valence-1} : "Unkonwn arguemnt 3.";
+  try 
+    sc := StructureConstants(t);
+  catch e
+    error "Cannot compute structure constants of tensor.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := i eq Minimum([i, j]));
+end intrinsic;
+
+intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j::RngIntElt ) -> SeqEnum
+{Performs the slice of t with the given grid and returns the tensor as matrices with i and j.}
+  if t`Cat`Contra and #grid+1 eq t`Valence then
+    grid cat:= [{1}];
   end if;
-  return Tensor( BaseRing(t), dims, seq, t`Cat );
+  require #grid eq t`Valence : "Grid inconsistent with frame.";
+  try
+    sc := StructureConstants(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  require forall{ i : i in [1..#grid] | grid[i] subset ({1..dims[i]} join {-dims[i]..-1}) } : "Unknown value in grid.";
+  for i in [1..#grid] do
+    S := grid[i];
+    if exists{ s : s in S | s lt 0 } then
+      T := S meet {1..dims[i]};
+      T join:= { dims[i]+s+1 : s in S diff T };
+      grid[i] := T;
+    end if;
+  end for;
+  require i ne j : "Arguments 3 and 4 must be distinct.";
+  require i in {0..t`Valence-1} : "Unknown argument 3.";
+  require j in {0..t`Valence-1} : "Unkonwn arguemnt 4.";
+  return __GetForms(__GetSlice(sc, dims, grid), [ #S : S in grid ], i, j);
+end intrinsic;
+
+intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
+{Returns the system of forms for the given 2-tensor.}
+  require t`Valence eq 3 : "Tensor must have valence 3.";
+  try 
+    sc := StructureConstants(t);
+  catch e
+    error "Cannot compute structure constants of tensor.";
+  end try;
+  spaces := __FRAME(t);
+  dims := [ Dimension(X) : X in spaces ];
+  return __GetForms(sc, dims, 2, 1);
+end intrinsic;
+
+intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
+{Foliates along the ith component.}
+  require i in {0..#t`Domain} : "Unknown argument 2.";
+  try 
+    sc := StructureConstants(t);
+  catch e
+    error "Cannot compute structure constants of tensor.";
+  end try;
+  spaces := Frame(t);
+  dims := [ Dimension(X) : X in spaces ];
+  l := [ {1..d} : d in dims ];
+  j := t`Valence-i;
+  F := [];
+  for i in [1..dims[j]] do
+    slice := l;
+    slice[j] := {i};
+    Append(~F, __GetSlice(sc, dims, slice));
+  end for;
+  return Matrix(F);
 end intrinsic;
 
 intrinsic Compress( t::TenSpcElt ) -> TenSpcElt
@@ -191,73 +296,4 @@ end intrinsic;
 intrinsic Compress( ~t::TenSpcElt )
 {Compress all 1-dimensional spaces in the domain.}
   t := Compress(t);
-end intrinsic;
-
-intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
-{Returns the sequence of matrices.}
-  require i ne j : "Arguments 2 and 3 must be distinct.";
-  require i in {0..t`Valence-1} : "Unknown argument 2.";
-  require j in {0..t`Valence-1} : "Unkonwn arguemnt 3.";
-  try 
-    sc := StructureConstants(t);
-  catch e
-    error "Cannot compute structure constants of tensor.";
-  end try;
-  spaces := __FRAME(t);
-  dims := [ Dimension(X) : X in spaces ];
-  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := i eq Minimum([i, j]));
-end intrinsic;
-
-intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j::RngIntElt ) -> SeqEnum
-{Performs the slice of t with the given grid and returns the tensor as matrices with i and j.}
-  if t`Cat`Contra and #grid+1 eq t`Valence then
-    grid cat:= [{1}];
-  end if;
-  require #grid eq t`Valence : "Grid inconsistent with frame.";
-  try
-    sc := StructureConstants(t);
-  catch err
-    error "Cannot compute structure constants.";
-  end try;
-  spaces := __FRAME(t);
-  dims := [ Dimension(X) : X in spaces ];
-  require forall{ k : k in [1..#grid] | grid[k] subset {1..dims[k]} } : "Unknown value in grid.";
-  require i ne j : "Arguments 3 and 4 must be distinct.";
-  require i in {0..t`Valence-1} : "Unknown argument 3.";
-  require j in {0..t`Valence-1} : "Unkonwn arguemnt 4.";
-  return __GetForms(__GetSlice(sc, dims, grid), [ #S : S in grid ], i, j);
-end intrinsic;
-
-intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
-{Returns the system of forms for the given 2-tensor.}
-  require t`Valence eq 3 : "Tensor must have valence 3.";
-  try 
-    sc := StructureConstants(t);
-  catch e
-    error "Cannot compute structure constants of tensor.";
-  end try;
-  spaces := __FRAME(t);
-  dims := [ Dimension(X) : X in spaces ];
-  return __GetForms(sc, dims, 2, 1);
-end intrinsic;
-
-intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
-{Foliates along the ith component.}
-  require i in {0..#t`Domain} : "Unknown argument 2.";
-  try 
-    sc := StructureConstants(t);
-  catch e
-    error "Cannot compute structure constants of tensor.";
-  end try;
-  spaces := Frame(t);
-  dims := [ Dimension(X) : X in spaces ];
-  l := [ {1..d} : d in dims ];
-  j := t`Valence-i;
-  F := [];
-  for i in [1..dims[j]] do
-    slice := l;
-    slice[j] := {i};
-    Append(~F, __GetSlice(sc, dims, slice));
-  end for;
-  return Matrix(F);
 end intrinsic;
