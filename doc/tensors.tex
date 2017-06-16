@@ -2442,8 +2442,6 @@ U1 : Full Vector space of degree 3 over Rational Field
 U0 : Full Vector space of degree 2 over Rational Field
 > Radical(S, 3);
 Vector space of degree 2, dimension 0 over Rational Field
-Mapping from: Full Vector space of degree 2 over Rational Field to Full 
-Vector space of degree 2 over Rational Field given by a rule
 \end{code}
 
 We can even see the same sequences of matrices in {\tt S}.
@@ -2479,8 +2477,8 @@ We can even see the same sequences of matrices in {\tt S}.
 
 \section{Invariants of tensors}
 
-To access the projections or the objects acting on a specific factor, the 
-following should be used.
+In this subsection, we detail functions to construct invariants of tensors.
+To access the projections or the objects acting on a specific factor $U_i$, the following function(s) should be used.
 
 \index{Induce}
 \begin{intrinsics}
@@ -2493,6 +2491,55 @@ Returns the induced sub-object associated to the $i$th factor of the
 associated 
 tensor and a projection from the given object to the returned sub-object.
 
+\begin{example}[Inducing]
+
+To demonstrate how to {\tt Induce}, we construct the 2-dimensional symplectic form on $K =$ GF$(3)$. 
+\begin{code}
+> T := Tensor(GF(3), [2, 2, 1], [0, 1, 2, 0]);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 2 over GF(3)
+U1 : Full Vector space of degree 2 over GF(3)
+U0 : Full Vector space of degree 1 over GF(3)
+> IsAlternating(T);
+true
+\end{code}
+
+This tensor has a nontrivial derivation algebra, isomorphic to $K^2\rtimes \mathfrak{sl}_2(3)$. 
+However, $\Der({\tt T})$ is represented in $\End(U_2)\times\End(U_1)\times \End(U_0)$. 
+We will induce the action on the $1$st coordinate.
+\begin{code}
+> D := DerivationAlgebra(T);
+> D.1;
+[2 2 0 0 0]
+[1 0 0 0 0]
+[0 0 0 2 0]
+[0 0 1 1 0]
+[0 0 0 0 0]
+> D.2;
+[2 0 0 0 0]
+[0 1 0 0 0]
+[0 0 0 0 0]
+[0 0 0 2 0]
+[0 0 0 0 1]
+> D1, pi := Induce(D, 1);
+> D1;
+Matrix Lie Algebra of degree 2 over Finite field of size 3
+> pi;
+Mapping from: AlgMatLie: D to AlgMatLie: D1 given by a rule [no inverse]
+\end{code}
+
+Now we can see that have the action of {\tt D} on $U_1$.
+\begin{code}
+> D1.1;
+[0 2]
+[1 1]
+> D1.2;
+[0 0]
+[0 2]
+\end{code}
+\end{example}
+
 \subsection{Standard invariants}
 
 We integrate the invariant theory associated to bilinear and multilinear maps
@@ -2500,65 +2547,136 @@ into the realm of tensors.
 
 \index{Radical}
 \begin{intrinsics}
-Radical(T, s) : TenSpcElt, RngIntElt -> ModTupRng, Map
+Radical(T, i) : TenSpcElt, RngIntElt -> ModTupRng
 \end{intrinsics}
 
-Returns the $s$th (categorical) radical as a subspace of $U_s$ along with an isomorphism from $U_s$ to $K^{d_s}$.
-If $U_s$ is already a vector space, then the returned map is the identity.
+Returns the $i$-radical of $T$ as a subspace of $U_i$. 
+This is the subspace 
+\[ U_{\widehat{i}}^\perp = \left\{ u_i \in U_i : \forall \left| u_{\widehat{i}}\right\rangle,\; \left\langle T \middle| u\right\rangle =0\right\}. \] 
 
 \index{Radical}
 \begin{intrinsics}
 Radical(T) : TenSpcElt -> Tup
 \end{intrinsics}
 
-Returns the tuple of all the $s$-radicals for each $s\in \{1,...,v\}$.
+Returns the tuple of all the $i$-radicals for each $i\in \{1,\dots,\vav\}$.
 
 \index{Coradical}
 \begin{intrinsics}
 Coradical(T) : TenSpcElt -> ModTupRng, Map
 \end{intrinsics}
 
-Returns the (categorical) coradical of $T$ and a vector space surjection from 
+Returns the coradical of $T$ and a vector space surjection from 
 the codomain to the coradical.
+This is the quotient $U_0 / \langle T | U_{\vav}, \dots, U_1\rangle$.
+
+\begin{example}[Radicals]
+
+We will construct the tensor for multiplcation in $\mathfrak{gl}_3(\mathbb{Q})$, or equivalently, the commutator tensor of $\mathbb{M}_3(\mathbb{Q})$.
+Because $\mathfrak{gl}_3(\mathbb{Q})$ contains the center of $\mathbb{M}_3(\mathbb{Q})$, there will be a 2- and 1-radical.
+\begin{code}
+> K := Rationals();
+> A := MatrixAlgebra(K, 3);
+> T, phi := CommutatorTensor(A);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 9 over Rational Field
+U1 : Full Vector space of degree 9 over Rational Field
+U0 : Full Vector space of degree 9 over Rational Field
+> 
+> R2 := Radical(T, 2);
+> R2.1 @@ phi;
+[1 0 0]
+[0 1 0]
+[0 0 1]
+> Radical(T);
+<
+    Vector space of degree 9, dimension 1 over Rational Field
+    Echelonized basis:
+    (1 0 0 0 1 0 0 0 1),
+
+    Vector space of degree 9, dimension 1 over Rational Field
+    Echelonized basis:
+    (1 0 0 0 1 0 0 0 1)
+>
+\end{code}
+
+Similarly, the image of {\tt T} will be 8-dimensional in $\mathbb{Q}^9$, so the coradical is $\mathbb{Q}$.
+\begin{code}
+> Image(T);
+Vector space of degree 9, dimension 8 over Rational Field
+Generators:
+( 1  0  0  0  0  0  0  0 -1)
+( 0  1  0  0  0  0  0  0  0)
+( 0  0  1  0  0  0  0  0  0)
+( 0  0  0  1  0  0  0  0  0)
+( 0  0  0  0  1  0  0  0 -1)
+( 0  0  0  0  0  1  0  0  0)
+( 0  0  0  0  0  0  1  0  0)
+( 0  0  0  0  0  0  0  1  0)
+Echelonized basis:
+( 1  0  0  0  0  0  0  0 -1)
+( 0  1  0  0  0  0  0  0  0)
+( 0  0  1  0  0  0  0  0  0)
+( 0  0  0  1  0  0  0  0  0)
+( 0  0  0  0  1  0  0  0 -1)
+( 0  0  0  0  0  1  0  0  0)
+( 0  0  0  0  0  0  1  0  0)
+( 0  0  0  0  0  0  0  1  0)
+> Coradical(T);
+Full Vector space of degree 1 over Rational Field
+Mapping from: Full Vector space of degree 9 over Rational Field to Full
+Vector space of degree 1 over Rational Field
+\end{code}
+\end{example}
+
 
 \subsection{Invariants for bilinear tensors}
 
-The following are used only for tensors of valence 2.
+The following intrinsics are specialized for tensors of valence 3, but equivalent intrinsics for general tensors are presented in the proceeding subsection.
 
 \index{AdjointAlgebra}
 \begin{intrinsics}
 AdjointAlgebra(B) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
-Returns the adjoint $*$-algebra of the given bilinear map. 
+Returns the adjoint $*$-algebra of the given Hermitian bilinear map $B$, represented on $\End(U_2)$. 
+This is using algorithms from {\sc StarAlge}, see the {\tt AdjointAlgebra} intrinsic in \cite{BW:StarAlge}.
+If the current version of {\sc StarAlge} is not attached, the default {\sc Magma} version will be used instead.
 
-\begin{example}[Ten\_Adj\_Alg]
-We get a pair of random cotensors from the exterior square of $V=\mathbb{F}_5^{10}$ and compute its adjoint $*$-algebra as a tensor.
+\begin{example}[AdjointAlge]
 
+Given the context of \cite{BW:isometry}, we construct a tensor from a $p$-group and compute its adjoint algebra.
 \begin{code}
-> V := VectorSpace(GF(5),10);
-> E := ExteriorCotensorSpace(V,2);
-> E;
-Cotensor space of dimension 45 over GF(5) with valence 1
-U2 : Full Vector space of degree 10 over GF(5)
-U1 : Full Vector space of degree 10 over GF(5)
-> 
-> T := Random(E);
-> S := Random(E);
-> CT := SubTensorSpace(E,[T,S]);
-> T2 := AsTensor(CT);
-> T2;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 10 over GF(5)
-U1 : Full Vector space of degree 10 over GF(5)
-U0 : Full Vector space of degree 2 over GF(5)
-> 
-> A := AdjointAlgebra(T2);
+> G := SmallGroup(3^7, 7000);
+> T := pCentralTensor(G);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over GF(3)
+U1 : Full Vector space of degree 4 over GF(3)
+U0 : Full Vector space of degree 3 over GF(3)
+\end{code}
+
+Unlike other intrinsics that compute invariants of tensors, {\tt AdjointAlgebra} exploits the fact that {\tt T} is Hermitian so that the adjoint algebra is faithfully represented on $\End(U_2)=\End(U_1)$. 
+\begin{code}
+> A := AdjointAlgebra(T);
+> A;
+Matrix Algebra of degree 4 and dimension 4 with 4 generators over GF(3)
+> A.1;
+[1 0 0 0]
+[0 0 0 0]
+[0 0 0 0]
+[0 0 0 1]
+\end{code}
+
+Because {\tt A} is constructed from algorithms in {\sc StarAlge}, we can apply other algorithms from that package specifically dealing with the involution on {\tt A}.
+\begin{code}
 > RecognizeStarAlgebra(A);
 true
+> SimpleParameters(A);
+[ <"symplectic", 2, 3> ]
 > Star(A);
-Mapping from: AlgMat: A to AlgMat: A given by a rule [no 
-inverse]
+Mapping from: AlgMat: A to AlgMat: A given by a rule [no inverse]
 \end{code}
 \end{example}
 
@@ -2567,21 +2685,84 @@ inverse]
 LeftNucleus(B) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
-Returns the left nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_2)\times \text{End}_K(U_0)$.
+Returns the left nucleus of the bilinear map $B$ as a subalgebra of $\End(U_2)^\op\times \End(U_0)^\op$.
 
 \index{MidNucleus!bilinear} 
 \begin{intrinsics}
 MidNucleus(B) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
-Returns the mid nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_2)\times \text{End}_K(U_1)$.
+Returns the mid nucleus of the bilinear map $B$ as a subalgebra of $\End(U_2)\times \End(U_1)^\op$.
 
 \index{RightNucleus!bilinear}
 \begin{intrinsics}
 RightNucleus(B) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
-Returns the right nucleus of the bilinear map $B$ as a subalgebra of $\text{End}_K(U_1)\times \text{End}_K(U_0)$.
+Returns the right nucleus of the bilinear map $B$ as a subalgebra of $\End(U_1)\times \End(U_0)$.
+
+\begin{example}[GoingNuclear]
+
+We will verify a theorem from \cite{FMW:densors} and \cite{Wilson:LMR}: all the nuclei of a tensor embed into the derivation algebra. 
+We construct the tensor given by $(3\times 4\times 5)$-matrix multiplcation.
+\begin{code}
+> K := Rationals();
+> A := KMatrixSpace(K, 3, 4);
+> B := KMatrixSpace(K, 4, 5);
+> C := KMatrixSpace(K, 3, 5);
+> F := func< x | x[1]*x[2] >;
+> T := Tensor([A, B, C], F);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 12 over Rational Field
+U1 : Full Vector space of degree 20 over Rational Field
+U0 : Full Vector space of degree 15 over Rational Field
+\end{code}
+
+Because matrix multiplication is associative, the left, middle, and right nuclei contain $\mathbb{M}_3(\mathbb{Q})$, $\mathbb{M}_4(\mathbb{Q})$, and $\mathbb{M}_5(\mathbb{Q})$ respectively.
+In fact, the following computation shows that this is equality.
+\begin{code}
+> L := LeftNucleus(T);
+> M := MidNucleus(T);
+> R := RightNucleus(T);
+> Dimension(L), Dimension(M), Dimension(R);
+9 16 25
+> D := DerivationAlgebra(T);
+> Dimension(D);
+49
+\end{code}
+
+Now we will embed these nuclei into the derivation algebra of {\tt T}. 
+\begin{code}
+> Omega := KMatrixSpace(K, 47, 47);
+> Z1 := ZeroMatrix(K, 20, 20);
+> L2, L_L2 := Induce(L, 2);
+> L0, L_L0 := Induce(L, 0);
+> embedL := map< L -> Omega | x :-> 
+>     DiagonalJoin(<Transpose(x @ L_L2), Z1, Transpose(x @ L_L0)>) >;
+> 
+> Z0 := ZeroMatrix(K, 15, 15);
+> M2, M_M2 := Induce(M, 2);
+> M1, M_M1 := Induce(M, 1);
+> embedM := map< M -> Omega | x :->
+>     DiagonalJoin(<x @ M_M2, -Transpose(x @ M_M1), Z0>) >;
+> 
+> Z2 := ZeroMatrix(K, 12, 12);
+> R1, R_R1 := Induce(R, 1);
+> R0, R_R0 := Induce(R, 0);
+> embedR := map< R -> Omega | x :->
+>     DiagonalJoin(<Z2, x @ R_R1, x @ R_R0>) >;
+> 
+> Random(Basis(L)) @ embedL in D;
+true
+> Random(Basis(M)) @ embedM in D;
+true
+> Random(Basis(R)) @ embedR in D;
+true
+\end{code}
+\end{example}
+
+
 
 \subsection{Invariants of general multilinear maps}
 
@@ -2592,81 +2773,115 @@ The following functions can be used for general multilinear maps.
 Centroid(T) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
-Returns the centroid of the tensor as a subalgebra of $\prod_{i=0}^v\text{End}_K(U_i)$.
+Returns the centroid of the tensor as a subalgebra of $\prod_{a\in[\vav]}\End(U_a)$.
 
-\begin{example}[Ten\_Centroid]
-We will compute the centroid of the tensor given by field multiplication in $\mathbb{F}_{3^{25}}$ as a subalgebra of $M_{25}(\mathbb{F}_3)$.
+\begin{example}[Centroid]
 
+The centroid $C$ of a tensor $t$ is the largest ring for which $t$ is $C$-linear, see \cite{FMW:densors}*{Theorem~D}. 
+To demonstrate this, we will construct the tensor given by multiplication of the splitting field of $f(x)=x^4-x^2-2$ over $\mathbb{Q}$.
+However, this field won't explicitly be given with the tensor data.
 \begin{code}
-> A := MatrixAlgebra(GF(3),25);
-> f := RandomIrreduciblePolynomial(GF(3),25);
-> S := sub< A | CompanionMatrix(f) >; // GF(3^25) inside A
-> T := Tensor(S);
+> A := MatrixAlgebra(Rationals(), 4);
+> R<x> := PolynomialRing(Rationals());
+> F := sub< A | A!1, CompanionMatrix(x^4-x^2-2) >;
+> F;
+Matrix Algebra of degree 4 with 2 generators over Rational Field
+> T := Tensor(F);
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Matrix Algebra of degree 25 with 1 generator over GF(3)
-U1 : Matrix Algebra of degree 25 with 1 generator over GF(3)
-U0 : Matrix Algebra of degree 25 with 1 generator over GF(3)
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 4 over Rational Field
+\end{code}
+
+The centroid is the field $\mathbb{Q}(\sqrt{2},i)$. 
+\begin{code}
 > C := Centroid(T);
-> Dimension(C);
-25
-> Ngens(C);
-1
+> C;
+Matrix Algebra of degree 12 with 4 generators over Rational Field
+> sub< C | C.1 > eq C;
+true
+> forall{ c : c in Generators(C) | IsInvertible(c) };
+true
+> IsCommutative(C);
+true
+> MinimalPolynomial(C.1);
+x^4 + 2*x^2 - 8
+> Factorization(MinimalPolynomial(C.1));
+[
+    <x^2 - 2, 1>,
+    <x^2 + 4, 1>
+]
 \end{code}
 \end{example}
+
 
 \index{DerivationAlgebra!tensor}
 \begin{intrinsics}
 DerivationAlgebra(T) : TenSpcElt -> AlgMatLie
 \end{intrinsics}
 
-Returns the derivation Lie algebra of the tensor as a Lie subalgebra of $\prod_{i=0}^v\text{End}_K(U_i)$.
+Returns the derivation Lie algebra of the tensor as a Lie subalgebra of $\prod_{a\in[\vav]}\End(U_a)$.
 
 \index{Nucleus}
 \begin{intrinsics}
 Nucleus(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
 \end{intrinsics}
 
-Returns the $st$-nucleus ($s\ne t$) of the tensor as a subalgebra of $\text{End}_K(U_i)\times \text{End}_K(U_j)$, 
+Returns the $\{s,t\}$-nucleus ($s\ne t$) of the tensor as a subalgebra of $\End(U_i)\times \End(U_j)$, 
 where $i=\max(s,t)$ and $j=\min(s,t)$.
+If $j>0$, then replace $\End(U_j)$ with $\End(U_j)^\op$. 
 
-\begin{example}[Ten\_Der\_Nuc]
-We first construct the derivation of the quaternion algebra over $\mathbb{Q}$ and verify that it is of type $A_1$.
+\begin{example}[RestrictDerivation]
 
+In a previous example, we embeded the nuclei of a tensor into the derivation algebra. 
+For a tensor $t: U_{\vav}\times \cdots\times U_1\rightarrowtail U_0$, the derivation algebra is represented in $\Omega=\prod_{a\in[\vav]}\mathfrak{gl}(U_a)$.
+We will restrict the derivation algebra to $\prod_{a\notin\{s,t\}} \mathfrak{gl}(U_a)$ for distinct $s,t\in[\vav]$. 
+From \cite{FMW:densors}*{Lemma~4.11}, the kernel of this restriction is equal to Nuc$_{\{s,t\}}(t)^-$.
+We will just verify that the dimensions match.
+
+We will construct a tensor given by matrix multiplcation: 
+\[ \mathbb{M}_{3\times 4}(\mathbb{F}_2)\times \mathbb{M}_{4\times 2}(\mathbb{F}_2) \times \mathbb{M}_{2\times 2}(\mathbb{F}_2) \rightarrowtail \mathbb{M}_{3\times 2}(\mathbb{F}_2) .\]
 \begin{code}
-> H := QuaternionAlgebra(Rationals(),-1,-1);
-> T := Tensor(H);                           
+> A := KMatrixSpace(GF(2), 3, 4);
+> B := KMatrixSpace(GF(2), 4, 2);
+> C := KMatrixSpace(GF(2), 2, 2);
+> D := KMatrixSpace(GF(2), 3, 2);
+> trip := func< x | x[1]*x[2]*x[3] >;
+> T := Tensor([A, B, C, D], trip);
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Quaternion Algebra with base ring Rational Field, 
-defined by i^2 = -1, j^2 = -1
-U1 : Quaternion Algebra with base ring Rational Field, 
-defined by i^2 = -1, j^2 = -1
-U0 : Quaternion Algebra with base ring Rational Field, 
-defined by i^2 = -1, j^2 = -1
-> D := DerivationAlgebra(T);
-> SemisimpleType(D);
-A1
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 12 over GF(2)
+U2 : Full Vector space of degree 8 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 6 over GF(2)
 \end{code}
 
-Now we verify that the mid nucleus of $T$ is the quaternion algebra.
-
+Now we will compute the derivation algebra of {\tt T}. 
+We choose $s=3$ and $t=2$, so the $\{3,2\}$-nucleus is $\mathbb{M}_{4\times 4}(\mathbb{F}_2)$.
 \begin{code}
-> ChangeTensorCategory(~T,HomotopismCategory(2));
-> N := Nucleus(T,2,1);
-> Dimension(N);
-4
-> N.1^2 eq N!-1;
-true
-> N.2^2 eq N!-1;
-true
-> N.1*N.2 eq -N.2*N.1;
-true
+> D := DerivationAlgebra(T);
+> Dimension(D);
+32
+> N32 := Nucleus(T, 3, 2);
+> N32;
+Matrix Algebra of degree 20 with 16 generators over GF(2)
+\end{code}
+
+To construct the restriction of $\Der(\texttt{T})$ into $\mathfrak{gl}(U_1)\times\mathfrak{gl}(U_0)$ we will use the {\tt Induce} function. 
+\begin{code}
+> Omega_10 := KMatrixSpace(GF(2), 10, 10);
+> D_vs := sub< KMatrixSpace(GF(2), 30, 30) | Basis(D) >;
+> D1, pi1 := Induce(D, 1);
+> D0, pi0 := Induce(D, 0);
+> res := hom< D_vs -> Omega_10 | 
+>     [<x, DiagonalJoin(x @ pi1, x @ pi0)> : x in Basis(D)] >;
+> res;
+Mapping from: ModMatFld: D_vs to ModMatFld: Omega_10
+> Kernel(res);
+KMatrixSpace of 30 by 30 matrices and dimension 16 over GF(2)
 \end{code}
 \end{example}
-
-If the centroid of a tensor is a commutative local ring, we can rewrite a tensor over its centroid.
-We employ the algorithms developed by Brooksbank and Wilson \cite{BW:Module-iso} to efficiently determine if a matrix algebra is cyclic.
 
 \index{TensorOverCentroid}
 \begin{intrinsics}
@@ -2675,29 +2890,45 @@ TensorOverCentroid(T) : TenSpcElt -> TenSpcElt, Hmtp
 
 If the given tensor $T$ is framed by $K$-vector spaces, then the returned tensor is framed by $E$-vector spaces where $E$ is the residue field of the centroid. 
 The returned homotopism is an isotopism of the $K$-tensors.
+This only works if the centroid of $T$ is a finite commutative local ring.
+We employ the algorithms developed by Brooksbank and Wilson \cite{BW:Module-iso} to efficiently determine if a matrix algebra is cyclic, see Appendix~\ref{append:cyclic}.
 
-\begin{example}[Ten\_Over\_Cen]
-We construct a pc presentation of the upper unitriangular matrices over $\mathbb{F}_{1024}$. 
-This will ``forget'' the field structure of our group, so that the tensor given by the commutator will be over $\mathbb{F}_2$.
-We will use the centroid to rewrite our tensor as an alternating form over $\mathbb{F}_{1024}$.
+\begin{example}[CentroidUnipotent]
 
+In the context of groups, centroids can be used to recover an underlying field of a matrix group, even if the given group is not input as such.
+Here we will construct the exponent-$p$ central tensor of the Sylow 2-subgroup of $\GL(3,\GF(2^{10}))$. 
+We will not print the {\tt GrpPC} version of this group as the number of relations is very large.
 \begin{code}
-> G := ClassicalSylow( GL(3,1024), 2 );
-> P := PCPresentation( UnipotentMatrixGroup(G) );
-> T := pCentralTensor(P,1,1);
+> U := ClassicalSylow(GL(3, 2^10), 2);
+> U.3;
+[       1    $.1^2        0]
+[       0        1        0]
+[       0        0        1]
+> G := PCPresentation(UnipotentMatrixGroup(U));
+> #G eq 2^30;
+true
+> T := pCentralTensor(G);
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
+Tensor of valence 3, U2 x U1 >-> U0
 U2 : Full Vector space of degree 20 over GF(2)
 U1 : Full Vector space of degree 20 over GF(2)
 U0 : Full Vector space of degree 10 over GF(2)
-> TC := TensorOverCentroid(T);
-> TC;
-Tensor of valence 2, U2 x U1 >-> U0
+\end{code}%$
+
+Even though our tensor right now is $\mathbb{F}_2^{20}\times \mathbb{F}_2^{20}\rightarrowtail\mathbb{F}_2^{10}$, we know it is the 2-dimensional alternating form over $\GF(2^{10})$. 
+We will construct the centroid, and then rewrite our tensor over the centroid to get the tensor we expect.
+\begin{code}
+> C := Centroid(T);
+> C;
+Matrix Algebra of degree 50 and dimension 10 with 1 generator over GF(2)
+> IsCyclic(C) and IsSimple(C);
+true
+> S := TensorOverCentroid(T);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
 U2 : Full Vector space of degree 2 over GF(2^10)
 U1 : Full Vector space of degree 2 over GF(2^10)
 U0 : Full Vector space of degree 1 over GF(2^10)
-> IsAlternating(TC);
-true
 \end{code}
 \end{example}
 
@@ -2709,6 +2940,37 @@ Discriminant(B) : TenSpcElt -> RngMPolElt
 
 Returns the discriminant of the bilinear map.
 
+\begin{example}[DiscriminatingOctonions]
+
+We will compute the discriminant of the tensor $\cdot :\mathbb{O}\times\mathbb{O}\rightarrowtail\mathbb{O}$.
+The discriminant of this tensor is homogeneous of degree 8 with 330 terms.
+\begin{code}
+> A := OctonionAlgebra(GF(7), -1, -1, -1);
+> T := Tensor(A);
+> T;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 8 over GF(7)
+U1 : Full Vector space of degree 8 over GF(7)
+U0 : Full Vector space of degree 8 over GF(7)
+> R<a,b,c,d,e,f,g,h> := PolynomialRing(GF(7), 8);
+> disc := R!Discriminant(T);
+> Degree(disc);
+8
+> IsHomogeneous(disc);
+true
+> #Terms(disc);
+330
+\end{code}
+
+However, if we factor the discriminant, then we can see that $\texttt{disc} = \left(x_1^2 + \cdots x_8^2\right)^4$.
+\begin{code}
+> Factorization(disc);
+[
+    <a^2 + b^2 + c^2 + d^2 + e^2 + f^2 + g^2 + h^2, 4>
+]
+\end{code}
+\end{example}
+
 \index{Pfaffian}
 \begin{intrinsics}
 Pfaffian(B) : TenSpcElt -> RngMPolElt
@@ -2716,45 +2978,78 @@ Pfaffian(B) : TenSpcElt -> RngMPolElt
 
 Returns the Pfaffian of the antisymmetric bilinear map.
 
-\begin{example}[Ten\_Disc\_Pfaff]
-We construct the discriminant and the Pfaffian of an antisymmetric 2-tensor.
+\begin{example}[Genus2Pfaff]
 
+In this demonstration, we pull from \cite{BMW:genus2}.
+A $p$-group $G$ has genus 2, if the image of the exponent-$p$ central tensor of $G$ is 2-dimensional over the centroid. 
+One of the algorithms in \cite{BMW:genus2} to decide isomorphism of such groups depends on the Pfaffian of the tensor. 
+
+First, we create two $3$-groups with genus 2. 
+The first group we create as a quotient of the Sylow 3-subgroup of $\GL(3,\GF(3^5))$. 
 \begin{code}
-> J := Matrix(GF(7),[[0,1],[-1,0]]);
-> J;
-[0 1]
-[6 0]
-> M := [ InsertBlock(ZeroMatrix(GF(7),4,4),J,i,i) 
-      : i in [1..3] ]; 
-> M;
-[
-    [0 1 0 0]
-    [6 0 0 0]
-    [0 0 0 0]
-    [0 0 0 0],
+> P := ClassicalSylow(GL(3, 3^5), 3);
+> P := PCPresentation(UnipotentMatrixGroup(P));
+> Z := Center(P);
+> N := sub< Z | [Random(Z) : i in [1..3]] >;
+> G := P/N;
+\end{code}
 
-    [0 0 0 0]
-    [0 0 1 0]
-    [0 6 0 0]
-    [0 0 0 0],
+The second group we create will be a quotient of the Sylow 3-subgroup of the  of $\GL(3, \GF(9))\times\GL(3, \GF(27))$. 
+\begin{code}
+> A := ClassicalSylow(GL(3, 9), 3);
+> B := ClassicalSylow(GL(3, 27), 3);
+> A := PCPresentation(UnipotentMatrixGroup(A));
+> B := PCPresentation(UnipotentMatrixGroup(B));
+> Q, inc := DirectProduct(A, B);
+> ZA := Center(A);
+> ZB := Center(B);
+> gens := [(ZA.i@inc[1])*(ZB.i@inc[2])^-1 : i in [1..2]] \
+>     cat [ZB.3@inc[2]];
+> M := sub< Q | gens >;
+> H := Q/M;
+\end{code}
 
-    [0 0 0 0]
-    [0 0 0 0]
-    [0 0 0 1]
-    [0 0 6 0]
-]
-> T := Tensor(M,2,1);
+Now we will construct the exponent-$p$ central tensors of \texttt{G} and \texttt{H}. 
+From the way we have created the groups, $G\cong H$ if, and only if, their tensors are pseudo-isometric.
+\begin{code}
+> T := pCentralTensor(G);
 > T;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full Vector space of degree 4 over GF(7)
-U1 : Full Vector space of degree 4 over GF(7)
-U0 : Full Vector space of degree 3 over GF(7)
-> Discriminant(T);
-$.1^2*$.3^2
-> Pfaffian(T);
-$.1*$.3
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(3)
+U1 : Full Vector space of degree 10 over GF(3)
+U0 : Full Vector space of degree 2 over GF(3)
+> 
+> S := pCentralTensor(H);
+> S;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(3)
+U1 : Full Vector space of degree 10 over GF(3)
+U0 : Full Vector space of degree 2 over GF(3)
+\end{code}
+
+An implication of the main algorithm in \cite{BMW:genus2} is that if the splitting behavior of the Pfaffians are different, then the groups are not isomorphic.
+Therefore, because the Pfaffian of $G$ has a different splitting behavior from the Pfaffian of $H$, we conclude that $G\not\cong H$. 
+\begin{code}
+> R<x,y> := PolynomialRing(GF(3), 2);
+> f := R!Pfaffian(T);
+> g := R!Pfaffian(S);
+> f;
+x^5 + x^3*y^2 + 2*x^2*y^3 + 2*x*y^4 + y^5
+> g;
+x^5 + 2*x^4*y + x^3*y^2 + 2*x^2*y^3 + x*y^4 + y^5
+> Factorization(f), Factorization(g);
+[
+    <x^5 + x^3*y^2 + 2*x^2*y^3 + 2*x*y^4 + y^5, 1>
+]
+[
+    <x^2 + x*y + 2*y^2, 1>,
+    <x^3 + x^2*y + x*y^2 + 2*y^3, 1>
+]
 \end{code}
 \end{example}
+
+
+
 
 \section{Exporting tensors}
 Tensors can be used define algebraic structures such as groups and algebras.

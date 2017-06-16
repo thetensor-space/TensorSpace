@@ -82,7 +82,7 @@ __Derivations := function( M )
         temp := [ x[l] : l in [1..#x] ] cat [i];
         r[ &+[ d^2 : d in dims ] + k + (i-1)*d ] -:= Slice(M,[{t} : t in temp])[1]; 
       end for;
-      for i in [1..M`Valence] do
+      for i in [1..#dims] do
         for j in [1..dims[i]] do
           temp := [ x[l] : l in [1..#x] ] cat [k];
           temp[i] := j; // represents the endomorphism from x[i] to e_j (jth basis element)
@@ -562,7 +562,7 @@ end function;
 // ==============================================================================
 //                             Linear algebra methods
 // ==============================================================================
-intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
+intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng
 {Returns the ith radical of t contained in Vi.}
   v := #t`Domain;
   require i ge 1 : "Argument must be a positive integer.";
@@ -581,6 +581,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
   D := t`Domain[v-i+1];
   B := Basis(D);
   V := VectorSpace(BaseRing(t),#B);
+  // is the map necessary?
   phi := map< D -> V | x:-> &+[ Coordinates( D, x )[j]*V.j : j in [1..#B] ], y:-> &+[ Coordinates( V, y )[j]*B[j] : j in [1..#B] ] >;
   vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
@@ -596,7 +597,7 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng, Map
     printf "  DONE!\n";
   end if;
   t`Radicals[v-i+1] := <R,phi>;
-  return R,phi;
+  return R;
 end intrinsic;
 
 intrinsic Coradical( M::TenSpcElt ) -> ModTupRng, Map
