@@ -3,12 +3,12 @@ R<x> := PolynomialRing(GF(p));
 I := ideal< R | x^p >;
 Q := quo< R | I >;
 Q;
-T := Tensor(Q);
-T;
-TensorCategory(T);
+t := Tensor(Q);
+t;
+TensorCategory(t);
 
 
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 IsSimple(D);
 Dimension(D);
 KillingForm(D);

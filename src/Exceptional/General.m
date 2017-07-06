@@ -67,7 +67,7 @@ intrinsic GenericTrace(x::AlgGenElt) -> FldElt
 	return -1*Eltseq(m)[d];  // arrays start at 1.
 end intrinsic;
 
-intrinsic GenericTracelessSubspaceBasis( A::AlgGen) -> .
+intrinsic GenericTracelessSubspaceBasis(A::AlgGen) -> .
 {Given a power associative algebra return a basis for the elements of generic trace 0}
 	T, mu := TensorOnVectorSpaces(Tensor(A));
 	V := Domain(T)[2];

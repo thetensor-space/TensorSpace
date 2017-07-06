@@ -612,9 +612,9 @@ intrinsic Coradical( M::TenSpcElt ) -> ModTupRng, Map
   return C,pi;
 end intrinsic;
 
-intrinsic Radical( M::TenSpcElt ) -> Tup
-{Returns the radical of M.}
-  return < Radical(M,i) : i in Reverse([1..#M`Domain]) >;
+intrinsic Radical( t::TenSpcElt ) -> Tup
+{Returns the radical of t.}
+  return < Radical(t,i) : i in Reverse([1..#t`Domain]) >;
 end intrinsic;
 
 intrinsic Centroid( t::TenSpcElt ) -> AlgMat
@@ -696,23 +696,23 @@ intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
   return D;
 end intrinsic;
 
-intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
-{Returns the ij-nucleus of the tensor t.}
-  require i ne j : "Integers must be distinct.";
+intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
+{Returns the ab-nucleus of the tensor t.}
+  require a ne b : "Integers must be distinct.";
   v := #t`Domain;
-  require {i,j} subset {0..v} : "Integers must correspond to Cartesian factors.";
+  require {a,b} subset {0..v} : "Integers must correspond to Cartesian factors.";
   if t`Cat`Contra then
-    require 0 notin {i,j} : "Integers must be positive for cotensors.";
+    require 0 notin {a,b} : "Integers must be positive for cotensors.";
   end if;
 
   // has it been computed before?
-  ind := Index(t`Nuclei[1],{i,j});
+  ind := Index(t`Nuclei[1],{a,b});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
   end if;
 
-  a := Maximum([i,j]);
-  b := Minimum([i,j]);
+  x := Maximum([a,b]);
+  y := Minimum([a,b]);
   try 
     _ := Eltseq(t);
   catch err
@@ -720,32 +720,32 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
   end try;
 
   if t`Valence eq 3 then
-    if {i,j} eq {0,1} then
-      Nij := __RightScalarsOfBimap(t);
-    elif {i,j} eq {0,2} then
-      Nij := __LeftScalarsOfBimap(t);
-    elif {i,j} eq {1,2} then
-      Nij := __AdjointOfBimap(t);
+    if {a,b} eq {0,1} then
+      Nab := __RightScalarsOfBimap(t);
+    elif {a,b} eq {0,2} then
+      Nab := __LeftScalarsOfBimap(t);
+    elif {a,b} eq {1,2} then
+      Nab := __AdjointOfBimap(t);
     end if;
   else
-    // shuffle a,b to v,v-1.
+    // shuffle x,y to v,v-1.
     perm := [0..v];
-    if #{a,b,v,v-1} eq 2 then
+    if #{x,y,v,v-1} eq 2 then
       perm := [ k : k in [0..v] ];
-    elif #{a,b,v,v-1} ne 3 then
-      perm[v+1] := a;
-      perm[v] := b;
-      perm[i+1] := v;
-      perm[j+1] := v-1;
+    elif #{x,y,v,v-1} ne 3 then
+      perm[v+1] := x;
+      perm[v] := y;
+      perm[a+1] := v;
+      perm[b+1] := v-1;
     else
-      k := Random(Exclude(Exclude({a,b,v-1,v},v-1),v));
-      l := Random(Exclude(Exclude({a,b,v-1,v},a),b));
-      perm[v+1] := a;
-      perm[v] := b;
+      k := Random(Exclude(Exclude({x,y,v-1,v},v-1),v));
+      l := Random(Exclude(Exclude({x,y,v-1,v},a),b));
+      perm[v+1] := x;
+      perm[v] := y;
       perm[k+1] := l;
     end if;
     s := Shuffle( t, perm ); 
-    Nij := __12Nucleus(s);
+    Nab := __12Nucleus(s);
   end if;
   
   if __SANITY_CHECK then
@@ -756,25 +756,25 @@ intrinsic Nucleus( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> AlgMat
       x[k] := x[k]*B;
       return x;
     end function;
-    for x in [Random(Nij) : r in [1..20]] do
-      X := ExtractBlock( x, 1, 1, Dimension(spaces[a+1]), Dimension(spaces[a+1]) );
-      Y := ExtractBlock( x, Dimension(spaces[a+1])+1, Dimension(spaces[a+1])+1, Dimension(spaces[b+1]), Dimension(spaces[b+1]) );
-      if a eq 0 then
+    for z in [Random(Nab) : r in [1..20]] do
+      X := ExtractBlock( z, 1, 1, Dimension(spaces[x+1]), Dimension(spaces[x+1]) );
+      Y := ExtractBlock( z, Dimension(spaces[x+1])+1, Dimension(spaces[x+1])+1, Dimension(spaces[y+1]), Dimension(spaces[y+1]) );
+      if x eq 0 then
         assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          (B @ tvs) * X eq MultiplyByBlock(B,Y,v-b+1) @ tvs };
-      elif b eq 0 then
+          (B @ tvs) * X eq MultiplyByBlock(B,Y,v-y+1) @ tvs };
+      elif y eq 0 then
         assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          MultiplyByBlock(B,X,v-a+1) @ tvs eq (B @ tvs) * Y };
+          MultiplyByBlock(B,X,v-x+1) @ tvs eq (B @ tvs) * Y };
       else
         assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          MultiplyByBlock(B,X,v-a+1) @ tvs eq MultiplyByBlock(B,Transpose(Y),v-b+1) @ tvs };
+          MultiplyByBlock(B,X,v-x+1) @ tvs eq MultiplyByBlock(B,Transpose(Y),v-y+1) @ tvs };
       end if;
     end for;
     printf "  DONE!\n";
   end if;
-  Nij`DerivedFrom := < t, [v-a+1,v-b+1] >;
-  t`Nuclei[2][ind] := Nij;
-  return Nij;
+  Nab`DerivedFrom := < t, [v-x+1,v-y+1] >;
+  t`Nuclei[2][ind] := Nab;
+  return Nab;
 end intrinsic;
 
 intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp

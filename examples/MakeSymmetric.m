@@ -1,10 +1,10 @@
 A := MatrixAlgebra(Rationals(), 3);
-T := Tensor(A);
-T;
-SystemOfForms(T)[1];
+t := Tensor(A);
+t;
+SystemOfForms(t)[1];
 
 
-S := SymmetricTensor(T);
-S;
-SystemOfForms(S)[1];
+s := SymmetricTensor(t);
+s;
+SystemOfForms(s)[1];
 

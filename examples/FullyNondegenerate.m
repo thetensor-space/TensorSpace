@@ -6,15 +6,15 @@ mult := function(x)
   v := VectorSpace(K, 3)!(Eltseq(x[2])[[1,3,5]]);
   return Eltseq(v*M) cat [0,0];
 end function;
-T := Tensor([V, U, U], mult);
-T;
+t := Tensor([V, U, U], mult);
+t;
 
 
-IsFullyNondegenerate(T);
-Image(T);
+IsFullyNondegenerate(t);
+Image(t);
 
 
-S, H := FullyNondegenerateTensor(T);
-S;
+s, H := FullyNondegenerateTensor(s);
+s;
 H;
 

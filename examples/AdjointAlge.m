@@ -1,9 +1,9 @@
 G := SmallGroup(3^7, 7000);
-T := pCentralTensor(G);
-T;
+t := pCentralTensor(G);
+t;
 
 
-A := AdjointAlgebra(T);
+A := AdjointAlgebra(t);
 A;
 A.1;
 

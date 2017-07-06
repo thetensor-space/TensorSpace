@@ -1,17 +1,17 @@
 A := MatrixAlgebra(Rationals(), 4);
-J := AnticommutatorTensor(A);
-J;
-SystemOfForms(J)[1];
-A.1*J*A.1;
+t := AnticommutatorTensor(A);
+t;
+SystemOfForms(t)[1];
+A.1*t*A.1;
 
 
-T := (1/2)*J;
-T;
-A.1*T*A.1;
+s := (1/2)*t;
+s;
+A.1*s*A.1;
 
 
-IsSymmetric(T);
-JordanID := func< x, y | (x*T*y)*T*(x*T*x) - x*T*(y*T*(x*T*x)) >;
+IsSymmetric(s);
+JordanID := func< x, y | (x*s*y)*s*(x*s*x) - x*s*(y*s*(x*s*x)) >;
 forall{ <x,y> : x in Basis(A), y in Basis(A) | \
-    JordanIdentity(x, y) eq Codomain(T)!0 };
+    JordanIdentity(x, y) eq Codomain(s)!0 };
 

@@ -3,15 +3,15 @@ A := KMatrixSpace(K, 3, 4);
 B := KMatrixSpace(K, 4, 5);
 C := KMatrixSpace(K, 3, 5);
 F := func< x | x[1]*x[2] >;
-T := Tensor([A, B, C], F);
-T;
+t := Tensor([A, B, C], F);
+t;
 
 
-L := LeftNucleus(T);
-M := MidNucleus(T);
-R := RightNucleus(T);
+L := LeftNucleus(t);
+M := MidNucleus(t);
+R := RightNucleus(t);
 Dimension(L), Dimension(M), Dimension(R);
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 Dimension(D);
 
 

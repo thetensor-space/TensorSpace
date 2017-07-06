@@ -1,11 +1,11 @@
 K := Rationals();
 L := LieAlgebra("A1", K);
-T := AssociatorTensor(L);
-T;
+t := AssociatorTensor(L);
+t;
 
-Eltseq(T);
+Eltseq(t);
 
 
 
-AsMatrices(T, 3, 1)[1..4];
+AsMatrices(t, 3, 1)[1..4];
 

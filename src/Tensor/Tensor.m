@@ -433,10 +433,10 @@ intrinsic Tensor( A::Alg ) -> TenSpcElt, Map
   return S, maps[1];
 end intrinsic;
 
-intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, List
-{Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
-  require s gt 0 : "First index must be positive.";
-  require t gt 0 : "Second index must be positive.";
+intrinsic pCentralTensor( G::Grp, p::RngIntElt, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, List
+{Returns the tensor La x Lb >-> La+b from the associated Lie algebra from the p-central series of G.}
+  require a gt 0 : "First index must be positive.";
+  require b gt 0 : "Second index must be positive.";
   try
     pcs := pCentralSeries(G,p);
   catch err
@@ -444,53 +444,53 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   end try;
 
   // pad s with trivial subs if s, t require it.
-  if s gt #pcs then
-    pcs[s] := sub< G | >;
-  elif s+1 gt #pcs then
-    pcs[s+1] := sub< G | >;
-  elif t gt #pcs then
-    pcs[t] := sub< G | >;
-  elif t+1 gt #pcs then 
-    pcs[t+1] := sub< G | >;
-  elif s+t gt #pcs then
-    pcs[s+t] := sub< G | >;
-  elif s+t+1 gt #pcs then
-    pcs[s+t+1] := sub< G | >;
+  if a gt #pcs then
+    pcs[a] := sub< G | >;
+  elif a+1 gt #pcs then
+    pcs[a+1] := sub< G | >;
+  elif b gt #pcs then
+    pcs[b] := sub< G | >;
+  elif b+1 gt #pcs then 
+    pcs[b+1] := sub< G | >;
+  elif a+b gt #pcs then
+    pcs[a+b] := sub< G | >;
+  elif a+b+1 gt #pcs then
+    pcs[a+b+1] := sub< G | >;
   end if;
 
   // take quotients in G to get to vector spaces.
-  if pcs[s] ne pcs[s+1] then
-    U1,f1 := GModule( G, pcs[s], pcs[s+1] );
+  if pcs[a] ne pcs[a+1] then
+    U1,f1 := GModule( G, pcs[a], pcs[a+1] );
     V1 := VectorSpace( GF(p), Dimension(U1) );
     g1 := hom< U1 -> V1 | [ < U1.i, V1.i > : i in [1..Dimension(U1)] ] >;
     h1 := f1*g1;
   else
     V1 := VectorSpace( GF(p), 0 );
-    h1 := map< pcs[s] -> V1 | x :-> V1!0, y :-> pcs[s]!1 >;
+    h1 := map< pcs[a] -> V1 | x :-> V1!0, y :-> pcs[a]!1 >;
   end if;
-  if pcs[t] ne pcs[t+1] then
-    U2,f2 := GModule( G, pcs[t], pcs[t+1] );
+  if pcs[b] ne pcs[b+1] then
+    U2,f2 := GModule( G, pcs[b], pcs[b+1] );
     V2 := VectorSpace( GF(p), Dimension(U2) );
     g2 := hom< U2 -> V2 | [ < U2.i, V2.i > : i in [1..Dimension(U2)] ] >;
     h2 := f2*g2;
   else
     V2 := VectorSpace( GF(p), 0 );
-    h2 := map< pcs[t] -> V2 | x :-> V2!0, y :-> pcs[t]!1 >;
+    h2 := map< pcs[b] -> V2 | x :-> V2!0, y :-> pcs[b]!1 >;
   end if;
-  if pcs[s+t] ne pcs[s+t+1] then
-    U3,f3 := GModule( G, pcs[s+t], pcs[s+t+1] );
+  if pcs[a+b] ne pcs[a+b+1] then
+    U3,f3 := GModule( G, pcs[a+b], pcs[a+b+1] );
     V3 := VectorSpace( GF(p), Dimension(U3) );
     g3 := hom< U3 -> V3 | [ < U3.i, V3.i > : i in [1..Dimension(U3)] ] >;
     h3 := f3*g3;
   else
     V3 := VectorSpace( GF(p), 0 );
-    h3 := map< pcs[s+t] -> V3 | x :-> V3!0, y :-> pcs[s+t]!1 >;
+    h3 := map< pcs[a+b] -> V3 | x :-> V3!0, y :-> pcs[a+b]!1 >;
   end if;
   
   F := function(x)
     return ( x[1] @@ h1, x[2] @@ h2 ) @ h3;
   end function;
-  if s eq t then
+  if a eq b then
     C := TensorCategory([1,1,1],{{0},{1,2}});
   else 
     C := HomotopismCategory(3);
@@ -498,8 +498,8 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, s::RngIntElt, t::RngIntElt ) -> 
   return __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C ), [* h1, h2, h3 *];
 end intrinsic;
 
-intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, List
-{Returns the tensor Ls x Lt >-> Ls+t from the associated Lie algebra from the p-central series of G.}
+intrinsic pCentralTensor( G::Grp, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, List
+{Returns the tensor La x Lb >-> La+b from the associated Lie algebra from the p-central series of G.}
   if Type(G) eq GrpMat then
     ord := LMGOrder(G);
   else
@@ -512,8 +512,22 @@ intrinsic pCentralTensor( G::Grp, s::RngIntElt, t::RngIntElt ) -> TenSpcElt, Lis
   order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
-  return pCentralTensor(G,p,s,t);
+  return pCentralTensor(G,p,a,b);
 end intrinsic;
+
+// included to overwrite the old version standard in Magma.
+intrinsic pCentralTensor( G::GrpPC, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, List
+{Returns the tensor La x Lb >-> La+b from the associated Lie algebra from the p-central series of G.}
+  try 
+    ord := #G;
+  catch err
+    error "Cannot compute the order of the group.";
+  end try;
+  order := Factorization(ord);
+  require #order eq 1 : "Group must be a p-group.";
+  p := order[1][1];
+  return pCentralTensor(G,p,a,b);
+end intrinsic
 
 intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, List
 {Returns the tensor L1 x L1 >-> L2 from the associated Lie algebra from the p-central series of G.}
@@ -563,15 +577,15 @@ end intrinsic;
 // ==============================================================================
 //                                  New from old
 // ==============================================================================
-intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt 
-{Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation g on the set [0..v-1].}
-  v := #M`Domain+1;
-  K := BaseRing(M);
+intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt 
+{Returns the Knuth-Liebler shuffle of t, with valence v, by the permutation g on the set [0..v-1].}
+  v := #t`Domain+1;
+  K := BaseRing(t);
   require IsField(K) : "Base ring must be a field.";
-  if M`Cat`Contra then
+  if t`Cat`Contra then
     require Labelling(Parent(g)) in {{1..v-1},{0..v-1}} : "Permutation must act on {1..v-1}.";
     if Labelling(Parent(g)) eq {1..v-1} then
-      g := Parent(M`Permutation)!([0] cat Eltseq(g));
+      g := Parent(t`Permutation)!([0] cat Eltseq(g));
     else
       require 0^g eq 0 : "Permutation must fix 0 for cotensors.";
     end if;
@@ -579,72 +593,72 @@ intrinsic Shuffle( M::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
     require Labelling(Parent(g)) eq {0..v-1} : "Permuation must act on {0..v-1}.";
   end if;
   try
-    _ := Eltseq(M);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
   g_elt := Reverse([ v-i : i in Eltseq(g) ]);
   ginv_elt := Reverse([ v-i : i in Eltseq(g^-1) ]);
-  spaces := __FRAME(M);
+  spaces := __FRAME(t);
   N_spaces := spaces[g_elt];
   D := N_spaces[1..v-1]; 
   C := N_spaces[v];
-  AF := AssociatedForm( M );
-  F := function( x )
+  AF := AssociatedForm(t);
+  F := function(x)
     seq := [];
     for c in Basis(C) do
       temp := [* v : v in x *] cat [* c *];
       y := < z : z in temp[ginv_elt] >; 
-      Append(~seq,Coordinates(AF`Codomain,y@AF));
+      Append(~seq,Coordinates(AF`Codomain, y@AF));
     end for;
     return C!seq;
   end function; 
 
   // Construct new tensor from the old one.
-  t := New(TenSpcElt);
+  s := New(TenSpcElt);
   dom := CartesianProduct( < X : X in D > );
   m := map< dom -> C | x :-> F(x) >;
-  t`Map := m;
-  t`Valence := #D+1;
-  t`Domain := D;
-  t`Codomain := C;
-  t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
-  t`Nuclei := [* [* S : S in Subsets( {0..t`Valence},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence},2 )] *] *];
-  t`Centroids := [* [* S : S in Subsets( {1..t`Valence},i ), i in Reverse([2..t`Valence]) *], [* 0 : i in [1..2^(t`Valence)-t`Valence-1] *] *];
+  s`Map := m;
+  s`Valence := #D+1;
+  s`Domain := D;
+  s`Codomain := C;
+  s`Radicals := [* 0 : i in [1..s`Valence] *]; // radical and coradical
+  s`Nuclei := [* [* S : S in Subsets( {0..s`Valence},2 ) *], [* 0 : i in [1..#Subsets( {0..s`Valence},2 )] *] *];
+  s`Centroids := [* [* S : S in Subsets( {1..s`Valence},i ), i in Reverse([2..s`Valence]) *], [* 0 : i in [1..2^(s`Valence)-s`Valence-1] *] *];
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
-  t`Reflexive := rec< rf | >;
-  if assigned M`Coerce then
-    t`Coerce := M`Coerce[g_elt];
+  s`Reflexive := rec< rf | >;
+  if assigned t`Coerce then
+    s`Coerce := t`Coerce[g_elt];
   end if;
-  if t`Valence eq 3 then
-    t := __GetBimapRecord(t);
+  if s`Valence eq 3 then
+    s := __GetBimapRecord(s);
   end if;
-  if assigned M`CoordImages then
-    t`CoordImages := M`CoordImages;
+  if assigned t`CoordImages then
+    s`CoordImages := t`CoordImages;
   end if;
-  t`Permutation := M`Permutation*g; 
-  t`Cat := New(TenCat);
-  t`Cat`Valence := v;
-  t`Cat`Arrows := map< {0..v} -> {-1,0,1} | x:->(x^g) @ M`Cat`Arrows >;
-  t`Cat`Repeats := { { x^(g^-1) : x in f } : f in M`Cat`Repeats };
-  t`Cat`Contra := M`Cat`Contra;
-  return t;
+  s`Permutation := t`Permutation*g; 
+  s`Cat := New(TenCat);
+  s`Cat`Valence := v;
+  s`Cat`Arrows := map< {0..v} -> {-1,0,1} | x:->(x^g) @ t`Cat`Arrows >;
+  s`Cat`Repeats := { { x^(g^-1) : x in f } : f in t`Cat`Repeats };
+  s`Cat`Contra := t`Cat`Contra;
+  return s;
 end intrinsic;
 
-intrinsic Shuffle( M::TenSpcElt, g::SeqEnum ) -> TenSpcElt
-{Returns the Knuth-Liebler shuffle of M, with valence v, by the permutation given by g on the set [0..v].}
-  if M`Cat`Contra then
-    isit, perm := IsCoercible(Sym({1..M`Valence-1}),g);
+intrinsic Shuffle( t::TenSpcElt, g::SeqEnum ) -> TenSpcElt
+{Returns the Knuth-Liebler shuffle of t, with valence v, by the permutation given by g on the set [0..v].}
+  if t`Cat`Contra then
+    isit, perm := IsCoercible(Sym({1..t`Valence-1}), g);
     if not isit then
-      isit, perm := IsCoercible(Sym({0..M`Valence-1}),g);
+      isit, perm := IsCoercible(Sym({0..t`Valence-1}), g);
       require isit : "Permutation must act on {1..v}.";
       require Index(g,0) eq 1 : "Permutation must fix 0.";
     end if;
   else
-    isit, perm := IsCoercible(Sym({0..M`Valence-1}),g);
+    isit, perm := IsCoercible(Sym({0..t`Valence-1}), g);
     require isit : "Permutation must act on {0..v}.";
   end if;
-  return Shuffle(M,perm);
+  return Shuffle(t, perm);
 end intrinsic;
 
 intrinsic AntisymmetricTensor( t::TenSpcElt ) -> TenSpcElt
@@ -730,42 +744,42 @@ end intrinsic;
 // ==============================================================================
 //                                      Forms
 // ==============================================================================
-intrinsic Tensor( M::[Mtrx], s::RngIntElt, t::RngIntElt, Cat::TenCat ) -> TenSpcElt
-{Returns the tensor given by the st-system of forms with the given tensor category.}  
-  require s ne t : "Integers must be distinct.";
-  require {s,t} subset {0..2} : "Integers must be contained in [0..2].";
+intrinsic Tensor( M::[Mtrx], a::RngIntElt, b::RngIntElt, Cat::TenCat ) -> TenSpcElt
+{Returns the tensor given by the (a,b)-system of forms with the given tensor category.}  
+  require a ne b : "Integers must be distinct.";
+  require {a,b} subset {0..2} : "Integers must be contained in [0..2].";
   require Cat`Valence eq 3 : "Tensor category incompatible.";
   if Cat`Contra then
-    require {s,t} subset {1,2} : "Integers must be contained in [1..2].";
+    require {a,b} subset {1,2} : "Integers must be contained in [1..2].";
     require #M eq 1 : "Does not represent a cotensor.";
   end if;
-  if s lt t then
+  if a lt b then
     M := [ Transpose(X) : X in M ];
   end if;
-  if {s,t} eq {1,2} then
+  if {a,b} eq {1,2} then
     S := &cat[ &cat[ [ M[k][i][j] : k in [1..#M] ] : j in [1..Ncols(M[1])] ] : i in [1..Nrows(M[1])] ];
     dims := [ Nrows(M[1]), Ncols(M[1]), #M ];
-  elif {s,t} eq {0,2} then
+  elif {a,b} eq {0,2} then
     S := &cat[ &cat[ Eltseq(M[k][i]) : k in [1..#M] ] : i in [1..Nrows(M[1])] ];
     dims := [ Nrows(M[1]), #M, Ncols(M[1]) ];
-  elif {s,t} eq {0,1} then
+  elif {a,b} eq {0,1} then
     S := &cat[ &cat[ Eltseq(M[k][i]) : i in [1..Nrows(M[1])] ] : k in [1..#M] ];
     dims := [ #M, Nrows(M[1]), Ncols(M[1]) ];
   end if;
   return Tensor( dims, S, Cat );
 end intrinsic;
 
-intrinsic Tensor( M::[Mtrx], s::RngIntElt, t::RngIntElt ) -> TenSpcElt
-{Returns the tensor given by the st-system of forms.}
-  return Tensor( M, s, t, HomotopismCategory(3) );
+intrinsic Tensor( M::[Mtrx], a::RngIntElt, b::RngIntElt ) -> TenSpcElt
+{Returns the tensor given by the (a,b)-system of forms.}
+  return Tensor( M, a, b, HomotopismCategory(3) );
 end intrinsic;
 
-intrinsic Tensor( M::Mtrx, s::RngIntElt, t::RngIntElt, Cat::TenCat ) -> TenSpcElt
-{Returns the tensor given by the st-system of forms with the given tensor category.}
-  return Tensor( [M], s, t, Cat );
+intrinsic Tensor( M::Mtrx, a::RngIntElt, b::RngIntElt, Cat::TenCat ) -> TenSpcElt
+{Returns the tensor given by the (a,b)-system of forms with the given tensor category.}
+  return Tensor( [M], a, b, Cat );
 end intrinsic;
 
-intrinsic Tensor( M::Mtrx, s::RngIntElt, t::RngIntElt ) -> TenSpcElt
-{Returns the tensor given by the st-system of forms.}
-  return Tensor( [M], s, t );
+intrinsic Tensor( M::Mtrx, a::RngIntElt, b::RngIntElt ) -> TenSpcElt
+{Returns the tensor given by the (a,b)-system of forms.}
+  return Tensor( [M], a, b );
 end intrinsic;

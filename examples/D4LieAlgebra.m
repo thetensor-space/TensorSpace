@@ -1,21 +1,21 @@
 L := LieAlgebra("D4", GF(11));
-T := Tensor(L);
-T;
-IsAlternating(T);
-TensorCategory(T);
+t := Tensor(L);
+t;
+IsAlternating(t);
+TensorCategory(t);
 
 
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 Dimension(D);
 SemisimpleType(D);
 
 
-ChangeTensorCategory(~T, HomotopismCategory(3));
-T;
-TensorCategory(T);
+ChangeTensorCategory(~t, HomotopismCategory(3));
+t;
+TensorCategory(t);
 
 
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 Dimension(D);
 R := SolvableRadical(D);
 SemisimpleType(D/R);

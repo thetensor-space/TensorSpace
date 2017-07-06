@@ -1,12 +1,12 @@
 K := Rationals();
 A := MatrixAlgebra(K, 3);
-T, phi := CommutatorTensor(A);
-T;
+t, phi := CommutatorTensor(A);
+t;
 
-R2 := Radical(T, 2);
+R2 := Radical(t, 2);
 R2.1 @@ phi;
-Radical(T);
+Radical(t);
 
 
-Image(T);
-Coradical(T);
+Image(t);
+Coradical(t);

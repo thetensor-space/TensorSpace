@@ -220,17 +220,14 @@ intrinsic Image( t::TenSpcElt ) -> ModTupRng
   return S;
 end intrinsic;
 
-intrinsic NondegenerateTensor( M::TenSpcElt ) -> TenSpcElt, Hmtp
-{Returns the associated nondegenerate tensor of M along with a homotopism. 
-Note that the domain and codomain of the returned tensor will be vector spaces.}
-  if assigned M`Nondegenerate then
-    return M`Nondegenerate[1], M`Nondegenerate[2];
+intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
+{Returns the associated nondegenerate tensor of t along with a homotopism.}
+  if assigned t`Nondegenerate then
+    return t`Nondegenerate[1], t`Nondegenerate[2];
   end if;
-  if exists{ X : X in M`Domain cat [* M`Codomain *] | Type(X) ne ModTupFld } then
-    passed, t, H2, err := __TensorOnVectorSpaces(M);
+  if exists{ X : X in t`Domain cat [* t`Codomain *] | Type(X) ne ModTupFld } then
+    passed, t, H2, err := __TensorOnVectorSpaces(t);
     require passed : err;
-  else
-    t := M;
   end if;
   R := BaseRing(t);
   D := t`Domain;
@@ -248,120 +245,120 @@ Note that the domain and codomain of the returned tensor will be vector spaces.}
     return < x[i] @@ proj[i] : i in [1..#x] > @ t;
   end function;
 
-  N := __GetTensor( dom, t`Codomain, F : Cat := M`Cat );
-  N`Radicals := [* sub< dom[i] | > : i in [1..#dom] *];
+  s := __GetTensor( dom, t`Codomain, F : Cat := t`Cat );
+  s`Radicals := [* sub< dom[i] | > : i in [1..#dom] *];
   if assigned t`Coerce then
-    N`Coerce := [* t`Coerce[i] * proj[i] : i in [1..#proj] *];
+    s`Coerce := [* t`Coerce[i] * proj[i] : i in [1..#proj] *];
   end if;
-  H := __GetHomotopism( M, N, proj : Cat := HomotopismCategory(M`Valence : Contravariant := M`Cat`Contra) );
+  H := __GetHomotopism( t, s, proj : Cat := HomotopismCategory(t`Valence : Contravariant := t`Cat`Contra) );
   if assigned H2 then
     H := H2*H;
   end if;
-  M`Nondegenerate := < N, H >;
-  return N,H;
+  t`Nondegenerate := < s, H >;
+  return s, H;
 end intrinsic;
 
-intrinsic IsNondegenerate( M::TenSpcElt ) -> BoolElt
-{Decides if M is nondegenerate.}
-  Rad := Radical(M);
+intrinsic IsNondegenerate( t::TenSpcElt ) -> BoolElt
+{Decides if t is nondegenerate.}
+  Rad := Radical(t);
   return forall{ R : R in Rad | R eq sub< R | R!0 > };
 end intrinsic;
 
-intrinsic FullyNondegenerateTensor( M::TenSpcElt ) -> TenSpcElt, Hmtp
-{Returns the fully nondegenerate tensor of M.}
-  if assigned M`FullyNondeg then
-    return M`FullyNondeg[1],M`FullyNondeg[2];
+intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
+{Returns the fully nondegenerate tensor of t.}
+  if assigned t`FullyNondeg then
+    return t`FullyNondeg[1], t`FullyNondeg[2];
   end if;
-  N, H := NondegenerateTensor( M );
-  if M`Cat`Contra then
-    return N,H;
+  s, H := NondegenerateTensor(t);
+  if t`Cat`Contra then
+    return s, H;
   end if;
-  I := Image( N );
-  inc := hom< I -> N`Codomain | [ <b,b> : b in Basis(I) ] >;
+  I := Image(s);
+  inc := hom< I -> s`Codomain | [ <b,b> : b in Basis(I) ] >;
   F := function(x)
-    return x @ N;
+    return x @ s;
   end function;
-  FN := __GetTensor( N`Domain, I, F : Cat := M`Cat );
-  H := __GetHomotopism(M,FN,H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *]: Cat := CohomotopismCategory(M`Valence));
-  M`FullyNondeg := <FN,H>;
-  return FN,H;
+  full_s := __GetTensor( s`Domain, I, F : Cat := t`Cat );
+  H := __GetHomotopism(t, full_s, H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *] : Cat := CohomotopismCategory(t`Valence));
+  t`FullyNondeg := <full_s, H>;
+  return full_s, H;
 end intrinsic;
 
-intrinsic IsFullyNondegenerate( M::TenSpcElt ) -> BoolElt
-{Decides if M is fully nondegenerate.}
-  return IsNondegenerate(M) and (Codomain(M) eq Image(M));
+intrinsic IsFullyNondegenerate( t::TenSpcElt ) -> BoolElt
+{Decides if t is fully nondegenerate.}
+  return IsNondegenerate(t) and (Codomain(t) eq Image(t));
 end intrinsic;
 
-intrinsic AssociatedForm( M::TenSpcElt ) -> TenSpcElt
-{If M : Vn x ... x V1 >-> V0, returns the associated form F : Vn x ... x V0 >-> K as vector spaces.}
-  if exists{ X : X in Frame(M) | Type(X) ne ModTupFld } then
-    passed, M, _, err := __TensorOnVectorSpaces(M);
+intrinsic AssociatedForm( t::TenSpcElt ) -> TenSpcElt
+{If t : Un x ... x U1 >-> U0, returns the associated form s : Un x ... x U0 >-> K.}
+  if exists{ X : X in Frame(t) | Type(X) ne ModTupFld } then
+    passed, t, _, err := __TensorOnVectorSpaces(t);
     require passed : err;
   end if;
-  K := BaseRing(M);
+  K := BaseRing(t);
   require ISA(Type(K),Fld) : "Base ring must be a field.";
-  D := __FRAME(M);
+  D := __FRAME(t);
   C := VectorSpace(K,1);
   F := function(x)
     y := < x[i] : i in [1..#x-1] >;
-    return C![DotProduct(y @ M,x[#x])];
+    return C![DotProduct(y @ t, x[#x])];
   end function;
-  if M`Cat`Contra then 
-    Cat := CotensorCategory( Prune(Arrows(M`Cat)) cat [1], { {x+1 : x in S} : S in M`Cat`Repeats } );
+  if t`Cat`Contra then 
+    Cat := CotensorCategory( Prune(Arrows(t`Cat)) cat [1], { {x+1 : x in S} : S in t`Cat`Repeats } );
   else
-    Cat := TensorCategory( Arrows(M`Cat) cat [1], { {x+1 : x in S} : S in M`Cat`Repeats } join {{0}} );
+    Cat := TensorCategory( Arrows(t`Cat) cat [1], { {x+1 : x in S} : S in t`Cat`Repeats } join {{0}} );
   end if;
-  Form := Tensor( D, C, F, Cat );
-  if assigned M`CoordImages then
-    Form`CoordImages := Eltseq(M);
+  s := Tensor( D, C, F, Cat );
+  if assigned t`CoordImages then
+    s`CoordImages := Eltseq(t);
   end if;
-  if assigned M`Coerce then
-    Form`Coerce := M`Coerce cat [* hom< C -> C | <C.1,C.1> > *];
+  if assigned t`Coerce then
+    s`Coerce := t`Coerce cat [* hom< C -> C | <C.1,C.1> > *];
   end if;
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (AssociatedForm)";
-    I := CartesianProduct( < Basis(X) : X in __FRAME(M) > );
-    assert forall{ x : x in I | Coordinates(M`Codomain,< x[i] : i in [1..#x-1]> @ M)[Index(Basis(M`Codomain),x[#x])] eq (x@Form)[1] };
+    I := CartesianProduct( < Basis(X) : X in __FRAME(t) > );
+    assert forall{ x : x in I | Coordinates(t`Codomain,< x[i] : i in [1..#x-1]> @ t)[Index(Basis(t`Codomain),x[#x])] eq (x@s)[1] };
     printf "  DONE!\n";
   end if;
-  return Form;
+  return s;
 end intrinsic;
 
-intrinsic IsAntisymmetric( M::TenSpcElt ) -> BoolElt
-{Decides if M is antisymmetric.}
-  if assigned M`Reflexive`Antisymmetric then
-    return M`Reflexive`Antisymmetric;
+intrinsic IsAntisymmetric( t::TenSpcElt ) -> BoolElt
+{Decides if t is antisymmetric.}
+  if assigned t`Reflexive`Antisymmetric then
+    return t`Reflexive`Antisymmetric;
   end if;
-  if exists{ D : D in M`Domain | Dimension(D) ne Dimension(M`Domain[1]) } then
-    M`Reflexive`Alternating := false;
+  if exists{ D : D in t`Domain | Dimension(D) ne Dimension(t`Domain[1]) } then
+    t`Reflexive`Alternating := false;
     return false;
   end if;
   try
-    _ := Eltseq(M);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  if M`Valence eq 3 then
-    F := SystemOfForms(M);
+  if t`Valence eq 3 then
+    F := SystemOfForms(t);
     isit := forall{ f : f in F | Transpose(f) eq -f };
   else
-    G := Parent(M`Permutation);
+    G := Parent(t`Permutation);
     Stab := Stabilizer(G,GSet(G),GSet(G)!0);
 
-    ShuffleWithSign := function(M,g)
-      s := Eltseq(Shuffle(M,g));
+    ShuffleWithSign := function(t,g)
+      s := Eltseq(Shuffle(t,g));
       if Sign(g) eq -1 then
         s := [ -x : x in s ];
       end if;
       return s;
     end function;
 
-    isit := forall{ g : g in Stab | Eltseq(M) eq ShuffleWithSign(M,g) };
+    isit := forall{ g : g in Stab | Eltseq(t) eq ShuffleWithSign(t,g) };
   end if;
-  M`Reflexive`Antisymmetric := isit;
-  if Characteristic(BaseRing(M)) ne 2 then
-    M`Reflexive`Alternating := isit;
+  t`Reflexive`Antisymmetric := isit;
+  if Characteristic(BaseRing(t)) ne 2 then
+    t`Reflexive`Alternating := isit;
   end if;
   return isit;
 end intrinsic;
@@ -381,29 +378,29 @@ intrinsic IsAlternating( t::TenSpcElt ) -> BoolElt
   return isit;
 end intrinsic;
 
-intrinsic IsSymmetric( M::TenSpcElt ) -> BoolElt
-{Decides if M is symmetric.}
-  if assigned M`Reflexive`Symmetric then
-    return M`Reflexive`Symmetric;
+intrinsic IsSymmetric( t::TenSpcElt ) -> BoolElt
+{Decides if t is symmetric.}
+  if assigned t`Reflexive`Symmetric then
+    return t`Reflexive`Symmetric;
   end if;
-  if exists{ D : D in M`Domain | Dimension(D) ne Dimension(M`Domain[1]) } then
-    M`Reflexive`Symmetric := false;
+  if exists{ D : D in t`Domain | Dimension(D) ne Dimension(t`Domain[1]) } then
+    t`Reflexive`Symmetric := false;
     return false;
   end if;
   try
-    _ := Eltseq(M);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  if M`Valence eq 3 then
-    F := SystemOfForms(M);
+  if t`Valence eq 3 then
+    F := SystemOfForms(t);
     isit := forall{ f : f in F | Transpose(f) eq f };
   else
-    G := Parent(M`Permutation);
+    G := Parent(t`Permutation);
     Stab := Stabilizer(G,GSet(G),GSet(G)!0);
-    isit := forall{ g : g in Stab | Eltseq(M) eq Eltseq(Shuffle(M,g)) };
+    isit := forall{ g : g in Stab | Eltseq(t) eq Eltseq(Shuffle(t,g)) };
   end if;
-  M`Reflexive`Symmetric := isit;
+  t`Reflexive`Symmetric := isit;
   return isit;
 end intrinsic;
 

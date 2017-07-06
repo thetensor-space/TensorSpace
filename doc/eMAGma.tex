@@ -29,12 +29,12 @@
 
 \chapter{Introduction}
 
-This chapter discusses Magma operations with multilinear algebra.
-Wherever possible we follow the conventions in use in physics 
-\cite{Weyl}*{Chapter V}, differential geometry 
-\cite{Lee:geom}*{Chapter 10}, and algebra \cite{Landsberg:tensors}.
+This documentation describes Magma operations with multilinear algebra.
+Our notation follows \cite{FMW:densors} closely and can be viewed as companion literature. 
+Wherever possible we follow the conventions in use in physics \cite{Weyl}*{Chapter V}, differential geometry \cite{Lee:geom}*{Chapter 10}, and algebra \cite{Landsberg:tensors}.
 Necessary categorical formalism is drawn largely from
-\cite{Wilson:division}.  The package covers:
+\cite{Wilson:division}.  
+The package covers:
 \begin{enumerate}
 \item Tensors and multilinear functions and their associated groups and algebras.
 \item Spaces of tensors.
@@ -43,21 +43,31 @@ Necessary categorical formalism is drawn largely from
 \end{enumerate}
 
 \section{Overview}
-Throughout $\rightarrowtail$ denotes multilinear maps 
-$[\cdot]:U_v\times \cdots \times U_1\rightarrowtail U_0$ of
-$K$-modules $\{U_v,\dots,U_0\}$ known as the {\em frame} of a 
-multilinear map or tensor.  
+We set up some notation used throughout.
+Define $K$ to be a commutative ring (typically a field), $\vav$ (Hebrew ``vav'') to be a nonnegative integer, and a sequence of right $K$-modules $U_0,\dots,U_{\vav}$.
+Set $[\vav]=\{0,\dots,\vav\}$, and for a subset $A\subset[\vav]$, let $\comp{A}=[\vav]-A$. 
+Let $\rversor_{a\in[\vav]} U_a$ denote the set of multilinear maps $U_{\vav}\times\cdots U_1\rightarrowtail U_0$. 
+Here, we use $\rightarrowtail$ exclusively for multilinear maps. 
+
+A \emph{tensor space} $T$ is a $K$-module equipped with a monomorphism 
+\[ \bra{\cdot} : T \hookrightarrow \rversor_{a\in[\vav]}U_a.\]
+\emph{Tensors} are elements of $T$, $(U_{\vav},\dots,U_0)$ is the \emph{frame}, and $\vav+1$ is the valence. 
+In Diarac styled $\bra{t}$ ``bra t'' and $\ket{u}$ ``ket u'' notation, we evaluate $\bra{t}\in\rversor_{a\in[\vav]}U_a$ on inputs $\ket{u}=\ket{u_{\vav},\dots, u_1}\in U_{\vav}\times\cdots\times U_1$ denote $\bra{t}u\rangle$ or $\bra{t} u_{\vav},\dots,u_1\rangle$. 
+
 The module $U_0$ is reserved for the codomain which inturn makes
 reverse indexing the simplest notation.
 Every tensor in Magma is treated as an element of a tensor space.
 By default a universal tensor space:
 \begin{align*}
-	\hom_K(U_v,\dots,\hom_K(U_1,U_0)\cdots).
+	\rversor_{a\in[\vav]} U_a = \hom_K(U_{\vav},\dots,\hom_K(U_1,U_0)\cdots).
 \end{align*} 
 In Magma, the tensor space is what determines the associated
 multilinear function of a given tensor $T$.  
 Evaluation of $T$ mimics a map
-$U_v\times \cdots \times U_1\to U_0$, for instance, ${\tt	< u_v,\dots,u_1> @ T;}$.
+$U_{\vav}\times \cdots \times U_1\to U_0$, for instance
+\begin{code}
+> <u_v, ..., u_1> @ T;
+\end{code}
 Special attention is given to bilinear maps 
 $*:U_2\times U_1\rightarrowtail U_0$
 including the ability to use infix notation ${\tt u_2*u_1}$.

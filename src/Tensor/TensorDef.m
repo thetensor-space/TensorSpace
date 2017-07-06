@@ -176,11 +176,11 @@ intrinsic '*'( t::TenSpcElt, f::Map ) -> TenSpcElt
   return __GetTensor( t`Domain, V, F : Cat := t`Cat, Co := coerce);
 end intrinsic;
 
-intrinsic '*'( T::TenSpcElt, S::TenSpcElt ) -> TenSpcElt
-{T * S}
-  require not T`Cat`Contra : "Tensor must be covariant.";
-  require S`Valence le 2 : "Argument 2 must have valence less than 2.";
-  return T * map< Codomain(T) -> Codomain(S) | x :-> <x> @ (S`Map) >;
+intrinsic '*'( t::TenSpcElt, s::TenSpcElt ) -> TenSpcElt
+{t * s}
+  require not t`Cat`Contra : "Tensor must be covariant.";
+  require s`Valence le 2 : "Argument 2 must have valence less than 2.";
+  return t * map< Codomain(t) -> Codomain(s) | x :-> <x> @ (s`Map) >;
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ end intrinsic;
 
 // This intrinsic is already in Magma, so we need to overwrite it. Ideally, we would delete it.
 // However, not including it in this package leaves the default one in Magma.
-intrinsic '*'( x::RngElt, B::TenSpcElt ) -> .
-{k*t}
-  return __GetTensorAction(x, B, 2);
+intrinsic '*'( x::RngElt, t::TenSpcElt ) -> .
+{x*t}
+  return __GetTensorAction(x, t, 2);
 end intrinsic;

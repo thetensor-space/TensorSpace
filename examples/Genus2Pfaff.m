@@ -18,16 +18,16 @@ M := sub< Q | gens >;
 H := Q/M;
 
 
-T := pCentralTensor(G);
-T;
+t := pCentralTensor(G);
+t;
 
-S := pCentralTensor(H);
-S;
+s := pCentralTensor(H);
+s;
 
 
 R<x,y> := PolynomialRing(GF(3), 2);
-f := R!Pfaffian(T);
-g := R!Pfaffian(S);
+f := R!Pfaffian(t);
+g := R!Pfaffian(s);
 f;
 g;
 Factorization(f), Factorization(g);

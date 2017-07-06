@@ -13,7 +13,7 @@
 
 
 
-intrinsic CompositionAlgebra(K::Fld, a::SeqEnum[FldElt]) -> AlgGen
+intrinsic CompositionAlgebra(K::Fld, a::[FldElt]) -> AlgGen
 {Constructs the composition algebra with specified parameters.}
 	require not ( Characteristic(K) eq 2 ) : "Not implemented for even characteristic.";
 
@@ -36,7 +36,7 @@ intrinsic CompositionAlgebra(K::Fld, a::SeqEnum[FldElt]) -> AlgGen
 	error "Cayley-Dickson composition algebras have at most 4 parameters.";
 end intrinsic;
 
-intrinsic CompositionAlgebra(K::Fld, a::SeqEnum[RngIntElt]) -> AlgGen
+intrinsic CompositionAlgebra(K::Fld, a::[RngIntElt]) -> AlgGen
 {Constructs the composition algebra with specified parameters.}
 	return CompositionAlgebra(K, [K | x : x in a]);
 end intrinsic;
@@ -85,7 +85,7 @@ intrinsic OctonionAlgebra( K::Fld, a::RngIntElt, b::RngIntElt, c::RngIntElt ) ->
 	return OctonionAlgebra(K,K!a, K!b, K!c);
 end intrinsic;
 
-intrinsic SplitOctonionAlgebra( K:Fld ) -> AlgGen
+intrinsic SplitOctonionAlgebra( K::Fld ) -> AlgGen
 {Split Octonion algebra over a field.}
 	return OctonionAlgebra(K, K!1,K!1,K!1);
 end intrinsic;

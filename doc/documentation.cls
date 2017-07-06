@@ -14,7 +14,7 @@
     citecolor=blue,
 }
 \RequirePackage[shortalphabetic]{amsrefs}
-\RequirePackage[margin=1in]{geometry}
+\RequirePackage[margin=0.75in]{geometry}
 \RequirePackage{amsmath}
 \RequirePackage{amsthm}
 \RequirePackage{amssymb}

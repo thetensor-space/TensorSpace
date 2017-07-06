@@ -177,11 +177,11 @@ Equivalent to t[ind] = k;}
   t := Assign(t, ind, k);
 end intrinsic;
 
-intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
+intrinsic AsMatrices( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> SeqEnum
 {Returns the sequence of matrices.}
-  require i ne j : "Arguments 2 and 3 must be distinct.";
-  require i in {0..t`Valence-1} : "Unknown argument 2.";
-  require j in {0..t`Valence-1} : "Unkonwn arguemnt 3.";
+  require a ne b : "Arguments 2 and 3 must be distinct.";
+  require a in {0..t`Valence-1} : "Unknown argument 2.";
+  require b in {0..t`Valence-1} : "Unkonwn arguemnt 3.";
   try 
     sc := StructureConstants(t);
   catch e
@@ -189,11 +189,11 @@ intrinsic AsMatrices( t::TenSpcElt, i::RngIntElt, j::RngIntElt ) -> SeqEnum
   end try;
   spaces := __FRAME(t);
   dims := [ Dimension(X) : X in spaces ];
-  return __GetForms(sc, dims, Maximum([i, j]), Minimum([i, j]) : op := i eq Minimum([i, j]));
+  return __GetForms(sc, dims, Maximum([a, b]), Minimum([a, b]) : op := a eq Minimum([a, b]));
 end intrinsic;
 
-intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j::RngIntElt ) -> SeqEnum
-{Performs the slice of t with the given grid and returns the tensor as matrices with i and j.}
+intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], a::RngIntElt, b::RngIntElt ) -> SeqEnum
+{Performs the slice of t with the given grid and returns the tensor as matrices with a and b.}
   if t`Cat`Contra and #grid+1 eq t`Valence then
     grid cat:= [{1}];
   end if;
@@ -214,10 +214,10 @@ intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], i::RngIntElt, j
       grid[i] := T;
     end if;
   end for;
-  require i ne j : "Arguments 3 and 4 must be distinct.";
-  require i in {0..t`Valence-1} : "Unknown argument 3.";
-  require j in {0..t`Valence-1} : "Unkonwn arguemnt 4.";
-  return __GetForms(__GetSlice(sc, dims, grid), [ #S : S in grid ], i, j);
+  require a ne b : "Arguments 3 and 4 must be distinct.";
+  require a in {0..t`Valence-1} : "Unknown argument 3.";
+  require b in {0..t`Valence-1} : "Unkonwn arguemnt 4.";
+  return __GetForms(__GetSlice(sc, dims, grid), [ #S : S in grid ], a, b);
 end intrinsic;
 
 intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
@@ -233,9 +233,9 @@ intrinsic SystemOfForms( t::TenSpcElt ) -> SeqEnum
   return __GetForms(sc, dims, 2, 1);
 end intrinsic;
 
-intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
-{Foliates along the ith component.}
-  require i in {0..#t`Domain} : "Unknown argument 2.";
+intrinsic Foliation( t::TenSpcElt, a::RngIntElt ) -> Mtrx
+{Foliates the a coordinate.}
+  require a in {0..#t`Domain} : "Unknown argument 2.";
   try 
     sc := StructureConstants(t);
   catch e
@@ -244,7 +244,7 @@ intrinsic Foliation( t::TenSpcElt, i::RngIntElt ) -> Mtrx
   spaces := Frame(t);
   dims := [ Dimension(X) : X in spaces ];
   l := [ {1..d} : d in dims ];
-  j := t`Valence-i;
+  j := t`Valence-a;
   F := [];
   for i in [1..dims[j]] do
     slice := l;

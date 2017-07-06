@@ -1,8 +1,8 @@
-T := Tensor(Rationals(), [2, 2, 1], [0, 1, -1, 0]);
-T;
-SystemOfForms(T);
+t := Tensor(Rationals(), [2, 2, 1], [0, 1, -1, 0]);
+t;
+SystemOfForms(t);
 
-S := Shuffle(T, [0,2,1]);
-S;
-SystemOfForms(S);
+s := Shuffle(t, [0,2,1]);
+s;
+SystemOfForms(s);
 

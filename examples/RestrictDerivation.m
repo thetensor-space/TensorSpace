@@ -3,13 +3,13 @@ B := KMatrixSpace(GF(2), 4, 2);
 C := KMatrixSpace(GF(2), 2, 2);
 D := KMatrixSpace(GF(2), 3, 2);
 trip := func< x | x[1]*x[2]*x[3] >;
-T := Tensor([A, B, C, D], trip);
-T;
+t := Tensor([A, B, C, D], trip);
+t;
 
 
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 Dimension(D);
-N32 := Nucleus(T, 3, 2);
+N32 := Nucleus(t, 3, 2);
 N32;
 
 

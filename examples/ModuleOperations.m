@@ -1,12 +1,12 @@
 K := Rationals();
-T := Tensor(K, [2, 2, 2], [1..8]);
-S := Tensor(K, [2, 2, 2], &cat[[2, -1] : i in [1..4]]);
-SystemOfForms(T);
-SystemOfForms(S);
+t := Tensor(K, [2, 2, 2], [1..8]);
+s := Tensor(K, [2, 2, 2], &cat[[2, -1] : i in [1..4]]);
+SystemOfForms(t);
+SystemOfForms(s);
 
 
-SystemOfForms(-T);
-SystemOfForms((1/3)*S);
-SystemOfForms(T+S);
-SystemOfForms(T-2*S);
+SystemOfForms(-t);
+SystemOfForms((1/3)*s);
+SystemOfForms(t+s);
+SystemOfForms(t-2*s);
 

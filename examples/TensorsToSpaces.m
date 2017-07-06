@@ -1,10 +1,10 @@
-T := Tensor(Rationals(), [5,4,3,2], [1..120]);
+t := Tensor(Rationals(), [5,4,3,2], [1..120]);
+t;
+T := AsTensorSpace(t, 3);
 T;
-TS := AsTensorSpace(T, 3);
-TS;
 
 
-F := [SliceAsMatrices(T, [{k},{1..4},{1..3},{1,2}], 2, 1) : \
+F := [SliceAsMatrices(t, [{k},{1..4},{1..3},{1,2}], 2, 1) : \
     k in [1..5]];
 
 
@@ -18,7 +18,7 @@ Tensor(F[4], 2, 1) eq 3*Tensor(F[2], 2, 1) - 2*Tensor(F[1], 2, 1);
 Tensor(F[5], 2, 1) eq 4*Tensor(F[2], 2, 1) - 3*Tensor(F[1], 2, 1);
 
 
-SystemOfForms(TS.1) eq F[1];
-SystemOfForms(TS.2) eq F[2];
-Radical(T, 3);
+SystemOfForms(T.1) eq F[1];
+SystemOfForms(T.2) eq F[2];
+Radical(t, 3);
 

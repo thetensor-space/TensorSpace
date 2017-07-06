@@ -10,6 +10,7 @@
 */
 
 import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
+import "../GlobalVars.m" : __FRAME;
 
 
 __GetInduction := function( X, i )
@@ -71,7 +72,7 @@ __WriteOverPrimeField := function( Forms )
   return SystemOfForms(N);
 end function;
 
-__GetRepresentation := function( T : UseAlt := true )
+__GetRepresentation := function( T )
   sc := T`CoordImages;
   U := T`Domain[1];
   V := T`Domain[2];
@@ -80,17 +81,19 @@ __GetRepresentation := function( T : UseAlt := true )
   b := Dimension(V);
   c := Dimension(W);
   K := BaseRing(U);
-  d := (a ne b) select 1+a+b+c else 1+a+c;
-  Z := ZeroMatrix(K, d, d);
+  r := Dimension(Radical(T, 1));
+  d := (a ne b) select 1+a+b+c else 1+a+r+c;
   I := IdentityMatrix(K, d);
 
-  if UseAlt then
-    gens := [ I + InsertBlock(InsertBlock(Z, Matrix(K, 1, a, Eltseq(U.i)), 1, 2), __GetForms(__GetSlice(sc, [a, b, c], [{i},{1..b},{1..c}]), [1, b, c], 1, 0)[1], d-b-c+1, d-c+1) : i in [1..a] ];
+  if T`Cat`Repeats eq {{2,1},{0}} and IsAlternating(T) then
+    gens := [ InsertBlock(InsertBlock(I, Matrix(K, 1, a, Eltseq(U.i)), 1, 2), __GetForms(__GetSlice(sc, [a, b, c], [{i},{1..b},{1..c}]), [1, b, c], 1, 0)[1], d-b-c+1, d-c+1) : i in [1..a] ];
   else
-    gens_U := [ I + InsertBlock(Z, Matrix(K, 1, a, Eltseq(u)), 1, 2) : u in Basis(U) ];
-    gens_V := [ I + InsertBlock(Z, X, 2, d-c+1) : X in __GetForms(sc, [a, b, c], 2, 0) ];
+    gens_U := [ InsertBlock(I, Matrix(K, 1, a, Eltseq(u)), 1, 2) : u in Basis(U) ];
+    gens_V := [ InsertBlock(I, X, 2, d-c+1) : X in __GetForms(sc, [a, b, c], 2, 0) ];
     gens := gens_U cat gens_V;
   end if;
+  gens cat:= [ InsertBlock(I, Matrix(K, 1, c, Eltseq(w)), 1, d-c+1) : w in Basis(W) ]; // in case not full
+  gens cat:= [ InsertBlock(I, Matrix(K, 1, 1, [1]), 1, a+1+i) : i in [1..r] ];
   G := sub< GL(d, K) | gens >;
   return G;
 end function;
@@ -108,26 +111,26 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-intrinsic HeisenbergGroup( B::TenSpcElt : UseAlt := true ) -> GrpMat
-{Returns the matrix group of class 2 from the given tensor B.}
-  require B`Valence eq 3 : "Tensor must have valence 3.";
+intrinsic HeisenbergGroup( t::TenSpcElt ) -> GrpMat
+{Returns the matrix group of class 2 from the given tensor t.}
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   try
-    _ := Eltseq(B);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  return __GetRepresentation(B : UseAlt := UseAlt and IsAlternating(B));
+  return __GetRepresentation(t);
 end intrinsic;
 
-intrinsic HeisenbergGroupPC( B::TenSpcElt : UseAlt := true ) -> GrpPC
-{Returns the pc-group of class 2 and exponent p from the given tensor B over a finite field.}
-  require B`Valence eq 3 : "Tensor must have valence 3.";
+intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
+{Returns the pc-group of class 2 and exponent p from the given tensor t over a finite field.}
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   try
-    _ := Eltseq(B);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  Forms := SystemOfForms(B);
+  Forms := SystemOfForms(t);
   K := BaseRing(Forms[1]);
   require ISA(Type(K), FldFin) : "Base field must be finite.";
   p := Characteristic(K);
@@ -135,7 +138,7 @@ intrinsic HeisenbergGroupPC( B::TenSpcElt : UseAlt := true ) -> GrpPC
   if #K gt p then
     Forms := __WriteOverPrimeField(Forms);
   end if;
-  if UseAlt and IsAlternating(B) then
+  if t`Cat`Repeats eq {{2,1},{0}} and IsAlternating(t) then
     require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
   else
     require Nrows(Forms[1]) + Ncols(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
@@ -157,80 +160,101 @@ intrinsic HeisenbergGroupPC( B::TenSpcElt : UseAlt := true ) -> GrpPC
   return P;
 end intrinsic;
 
-intrinsic HeisenbergAlgebra( B::TenSpcElt ) -> AlgGen
+intrinsic HeisenbergAlgebra( t::TenSpcElt ) -> AlgGen
 {Returns the algebra whose product is given by the tensor.}
-  require B`Valence eq 3 : "Tensor must have valence 3.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   try
-    _ := Eltseq(B);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  K := BaseRing(B);
-  if Dimension(B`Domain[1]) ne Dimension(B`Domain[2]) then
-    Forms := SystemOfForms(B);
-    c := Dimension(B`Domain[1]);
-    d := Dimension(B`Domain[2]);
-    Forms := [ InsertBlock(ZeroMatrix(K,c+d,c+d),f,1,c+1) : f in Forms ];
-    B := Tensor(Forms,2,1);
+  K := BaseRing(t);
+  fuse := t`Cat`Repeats;
+  dims := [ Dimension(X) : X in __FRAME(t) ];
+  if fuse eq {{0,1,2}} then // nonassociative 
+    sc := Eltseq(t);
+    n := dims[1];
+  elif fuse eq {{0},{1,2}} then // nilpotent
+    Forms := SystemOfForms(t);
+    Forms := [ ZeroMatrix(K, dims[1], dims[1]) : i in [1..dims[1]] ] cat Forms;
+    Forms := [ DiagonalJoin(X, ZeroMatrix(K, dims[3], dims[3])) : X in Forms ];
+    sc := Eltseq(Tensor(Forms, 2, 1));
+    n := dims[1] + dims[3];
+  else // generic
+    n := &+(dims);
+    Forms := [ ZeroMatrix(K, n, n) : i in [1..n] ];
+    OldForms := SystemOfForms(t);
+    for i in [1..dims[3]] do
+      Forms[n-dims[3]+i] := InsertBlock(Forms[n-dims[3]+i], OldForms[i], 1, dims[1]+1);
+    end for;
+    sc := Eltseq(Tensor(Forms, 2, 1));
   end if;
-  if Dimension(B`Domain[1]) ne Dimension(B`Codomain) then
-    Forms := SystemOfForms(B);
-    d := Dimension(B`Domain[1]);
-    e := Dimension(B`Codomain);
-    Forms := [ ZeroMatrix(K,d+e,d+e) : i in [1..d] ] cat [ DiagonalJoin(f,ZeroMatrix(K,e,e)) : f in Forms ];
-    B := Tensor(Forms,2,1);
-  end if;
-  A := Algebra< K, Dimension(B`Domain[1]) | Eltseq(B) >;
+  A := Algebra< K, n | sc >;
   return A;
 end intrinsic;
 
-intrinsic HeisenbergLieAlgebra( B::TenSpcElt ) -> AlgLie
+intrinsic HeisenbergLieAlgebra( t::TenSpcElt ) -> AlgLie
 {Returns the Lie algebra whose Lie bracket is given by the tensor.}
-  require B`Valence eq 3 : "Tensor must have valence 3.";
+  require t`Valence eq 3 : "Tensor must have valence 3.";
   try
-    _ := Eltseq(B);
+    _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
-  K := BaseRing(B);
-  B := AlternatingTensor(B);
-  Forms := SystemOfForms(B);
-  if Dimension(B`Domain[1]) ne Dimension(B`Codomain) then
-    d := Dimension(B`Domain[1]);
-    e := Dimension(B`Codomain);
-    Forms := [ ZeroMatrix(K,d+e,d+e) : i in [1..d] ] cat [ DiagonalJoin(f,ZeroMatrix(K,e,e)) : f in Forms ];
-    B := Tensor(Forms,2,1);
+  K := BaseRing(t);
+  fuse := t`Cat`Repeats;
+  dims := [ Dimension(X) : X in __FRAME(t) ];
+  if fuse eq {{2,1},{0}} and IsAlternating(t) then
+    n := dims[1]+dims[3]; 
+    Forms := [ ZeroMatrix(K, n, n) : i in [1..n] ];
+    OldForms := SystemOfForms(t);
+    for i in [1..dims[3]] do
+      Forms[n-dims[3]+i] := InsertBlock(Forms[n-dims[3]+i], OldForms[i], 1, 1);
+    end for;
+    sc := Eltseq(Tensor(Forms, 2, 1));
+  else
+    n := &+(dims);
+    Forms := [ ZeroMatrix(K, n, n) : i in [1..n] ];
+    OldForms := SystemOfForms(t);
+    for i in [1..dims[3]] do
+      Forms[n-dims[3]+i] := InsertBlock(Forms[n-dims[3]+i], OldForms[i], 1, dims[1]+1);
+      Forms[n-dims[3]+i] := InsertBlock(Forms[n-dims[3]+i], -Transpose(OldForms[i]), dims[1]+1, 1);
+    end for;
+    sc := Eltseq(Tensor(Forms, 2, 1));
   end if;
-  L := LieAlgebra< K, Dimension(Domain(B)[1]) | Eltseq(B) >;
+  L := LieAlgebra< K, n | sc >;
   return L;
 end intrinsic;
 
-intrinsic Induce( X::GrpMat, i::RngIntElt ) -> GrpMat, Map
-{Given a group of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
+intrinsic Induce( X::GrpMat, a::RngIntElt ) -> GrpMat, Map
+{Given a group of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
-  return __GetInduction(X,i);
+  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
+  return __GetInduction(X,a);
 end intrinsic;
 
-intrinsic Induce( X::AlgMat, i::RngIntElt ) -> AlgMat, Map
-{Given an algebra of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
+intrinsic Induce( X::AlgMat, a::RngIntElt ) -> AlgMat, Map
+{Given an algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
-  return __GetInduction(X,i);
+  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
+  return __GetInduction(X,a);
 end intrinsic;
 
-intrinsic Induce( X::AlgMatLie, i::RngIntElt ) -> AlgMatLie, Map
-{Given a Lie algebra of matrices associated to a tensor, returns the restriction of the object onto the ith space and a projection.}
+intrinsic Induce( X::AlgMatLie, a::RngIntElt ) -> AlgMatLie, Map
+{Given a Lie algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-i in X`DerivedFrom[2] : "No restriction found.";
-  return __GetInduction(X,i);
+  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
+  return __GetInduction(X,a);
 end intrinsic;
 
 intrinsic DerivationAlgebra( A::Alg ) -> AlgMatLie
 {Returns the derivation algebra of A.}
+  if Dimension(A) eq 0 then
+    return MatrixLieAlgebra(BaseRing(A), 0);
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;
@@ -242,6 +266,9 @@ end intrinsic;
 
 intrinsic Centroid( A::Alg ) -> AlgMat
 {Returns the centroid of A.}
+  if Dimension(A) eq 0 then
+    return MatrixAlgebra(BaseRing(A), 0);
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;
@@ -253,6 +280,9 @@ end intrinsic;
 
 intrinsic LeftNucleus( A::Alg ) -> AlgMat
 {Returns the left nucleus of A.}
+  if Dimension(A) eq 0 then
+    return MatrixAlgebra(BaseRing(A), 0);
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;
@@ -267,6 +297,9 @@ end intrinsic;
 
 intrinsic RightNucleus( A::Alg ) -> AlgMat
 {Returns the right nucleus of A.}
+  if Dimension(A) eq 0 then
+    return MatrixAlgebra(BaseRing(A), 0);
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;
@@ -281,6 +314,9 @@ end intrinsic;
 
 intrinsic MidNucleus( A::Alg ) -> AlgMat
 {Returns the mid nucleus of A.}
+  if Dimension(A) eq 0 then
+    return MatrixAlgebra(BaseRing(A), 0);
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;
@@ -295,6 +331,9 @@ end intrinsic;
 
 intrinsic Center( A::Alg ) -> Alg
 {Returns the center of A.}
+  if Dimension(A) eq 0 then
+    return A;
+  end if;
   if Type(BaseRing(A)) in {FldRe,FldCom} then 
     "Warning: answers known to be incorrect for the Real and Complex fields.";
   end if;

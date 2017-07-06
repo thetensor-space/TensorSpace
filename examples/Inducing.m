@@ -1,9 +1,9 @@
-T := Tensor(GF(3), [2, 2, 1], [0, 1, 2, 0]);
-T;
-IsAlternating(T);
+t := Tensor(GF(3), [2, 2, 1], [0, 1, 2, 0]);
+t;
+IsAlternating(t);
 
 
-D := DerivationAlgebra(T);
+D := DerivationAlgebra(t);
 D.1;
 D.2;
 D1, pi := Induce(D, 1);

@@ -3,18 +3,18 @@ U2 := KMatrixSpace(K, 2, 3);
 U1 := VectorSpace(K, 3);
 U0 := VectorSpace(K, 2);
 mult := func< x | Eltseq(x[1]*Matrix(3,1,Eltseq(x[2]))) >;
-T := Tensor([* U2, U1, U0 *], mult);
-T;
+t := Tensor([* U2, U1, U0 *], mult);
+t;
 
-Parent(T);
+Parent(t);
 
-Domain(T);
+Domain(t);
 
-Codomain(T);
+Codomain(t);
 
-Valence(T);
+Valence(t);
 
-Frame(T);
+Frame(t);
 
-BaseRing(T);
+BaseRing(t);
 

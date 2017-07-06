@@ -6,12 +6,12 @@ mult := function(x)
   v := VectorSpace(K, 3)!(Eltseq(x[2])[[1,3,5]]);
   return Eltseq(v*M) cat [0,0];
 end function;
-T := Tensor([V, U, U], mult);
-T;
+t := Tensor([V, U, U], mult);
+t;
 
 
-IsNondegenerate(T);
-S, H := NondegenerateTensor(T);
-S;
+IsNondegenerate(t);
+s, H := NondegenerateTensor(t);
+s;
 H;
 

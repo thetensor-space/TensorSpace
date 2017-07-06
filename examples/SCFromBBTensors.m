@@ -3,14 +3,14 @@ V := VectorSpace(GF(7), 2);
 left_action := func< x | x[2]*Transpose(Matrix(x[1])) >;
 left_action(<sl2!0, V!0>);
 
-T := Tensor([* sl2, V, V *], left_action);
-T;
+t := Tensor([* sl2, V, V *], left_action);
+t;
 
 
-StructureConstants(T);
+StructureConstants(t);
 
-S := Tensor([3, 2, 2], Eltseq(T));
-S;
+s := Tensor([3, 2, 2], Eltseq(t));
+s;
 
-T eq S;
+t eq s;
 

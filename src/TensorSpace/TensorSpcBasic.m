@@ -188,19 +188,19 @@ intrinsic AsCotensorSpace( t::TenSpcElt ) -> TenSpc, Mtrx
   return CT, F;
 end intrinsic;
 
-intrinsic AsTensorSpace( t::TenSpcElt, i::RngIntElt ) -> TenSpc, Mtrx
-{Returns the associated tensor space of the tensor in the i coordinate.}
-  require i gt 0 : "Index must be positive.";
-  F := Foliation(t,i);
-  surj := [0] cat Reverse(Remove([1..#t`Domain],t`Valence-i));
+intrinsic AsTensorSpace( t::TenSpcElt, a::RngIntElt ) -> TenSpc, Mtrx
+{Returns the associated tensor space of the tensor in the a coordinate.}
+  require a gt 0 : "Index must be positive.";
+  F := Foliation(t,a);
+  surj := [0] cat Reverse(Remove([1..#t`Domain],t`Valence-a));
   part := { { Index(surj,x)-1 : x in S | x in surj } : S in t`Cat`Repeats };
   if {} in part then Exclude(~part,{}); end if;
   spaces := Frame(t);
-  Remove(~spaces,t`Valence-i);
+  Remove(~spaces,t`Valence-a);
   if t`Cat`Contra then
-    Cat := TensorCategory(Remove(Arrows(t`Cat),i) cat [1],part join {{0}}); 
+    Cat := TensorCategory(Remove(Arrows(t`Cat),a) cat [1],part join {{0}}); 
   else
-    Cat := TensorCategory(Remove(Arrows(t`Cat),i),part); 
+    Cat := TensorCategory(Remove(Arrows(t`Cat),a),part); 
   end if;
   T := TensorSpace(spaces,Cat);
   S := sub< T`Mod | [ T`Mod!F[i] : i in [1..Nrows(F)] ] >;

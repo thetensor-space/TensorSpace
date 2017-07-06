@@ -179,36 +179,36 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 //                                     Parent
 // ------------------------------------------------------------------------------
-intrinsic Parent( U::BmpU ) -> TenSpcElt
-{Returns the parent bilinear map for U.}
-  return U`Parent;
+intrinsic Parent( X::BmpU ) -> TenSpcElt
+{Returns the parent bilinear map for X.}
+  return X`Parent;
 end intrinsic;
 
-intrinsic Parent( V::BmpV ) -> TenSpcElt
-{Returns the parent bilinear map for V.}
-  return V`Parent;
+intrinsic Parent( X::BmpV ) -> TenSpcElt
+{Returns the parent bilinear map for X.}
+  return X`Parent;
 end intrinsic;
 
-intrinsic Parent( u::BmpUElt ) -> BmpU
-{Returns the parent U for u.}
-  return u`Parent;
+intrinsic Parent( x::BmpUElt ) -> BmpU
+{Returns the parent U for x.}
+  return x`Parent;
 end intrinsic;
 
-intrinsic Parent( v::BmpVElt ) -> BmpV
-{Returns the parent V for v.}
-  return v`Parent;
+intrinsic Parent( x::BmpVElt ) -> BmpV
+{Returns the parent V for x.}
+  return x`Parent;
 end intrinsic;
 
-intrinsic LeftDomain( B::TenSpcElt ) -> BmpU
-{Returns the left domain of B used for coercion.}
-  require B`Valence eq 3 : "Must be a valence 3 tensor.";
-  return B`Bimap`U;
+intrinsic LeftDomain( t::TenSpcElt ) -> BmpU
+{Returns the left domain of t used for coercion.}
+  require t`Valence eq 3 : "Must be a valence 3 tensor.";
+  return t`Bimap`U;
 end intrinsic;
 
-intrinsic RightDomain( B::TenSpcElt ) -> BmpV
-{Returns the right domain of B used for coercion.}
-  require B`Valence eq 3 : "Must be a valence 3 tensor.";
-  return B`Bimap`V;
+intrinsic RightDomain( t::TenSpcElt ) -> BmpV
+{Returns the right domain of t used for coercion.}
+  require t`Valence eq 3 : "Must be a valence 3 tensor.";
+  return t`Bimap`V;
 end intrinsic;
 
 // ------------------------------------------------------------------------------
@@ -238,13 +238,13 @@ end intrinsic;
 //                             Multiplication : x * y
 // ------------------------------------------------------------------------------
 // Elements
-intrinsic '*'( u::BmpUElt, v::BmpVElt ) -> .
-{u * v}
-  require Parent(Parent(u)) eq Parent(Parent(v)) : "Elements come from different bimaps.";
-  B := Parent(Parent(u));
-  x := u`Element;
-  y := v`Element;
-  return <x,y> @ B`Map;
+intrinsic '*'( x::BmpUElt, y::BmpVElt ) -> .
+{x * y}
+  require Parent(Parent(x)) eq Parent(Parent(y)) : "Elements come from different bimaps.";
+  B := Parent(Parent(x));
+  u := x`Element;
+  v := y`Element;
+  return <u,v> @ B`Map;
 end intrinsic;
 
 // Subspaces
@@ -412,16 +412,16 @@ intrinsic '*'( X::BmpV, Y::BmpV ) -> .
 end intrinsic;
 
 // ------------------------------------------------------------------------------
-//                            Muliplication : x * B * y
+//                            Muliplication : x * t * y
 // ------------------------------------------------------------------------------
-intrinsic '*'( x::., B::TenSpcElt ) -> .
-{x * B}
-  require B`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
-  return __GetTensorAction(x, B, 2);
+intrinsic '*'( x::., t::TenSpcElt ) -> .
+{x * t}
+  require t`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
+  return __GetTensorAction(x, t, 2);
 end intrinsic;
 
-intrinsic '*'( B::TenSpcElt, y::. ) -> .
-{B * y}
-  require B`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
-  return __GetTensorAction(y, B, 1);
+intrinsic '*'( t::TenSpcElt, y::. ) -> .
+{t * y}
+  require t`Valence le 3 : "Operation only defined for tensors of valence less than 4.";
+  return __GetTensorAction(y, t, 1);
 end intrinsic;

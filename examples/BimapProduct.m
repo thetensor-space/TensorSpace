@@ -1,8 +1,8 @@
 G := SmallGroup(512, 10^6);
-T := pCentralTensor(G);
-T;
-U := LeftDomain(T);
-V := RightDomain(T);
+t := pCentralTensor(G);
+t;
+U := LeftDomain(t);
+V := RightDomain(t);
 U;
 V;
 

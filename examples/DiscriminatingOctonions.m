@@ -1,8 +1,8 @@
 A := OctonionAlgebra(GF(7), -1, -1, -1);
-T := Tensor(A);
-T;
+t := Tensor(A);
+t;
 R<a,b,c,d,e,f,g,h> := PolynomialRing(GF(7), 8);
-disc := R!Discriminant(T);
+disc := R!Discriminant(t);
 Degree(disc);
 IsHomogeneous(disc);
 #Terms(disc);
