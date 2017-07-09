@@ -20,7 +20,7 @@ end function;
 
 __TensorCatSanity := function( F, C )
   v := #F;
-  if #F ne C`Valence then
+  if (not C`Contra and (#F ne C`Valence)) or (C`Contra and (#F+1 ne C`Valence)) then
     return false, "Valences do not match.";
   end if;
   parts := [ P : P in C`Repeats | #P gt 1 ];

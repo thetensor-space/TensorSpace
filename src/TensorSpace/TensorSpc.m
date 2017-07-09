@@ -32,13 +32,19 @@ __GetTensorSpace := function( R, L, C : Co := false )
   return T;
 end function;
 
+__GetTensorSpaceOverVectorSpaces := function( R, S )
+  S2 := [* RSpace(R, Dimension(X)) : X in S *]; 
+  L := [* map< S[i] -> S2[i] | x :-> S2[i]!Coordinates(S[i], x), y :-> S[i]!Coordinates(S2[i], y) > : i in [1..#S] *];
+  return S2, L;
+end function;
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ==============================================================================
 //                       General Universal (Co)Tensor Spaces
 // ==============================================================================
-intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
+intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc, List
 {The universal tensor space with given modules and specified tensor category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   try
@@ -50,15 +56,16 @@ intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
   passed, err := __TensorCatSanity(S, C);
   require passed : err;
   R := BaseRing(S[1]);
-  return __GetTensorSpace(R,S,C);
+  S, L := __GetTensorSpaceOverVectorSpaces(R, S);
+  return __GetTensorSpace(R, S, C : Co := L), L;
 end intrinsic;
 
-intrinsic TensorSpace( S::SeqEnum ) -> TenSpc
+intrinsic TensorSpace( S::SeqEnum ) -> TenSpc, List
 {The universal tensor space with given modules and homotopism category.}
-  return TensorSpace(S,HomotopismCategory(#S));
+  return TensorSpace(S, HomotopismCategory(#S));
 end intrinsic;
 
-intrinsic TensorSpace( S::List, C::TenCat ) -> TenSpc
+intrinsic TensorSpace( S::List, C::TenCat ) -> TenSpc, List
 {The universal tensor space with given modules and specified tensor category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   try
@@ -70,16 +77,17 @@ intrinsic TensorSpace( S::List, C::TenCat ) -> TenSpc
   passed, err := __TensorCatSanity(S, C);
   require passed : err;
   R := BaseRing(S[1]);
-  return __GetTensorSpace(R,S,C);
+  S, L := __GetTensorSpaceOverVectorSpaces(R, S);
+  return __GetTensorSpace(R, S, C : Co := L), L;
 end intrinsic;
 
-intrinsic TensorSpace( S::List ) -> TenSpc
+intrinsic TensorSpace( S::List ) -> TenSpc, List
 {The universal tensor space with given modules and homotopism category.}
   return TensorSpace(S,HomotopismCategory(#S));
 end intrinsic;
 
 
-intrinsic CotensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
+intrinsic CotensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc, List
 {The universal cotensor space with given modules and specified tensor category.}
   require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   try
@@ -94,15 +102,16 @@ intrinsic CotensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc
   require passed : err;
   R := BaseRing(S[1]);
   S := SequenceToList(S) cat [*RSpace(R,1)*];
-  return __GetTensorSpace(R,S,C);
+  S, L := __GetTensorSpaceOverVectorSpaces(R, S);
+  return __GetTensorSpace(R, S, C : Co := L), L[1..#L-1];
 end intrinsic;
 
-intrinsic CotensorSpace( S::SeqEnum ) -> TenSpc
+intrinsic CotensorSpace( S::SeqEnum ) -> TenSpc, List
 {The universal cotensor space with given modules and homotopism category.}
-  return CotensorSpace(S,HomotopismCategory(#S+1 : Contravariant := true));
+  return CotensorSpace(S, HomotopismCategory(#S+1 : Contravariant := true));
 end intrinsic;
 
-intrinsic CotensorSpace( S::List, C::TenCat ) -> TenSpc
+intrinsic CotensorSpace( S::List, C::TenCat ) -> TenSpc, List
 {The universal cotensor space with given modules and specified tensor category.}
   require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   try
@@ -117,12 +126,13 @@ intrinsic CotensorSpace( S::List, C::TenCat ) -> TenSpc
   require passed : err;
   R := BaseRing(S[1]);
   S cat:= [*RSpace(R,1)*];
-  return __GetTensorSpace(R,S,C);
+  S, L := __GetTensorSpaceOverVectorSpaces(R, S);
+  return __GetTensorSpace(R, S, C : Co := L), L[1..#L-1];
 end intrinsic;
 
-intrinsic CotensorSpace( S::List ) -> TenSpc
+intrinsic CotensorSpace( S::List ) -> TenSpc, List
 {The universal cotensor space with given modules and homotopism category.}
-  return CotensorSpace(S,HomotopismCategory(#S+1 : Contravariant := true));
+  return CotensorSpace(S, HomotopismCategory(#S+1 : Contravariant := true));
 end intrinsic;
 
 // ==============================================================================

@@ -2,7 +2,7 @@
 In Magma a tensor space is a parent type for tensors.  It behaves
 as a module but also maintains an interpretation of its elements as
 a multilinear map.  Each tensor space further maintains a tensor category
-which is assigned to its tensors.
+which is also assigned to its tensors.
 
 
 \section{Constructions of tensor and cotensor spaces}
@@ -22,10 +22,9 @@ KTensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
 KTensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
 \end{intrinsics}
 
-For a field $K$ and sequence $S=[d_v,\cdots, d_0]$, 
-returns the universal tensor space $\hom_K(K^{d_v},\dots ,\hom_K(K^{d_1},K^{d_0})\cdots )\cong K^{d_v\cdots d_0}$
-with covariant tensor category given by $C$.
-The default is Albert's homotopism category.
+For a field $K$ and sequence $S=[d_{\vav},\cdots, d_0]$, 
+returns the universal tensor space $\rversor_{a\in [\vav]} K^{d_a}$ with covariant tensor category given by $C$.
+The default category is the homotopism category.
 
 \index{RTensorSpace}
 \begin{intrinsics}
@@ -33,22 +32,96 @@ RTensorSpace(R, S) : Rng, [RngIntElt] -> TenSpc
 RTensorSpace(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpc
 \end{intrinsics}
 
-For a commutative and unital ring $R$ and sequence $S=[d_v,\cdots, d_0]$, 
-returns the universal tensor space $\hom_R(R^{d_v},\dots ,\hom_R(R^{d_1},R^{d_0})\cdots )\cong R^{d_v\cdots d_0}$
-with covariant tensor category given by $C$.
-The default is Albert's homotopism category.
+For a commutative ring $R$ and sequence $S=[d_{\vav},\cdots, d_0]$, 
+returns the universal tensor space $\rversor_{a\in [\vav]} R^{d_a}$ with covariant tensor category given by $C$.
+The default category is the homotopism category.
+
+\begin{example}[UniversalKTenSpc]
+
+We demonstrate how to construct universal tensor spaces from a field $K=\mathbb{Q}$ and a sequence of nonnegative integers $[6,5,4,3]$. 
+The resulting tensor space is isomorphic to the space of multilinear maps with frame 
+\[ \mathbb{Q}^6\times \mathbb{Q}^5\times\mathbb{Q}^4\rightarrowtail\mathbb{Q}^3. \]
+\begin{code}
+> K := Rationals();
+> S := [6, 5, 4, 3];
+> T := KTensorSpace(K, S);
+> T;
+Tensor space of dimension 360 over Rational Field with valence 4
+U3 : Full Vector space of degree 6 over Rational Field
+U2 : Full Vector space of degree 5 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 3 over Rational Field
+\end{code}
+
+Because tensor spaces act like modules, we can construct tensors in the same way we construct vectors.
+\begin{code}
+> t := T![Random([-1, 0, 1]) : i in [1..Dimension(T)]];
+> t;
+Tensor of valence 4, U3 x U2 x U1 >-> U0
+U3 : Full Vector space of degree 6 over Rational Field
+U2 : Full Vector space of degree 5 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 3 over Rational Field
+> Parent(t);
+Tensor space of dimension 360 over Rational Field with valence 4
+U3 : Full Vector space of degree 6 over Rational Field
+U2 : Full Vector space of degree 5 over Rational Field
+U1 : Full Vector space of degree 4 over Rational Field
+U0 : Full Vector space of degree 3 over Rational Field
+\end{code}
+\end{example}
+
 
 \index{TensorSpace}
 \begin{intrinsics}
-TensorSpace(S) : SeqEnum -> TenSpc
-TensorSpace(S) : List -> TenSpc
-TensorSpace(S, C) : SeqEnum, TenCat -> TenSpc
-TensorSpace(S, C) : List, TenCat -> TenSpc
+TensorSpace(S) : SeqEnum -> TenSpc, List
+TensorSpace(S) : List -> TenSpc, List
+TensorSpace(S, C) : SeqEnum, TenCat -> TenSpc, List
+TensorSpace(S, C) : List, TenCat -> TenSpc, List
 \end{intrinsics}
 
-Given a sequence $S=[U_v,\dots, U_0]$ of $K$-modules returns a universal tensor 
-space equivalent to $\hom_K(U_v\otimes_K\cdots\otimes_K U_1,U_0)$ with covariant tensor 
-category given by $C$. The default is Albert's homotopism category. 
+Given a sequence $S=[U_{\vav},\dots, U_0]$ of $R$-modules returns a universal tensor 
+space equivalent to $\rversor_{a\in[\vav]} U_a$ with covariant tensor 
+category given by $C$ and a list of maps into the vector spaces in the frame. 
+The default category is the homotopism category. 
+
+\begin{example}[UniversalTenSpc]
+
+We will construct a similar tensor space as the previous example. 
+However, the objects will be different, according to Magma.
+\begin{code}
+> R := Integers();
+> S := [* RMatrixSpace(R, 2, 3), RSpace(R, 5), RMatrixSpace(R, 2, 2), \
+>     RSpace(R, 3) *];
+> T := TensorSpace(S);
+> T;
+Tensor space of dimension 360 over Integer Ring with valence 4
+U3 : Full RSpace of degree 6 over Integer Ring
+U2 : Full RSpace of degree 5 over Integer Ring
+U1 : Full RSpace of degree 4 over Integer Ring
+U0 : Full RSpace of degree 3 over Integer Ring
+\end{code}
+
+Even though the frame of $T$ does not include matrix spaces, like with tensors, it can still evalute matrices. 
+For example, we evaluate $T$ at $(0,0,0)$, which is the trivial subspace in $\mathbb{Z}^3$.
+\begin{code}
+> x := < X!0 : X in S[1..3] >;
+> x;
+<
+    [0 0 0]
+    [0 0 0],
+
+    (0 0 0 0 0),
+
+    [0 0]
+    [0 0]
+>
+> x @ T;
+RSpace of degree 3, dimension 0 over Integer Ring
+Generators: 
+
+\end{code}
+\end{example}
 
 \index{TensorSpace!signatured}
 \begin{intrinsics}
@@ -60,92 +133,56 @@ Returns the signatured $(p,q)$-tensor space over the vector space $V=K^d$.
 The first $p$ indices are covariant and the last $q$ indices are contravariant.  
 This is functionally equivalent
 to creating a universal tensor space from the sequence 
-$[V,\dots,_p V, V^*,\dots,_q V^*]$
-and the tensor category with arrows $[1,\dots,_p 1, -1,\dots,_q -1]$ and 
+$[V,\dots,_p V, V^*,\dots,_q V^*, K]$
+and the tensor category with arrows $[1,\dots,_p 1, -1,\dots,_q -1, 0]$ and 
 duplicates $\{\{p+q,\dots,1+q\},\{q,\dots,1\},\{0\}\}$.
+The valence of the returned tensor space will be $p+q+1$. 
 
-\begin{example}[TenSpc\_Const]
-We demonstrate how to construct universal tensor spaces.
+\begin{example}[SignaturedTenSpc]
 
+Here we simply demonstrate the nuances of the signatured tensor space constructor.
+We set $V=\mathbb{F}_5^4$, $p=3$, and $q=2$, and the tensor space we will construct will have frame 
+\[ V\times V\times V \times V^* \times V^*\rightarrowtail\mathbb{F}_5. \]
+Notice this is equivalent to the frame $V\times V\times V\rightarrowtail V \times V$. 
 \begin{code}
-> TS := KTensorSpace(Rationals(),[ i : i in [3..7] ]);
-> TS;
-Tensor space of dimension 2520 over Rational Field with 
-valence 4
-U4 : Full Vector space of degree 3 over Rational Field
-U3 : Full Vector space of degree 4 over Rational Field
-U2 : Full Vector space of degree 5 over Rational Field
-U1 : Full Vector space of degree 6 over Rational Field
-U0 : Full Vector space of degree 7 over Rational Field
-> 
-> TS.1;
-Tensor of valence 4, U4 x U3 x U2 x U1 >-> U0
-U4 : Full Vector space of degree 3 over Rational Field
-U3 : Full Vector space of degree 4 over Rational Field
-U2 : Full Vector space of degree 5 over Rational Field
-U1 : Full Vector space of degree 6 over Rational Field
-U0 : Full Vector space of degree 7 over Rational Field
+> K := GF(5);
+> T := TensorSpace(K, 4, 3, 2);
+> T;
+Tensor space of dimension 1024 over GF(5) with valence 6
+U5 : Full Vector space of degree 4 over GF(5)
+U4 : Full Vector space of degree 4 over GF(5)
+U3 : Full Vector space of degree 4 over GF(5)
+U2 : Full Vector space of degree 4 over GF(5)
+U1 : Full Vector space of degree 4 over GF(5)
+U0 : Full Vector space of degree 1 over GF(5)
+> S := KTensorSpace(K, [4, 4, 4, 4, 4, 1]);
+> S;
+Tensor space of dimension 1024 over GF(5) with valence 6
+U5 : Full Vector space of degree 4 over GF(5)
+U4 : Full Vector space of degree 4 over GF(5)
+U3 : Full Vector space of degree 4 over GF(5)
+U2 : Full Vector space of degree 4 over GF(5)
+U1 : Full Vector space of degree 4 over GF(5)
+U0 : Full Vector space of degree 1 over GF(5)
 \end{code}
 
-Give a tensor space a frame.
-
+However, the subtleties of this construction lies in the tensor category. 
+On the surface, the spaces $T$ and $S$ look the same, but probing the category reveals their differences.
 \begin{code}
-> R := pAdicRing(3,6);
-> Fr := [RSpace(R,5), sub<RSpace(R,3)|[0,1,0],[0,0,1]>,\
->   RSpace(R,2)];
-> TS := TensorSpace(Fr);
-> TS;
-Tensor space of dimension 20 over 3-adic ring mod 3^6 with 
-valence 2
-U2 : Full RSpace of degree 5 over pAdicRing(3, 6)
-U1 : RSpace of degree 3, dimension 2 over pAdicRing(3, 6)
-Generators:
-(0 1 0)
-(0 0 1)
-Echelonized basis:
-(0 1 0)
-(0 0 1)
-U0 : Full RSpace of degree 2 over pAdicRing(3, 6)
-> 
-> TS.10;
-Tensor of valence 2, U2 x U1 >-> U0
-U2 : Full RSpace of degree 5 over pAdicRing(3, 6)
-U1 : RSpace of degree 3, dimension 2 over pAdicRing(3, 6)
-Generators:
-(0 1 0)
-(0 0 1)
-Echelonized basis:
-(0 1 0)
-(0 0 1)
-U0 : Full RSpace of degree 2 over pAdicRing(3, 6)
+> TensorCategory(S); // default category
+Tensor category of valence 6 (->,->,->,->,->,->) ({ 1 },{ 2 },{ 0 },{ 3 },{ 4 
+},{ 5 })
+> TensorCategory(T); 
+Tensor category of valence 6 (<-,<-,<-,->,->,==) ({ 0 },{ 3 .. 5 },{ 1 .. 2 })
+> S eq T;
+false
 \end{code}
-
-With signatured tensor spaces, the tensor category is not immediately obvious at print out. 
-Instead, one can glean categorical information using {\tt TensorCategory} on a tensor space.
-
-\begin{code}
-> TS := TensorSpace( VectorSpace(GF(3),3), 2, 4 );
-> TS;
-Tensor space of dimension 729 over GF(3) with valence 6
-U6 : Full Vector space of degree 3 over GF(3)
-U5 : Full Vector space of degree 3 over GF(3)
-U4 : Full Vector space of degree 3 over GF(3)
-U3 : Full Vector space of degree 3 over GF(3)
-U2 : Full Vector space of degree 3 over GF(3)
-U1 : Full Vector space of degree 3 over GF(3)
-U0 : Full Vector space of degree 1 over GF(3)
-> 
-> TensorCategory(TS);
-Tensor category of Valence 6 (<-,<-,->,->,->,->,==)
-({ 0 },{ 5 .. 6 },{ 1 .. 4 })
-\end{code}
-
-We see that the indices 5 and 6 are contravariant and both are linked together as well. Furthermore the covariant indices are 1--4, which are also linked together.
 \end{example}
+
 
 \subsection{Universal cotensor spaces}~
 
-We only consider cotensor spaces over fields.
+Currently, we only consider cotensor spaces over fields.
 
 \index{KCotensorSpace}
 \begin{intrinsics}
@@ -153,51 +190,65 @@ KCotensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
 KCotensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
 \end{intrinsics}
 
-For a field $K$ and sequence $S=[d_v,\dots, d_1]$ returns the universal cotensor 
-space $\hom_K(K^{d_v}\otimes \cdots \otimes K^{d_1},K)\cong K^{d_v\cdots d_1}$ with the given contravariant tensor category $C$.
-The default is Albert's homotopism category.
+For a field $K$ and sequence $S=[d_{\vav},\dots, d_1]$ returns the universal cotensor 
+space $\bigotimes_{a\in\comp{0}}K^{d_a}$ with the given contravariant tensor category $C$.
+The default category is the homotopism category.
+Notice the sequence $S$ indices do \emph{not} include 0.
 
 \index{CotensorSpace}
 \begin{intrinsics}
-CotensorSpace(S) : SeqEnum -> TenSpc
-CotensorSpace(S) : List -> TenSpc
-CotensorSpace(S, C) : SeqEnum, TenCat -> TenSpc
-CotensorSpace(S, C) : List, TenCat -> TenSpc
+CotensorSpace(S) : SeqEnum -> TenSpc, List
+CotensorSpace(S) : List -> TenSpc, List
+CotensorSpace(S, C) : SeqEnum, TenCat -> TenSpc, List
+CotensorSpace(S, C) : List, TenCat -> TenSpc, List
 \end{intrinsics}
 
-Given a sequence $S=[U_v,\dots, U_1]$ of $K$-vector spaces returns the universal tensor 
-space equivalent to $\hom_K(U_v\otimes_K\cdots\otimes_K U_1,K)$ with contravariant tensor 
-category given by $C$. The default is Albert's homotopism category.
+Given a sequence $S=[U_{\vav},\dots, U_1]$ of $K$-vector spaces returns the universal tensor 
+space equivalent to $\bigotimes_{a\in\comp{0}}U_a$ with contravariant tensor 
+category given by $C$ and a list of maps into the vector spaces of the frame. 
+The default category is the homotopism category.
+Notice the sequence $S$ indices do \emph{not} include 0.
 
-\begin{example}[CoTenSpc\_Const]
-We construct cotensor spaces in the same way as we do tensor spaces.
+\begin{example}[UniversalCoTenSpc]
 
+Constructing cotensor spaces is nearly the same as constructing tensor spaces. 
+When providing a sequence of modules or a sequence of dimensions, we do not include the entry for $U_0$. 
+It is automatically set to $U_0=K$.
+Furthermore, the black-box construction forgets all other structure of the vector spaces and only builds a frame out of vector spaces. 
+The maps are returned as a \texttt{List} in case they are needed.
 \begin{code}
-> CT := KCotensorSpace(GF(2),[ i : i in [5..7] ]);
-> CT;
-Cotensor space of dimension 210 over GF(2) with valence 2
-U3 : Full Vector space of degree 5 over GF(2)
-U2 : Full Vector space of degree 6 over GF(2)
-U1 : Full Vector space of degree 7 over GF(2)
-> 
-> CT.1;
-Cotensor of valence 2, U3 x U2 x U1 >-> K
-U3 : Full Vector space of degree 5 over GF(2)
-U2 : Full Vector space of degree 6 over GF(2)
-U1 : Full Vector space of degree 7 over GF(2)
-> 
-> 
-> Cat := CotensorCategory([1,0,-1],{{1},{2},{3}});
-> Fr := [ VectorSpace(GF(8),4) : i in [1..3] ];
-> CT := CotensorSpace( Fr, Cat );
-> CT;
-Cotensor space of dimension 64 over GF(2^3) with valence 2
-U3 : Full Vector space of degree 4 over GF(2^3)
-U2 : Full Vector space of degree 4 over GF(2^3)
-U1 : Full Vector space of degree 4 over GF(2^3)
-> 
-> TensorCategory(CT);
-Cotensor category of valence 2 (->,==,<-) ({ 1 },{ 2 },{ 3 })
+> K := Rationals();
+> S := [* KSpace(K, 3), MatrixAlgebra(K, 3), KMatrixSpace(K, 2, 3) *];
+> S;
+[*
+    Full Vector space of degree 3 over Rational Field,
+    Full Matrix Algebra of degree 3 over Rational Field,
+    Full KMatrixSpace of 2 by 3 matrices over Rational Field
+*]
+> T := CotensorSpace(S);
+> T;
+Cotensor space of dimension 162 over Rational Field with valence 4
+U3 : Full Vector space of degree 3 over Rational Field
+U2 : Full Vector space of degree 9 over Rational Field
+U1 : Full Vector space of degree 6 over Rational Field
+\end{code}
+
+Like with tensor spaces, cotensors are elements of cotensor spaces, and for many purposes in Magma, cotensor and tensor spaces have similar functionality. 
+\begin{code}
+> t := T.3;
+> t;
+Cotensor of valence 4, U3 x U2 x U1 >-> K
+U3 : Full Vector space of degree 3 over Rational Field
+U2 : Full Vector space of degree 9 over Rational Field
+U1 : Full Vector space of degree 6 over Rational Field
+> Eltseq(t);
+[ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0 ]
 \end{code}
 \end{example}
 

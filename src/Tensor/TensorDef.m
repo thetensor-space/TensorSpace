@@ -139,6 +139,12 @@ intrinsic '@'( x::Tup, t::TenSpcElt ) -> .
   end if;
 end intrinsic;
 
+intrinsic '@'( x::Tup, T::TenSpc ) -> .
+{x @ T}
+  C := Codomain(T!0);
+  Im := sub< C | [x @ t : t in Basis(T)] >;
+  return Im;
+end intrinsic;
 // ------------------------------------------------------------------------------
 //                                   Composition
 // ------------------------------------------------------------------------------
