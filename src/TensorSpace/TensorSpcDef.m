@@ -170,6 +170,33 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
   return false, "Incompatible.";
 end intrinsic;
 
+intrinsic IsCoercible( T::TenSpc, S::TenSpc ) -> BoolElt
+{Determines if S is coercible in T.}
+  B := Basis(S);
+  // First try to coerce tensors as is.
+  try 
+    gens := <>;
+    for t in B do
+      Append(~gens, T!t);
+    end for;
+    S2 := sub< T | gens >;
+    return true, S2;
+  catch err
+    // Now try to coerce as sequences.
+    seqs := [Eltseq(t) : t in B];
+    try
+      gens := <>;
+      for s in seqs do
+        Append(~gens, T!s);
+      end for;
+      S2 := sub< T | gens >;
+      return true, S2;
+    catch err
+      return false;
+    end try;
+  end try;
+end intrinsic;
+
 // Only used to do T!0 to get the trivial tensor.
 intrinsic IsCoercible( T::TenSpc, t::RngIntElt ) -> BoolElt
 {Determines if t is coercible in T.}
@@ -201,7 +228,7 @@ intrinsic 'in'( t::TenSpcElt, T::TenSpc ) -> BoolElt
   try 
     return t`Element in T`Mod;
   catch err
-    error "Cannot find covering space.";
+    return false;
   end try;
 end intrinsic;
 
@@ -211,10 +238,10 @@ intrinsic 'subset'( S::TenSpc, T::TenSpc ) -> BoolElt
     try 
       return S`Mod subset T`Mod;
     catch err
-      error "Cannot find covering space.";
+      return false;
     end try;
   end if;
-  error "Cannot find covering space.";
+  return false;
 end intrinsic;
 
 // ------------------------------------------------------------------------------

@@ -1,18 +1,15 @@
-H := ClassicalSylow( GL(3,125), 5 ); // Heisenberg group
-T := pCentralTensor(H,5,1,1);
-T;
+H := ClassicalSylow(GL(3,125), 5);
+t := pCentralTensor(H);
+t;
 
-C := Centroid(T);
+
+C := Centroid(t);
 C;
-
-S := TensorOverCentroid(T);
-S;
-
-TS := Parent(S);
-N := NucleusClosure(TS,S,2,1);
-N;
+s := TensorOverCentroid(t);
+s;
 
 
-NT := NucleusClosure(Parent(T),T,2,1);
-NT;
+NucleusClosure(Parent(s), s, 2, 1);
+
+NucleusClosure(Parent(t), t, 2, 1);
 

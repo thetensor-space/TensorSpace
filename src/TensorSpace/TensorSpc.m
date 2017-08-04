@@ -212,6 +212,25 @@ end intrinsic;
 // ==============================================================================
 //                                Standard Examples
 // ==============================================================================
+// Must be a better way to do these.
+intrinsic SymmetricSpace( T::TenSpc ) -> TenSpc, Map
+{Returns the largest subtensor space of T where every tensor is symmetric.}
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  return sub< T | [T!SymmetricTensor(t) : t in Generators(T)] >;
+end intrinsic;
+
+intrinsic AlternatingSpace( T::TenSpc ) -> TenSpc, Map
+{Returns the largest subtensor space of T where every tensor is alternating.}
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  return sub<T | [T!AlternatingTensor(t) : t in Generators(T)]>;
+end intrinsic;
+
+intrinsic AntisymmetricSpace( T::TenSpc ) -> TenSpc, Map
+{Returns the largest subtensor space of T where every tensor is antisymmetric.}
+  require forall{ X : X in T`Frame[1..T`Valence-1] | Dimension(X) eq Dimension(T`Frame[1]) } : "Incompatible frame.";
+  return sub< T | [T!AntisymmetricTensor(t) : t in Generators(T)] >;
+end intrinsic;
+
 intrinsic ExteriorCotensorSpace( V::ModTupFld, n::RngIntElt ) -> TenSpc
 {Returns the nth exterior power of V as a cotensor space.}
   d := Dimension(V); 

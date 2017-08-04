@@ -90,85 +90,85 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-intrinsic DerivationClosure( TS::TenSpc, O::[Mtrx] ) -> TenSpc
-{Returns the derivation closure of the tensor space with the given operators O.}
-  require TS`Valence eq 3 : "Tensor space must have valence 3.";
-  dims := [ Dimension(X) : X in TS`Frame ];
-  require Nrows(O[1]) eq &+dims and Ncols(O[1]) eq &+dims : "Incompatible operators.";
-  require BaseRing(TS) eq BaseRing(O[1]) : "Base rings are incompatible.";
-  N := __GetDensorTensors(O,dims[1],dims[2],dims[3]);
-  S := __GetTensorSpace( TS`Ring, TS`Frame, TS`Cat );
-  S`Mod := sub< TS`Mod | [ TS`Mod!N[i] : i in [1..Nrows(N)] ] >;
+intrinsic DerivationClosure( T::TenSpc, Delta::[Mtrx] ) -> TenSpc
+{Returns the derivation closure of the tensor space with the given operators Delta.}
+  require T`Valence eq 3 : "Tensor space must have valence 3.";
+  dims := [ Dimension(X) : X in T`Frame ];
+  require Nrows(Delta[1]) eq &+dims and Ncols(Delta[1]) eq &+dims : "Incompatible operators.";
+  require BaseRing(T) eq BaseRing(Delta[1]) : "Base rings are incompatible.";
+  N := __GetDensorTensors(Delta, dims[1], dims[2], dims[3]);
+  S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
+  S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
   if __SANITY_CHECK and Dimension(S) gt 0 then
     printf "Sanity check turned on... (DerivationClosure)";
-    assert forall{ i : i in [1..10] | O subset DerivationAlgebra(Random(S)) };
+    assert forall{ i : i in [1..10] | Delta subset DerivationAlgebra(Random(S)) };
     printf "  DONE!\n";
   end if;
   return S;
 end intrinsic;
 
-intrinsic DerivationClosure( TS::TenSpc, O::[AlgMatLie] ) -> TenSpc
-{Returns the derivation closure of the tensor space with the given operators O.}
-  return DerivationClosure(TS,[ Matrix(X) : X in O ]);
+intrinsic DerivationClosure( T::TenSpc, Delta::[AlgMatLie] ) -> TenSpc
+{Returns the derivation closure of the tensor space with the given operators Delta.}
+  return DerivationClosure(T, [ Matrix(X) : X in Delta ]);
 end intrinsic;
 
-intrinsic DerivationClosure( TS::TenSpc, O::AlgMatLie ) -> TenSpc
-{Returns the derivation closure of the tensor space with the given operators O.}
-  return DerivationClosure(TS,Basis(O));
+intrinsic DerivationClosure( T::TenSpc, Delta::AlgMatLie ) -> TenSpc
+{Returns the derivation closure of the tensor space with the given operators Delta.}
+  return DerivationClosure(T, Basis(Delta));
 end intrinsic;
 
-intrinsic DerivationClosure( TS::TenSpc, O::AlgMat ) -> TenSpc
-{Returns the derivation closure of the tensor space with the given operators O.}
-  return DerivationClosure(TS,Basis(O));
+intrinsic DerivationClosure( T::TenSpc, Delta::AlgMat ) -> TenSpc
+{Returns the derivation closure of the tensor space with the given operators Delta.}
+  return DerivationClosure(T, Basis(Delta));
 end intrinsic;
 
-intrinsic DerivationClosure( TS::TenSpc, O::ModMatFld ) -> TenSpc
-{Returns the derivation closure of the tensor space with the given operators O.}
-  return DerivationClosure(TS,Basis(O));
+intrinsic DerivationClosure( T::TenSpc, Delta::ModMatFld ) -> TenSpc
+{Returns the derivation closure of the tensor space with the given operators Delta.}
+  return DerivationClosure(T, Basis(Delta));
 end intrinsic;
 
-intrinsic DerivationClosure( TS::TenSpc, T::TenSpcElt ) -> TenSpc
-{Returns the derivation closure of the tensor space with the derivation algebra of the given tensor.}
-  return DerivationClosure(TS,Basis(DerivationAlgebra(T)));
+intrinsic DerivationClosure( T::TenSpc, t::TenSpcElt ) -> TenSpc
+{Returns the derivation closure of the tensor space with operators given by the derivation algebra of t.}
+  return DerivationClosure(T, Basis(DerivationAlgebra(t)));
 end intrinsic;
 
-intrinsic NucleusClosure( TS::TenSpc, O::[Mtrx], s::RngIntElt, t::RngIntElt ) -> TenSpc
-{Returns the nucleus closure of the tensor space with the given operators O acting on Us and Ut.}
-  require TS`Valence eq 3 : "Tensor space must have valence 3.";
-  K := BaseRing(TS);
-  require K eq BaseRing(O[1]) : "Base rings are incompatible.";
-  dims := [ Dimension(X) : X in TS`Frame ];
-  a := 3-s;
-  b := 3-t;
-  c := Random({1,2,3} diff {a,b});
-  require (&+(dims[[a,b]]) eq Nrows(O[1])) and (Nrows(O[1]) eq Ncols(O[1])) : "Incompatible operators.";
-  blocks := [* [ ExtractBlock( X, 1, 1, dims[a], dims[a] ) : X in O ], [ ExtractBlock( -Transpose(X), dims[a]+1, dims[a]+1, dims[b], dims[b] ) : X in O ], [ ZeroMatrix(K,dims[c],dims[c]) : i in [1..#O] ] *];
+intrinsic NucleusClosure( T::TenSpc, Delta::[Mtrx], a::RngIntElt, b::RngIntElt ) -> TenSpc
+{Returns the nucleus closure of the tensor space with the given operators Delta acting on Ua and Ub.}
+  require T`Valence eq 3 : "Tensor space must have valence 3.";
+  K := BaseRing(T);
+  require K eq BaseRing(Delta[1]) : "Base rings are incompatible.";
+  dims := [ Dimension(X) : X in T`Frame ];
+  a := 3-a;
+  b := 3-b;
+  c := Random({1,2,3} diff {a,b}); // only one elt...
+  require (&+(dims[[a,b]]) eq Nrows(Delta[1])) and (Nrows(Delta[1]) eq Ncols(Delta[1])) : "Incompatible operators.";
+  blocks := [* [ ExtractBlock( X, 1, 1, dims[a], dims[a] ) : X in Delta ], [ ExtractBlock( -Transpose(X), dims[a]+1, dims[a]+1, dims[b], dims[b] ) : X in Delta ], [ ZeroMatrix(K,dims[c],dims[c]) : i in [1..#Delta] ] *];
   perm := [1,2,3];
   temp := [a,b,c];
   ParallelSort(~temp,~perm);
-  M := [ DiagonalJoin( < blocks[perm[i]][j] : i in [1..3] > ) : j in [1..#O] ];
+  M := [ DiagonalJoin( < blocks[perm[i]][j] : i in [1..3] > ) : j in [1..#Delta] ];
   N := __GetDensorTensors(M,dims[1],dims[2],dims[3]);
-  S := __GetTensorSpace( TS`Ring, TS`Frame, TS`Cat );
-  S`Mod := sub< TS`Mod | [ TS`Mod!N[i] : i in [1..Nrows(N)] ] >;
+  S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
+  S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
   if __SANITY_CHECK and Dimension(S) gt 0 then
     printf "Sanity check turned on... (NucleusClosure)";
-    assert forall{ i : i in [1..10] | O subset Nucleus(Random(S),s,t) };
+    assert forall{ i : i in [1..10] | Delta subset Nucleus(Random(S), 3-a, 3-b) };
     printf "  DONE!\n";
   end if;
   return S;
 end intrinsic;
 
-intrinsic NucleusClosure( TS::TenSpc, O::AlgMat, s::RngIntElt, t::RngIntElt ) -> TenSpc
-{Returns the nucleus closure of the tensor space with the given operators O acting on Us and Ut.}
-  return NucleusClosure(TS,Basis(O),s,t);
+intrinsic NucleusClosure( T::TenSpc, Delta::AlgMat, a::RngIntElt, b::RngIntElt ) -> TenSpc
+{Returns the nucleus closure of the tensor space with the given operators Delta acting on Ua and Ub.}
+  return NucleusClosure(T, Basis(Delta), a, b);
 end intrinsic;
 
-intrinsic NucleusClosure( TS::TenSpc, O::ModMatFld, s::RngIntElt, t::RngIntElt ) -> TenSpc
-{Returns the nucleus closure of the tensor space with the given operators O acting on Us and Ut.}
-  return NucleusClosure(TS,Basis(O),s,t);
+intrinsic NucleusClosure( T::TenSpc, Delta::ModMatFld, a::RngIntElt, b::RngIntElt ) -> TenSpc
+{Returns the nucleus closure of the tensor space with the given operators Delta acting on Ua and Ub.}
+  return NucleusClosure(T, Basis(Delta), a, b);
 end intrinsic;
 
-intrinsic NucleusClosure( TS::TenSpc, T::TenSpcElt, s::RngIntElt, t::RngIntElt ) -> TenSpc
-{Returns the nucleus closure of the tensor space with the st-nucleus of the given tensor.}
-  return NucleusClosure(TS,Basis(Nucleus(T,s,t)),s,t);
+intrinsic NucleusClosure( T::TenSpc, t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> TenSpc
+{Returns the nucleus closure of the tensor space with the ab-nucleus of the given tensor t.}
+  return NucleusClosure(T, Basis(Nucleus(t, a, b)), a, b);
 end intrinsic;
