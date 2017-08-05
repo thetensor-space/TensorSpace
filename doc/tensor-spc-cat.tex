@@ -959,23 +959,24 @@ all tensors are assigned a category that is natural to the method
 by which it was created.
 For example a tensor created from an algebra will be assigned an 
 algebra category, whereas a tensor created by structure constants
-will be assigned the Albert homotopism category.  Tensor categories influence
+will be assigned the Albert homotopism category \cite{Albert:Fundamentals}.  
+Tensor categories influence
 the behavior of commands such as kernels and images  
 as well as the algebraic invariants such as derivation algebras of a tensor.  
 
 Our conventions follow \cite{Wilson:division}.  In particular given
-a tensor $T$ framed by $[U_{v},\dots,U_0]$ then a tensor category for
-$T$ will specify a function $A:\{0\dots v\}\to \{-1,0,1\}$ along with
-a partition $\mathcal{P}$ of $\{0,\dots,v\}$ such that the following 
+a tensor $t$ framed by $[U_{\vav},\dots,U_0]$ then a tensor category for
+$t$ will specify a function $A:[\vav]\to \{-1,0,1\}$ along with
+a partition $\mathcal{P}$ of $[\vav]$ such that the following 
 rules apply to the tensors and morphisms in the category.
 \begin{enumerate}
-\item for each tensor $T$ framed by $[U_v,\dots,U_0]$, if
+\item for each tensor $t$ framed by $[U_{\vav},\dots,U_0]$, if
 $X\in\mathcal{P}$, then 
 $$\forall i,j\in X,\quad U_i=U_j.$$
 
-\item Given a second tensor $S$ framed by $[V_v,\dots,V_0]$,
-a morphism $f:T\to S$ (Magma type {\tt Hmtp}) will be a list
-$[f_v,\dots,f_0]$ of homomorphisms as follows:
+\item Given a second tensor $s$ framed by $[V_{\vav},\dots,V_0]$,
+a morphism $f:t\to s$ (Magma type {\tt Hmtp}) will be a list
+$[f_{\vav},\dots,f_0]$ of homomorphisms as follows:
 \begin{itemize}
 \item (Covariant) if $A(i)=1$ then $f_i:U_i\to V_i$;
 \item (Constant) if $A(i)=0$ then $U_i=V_i$ and $f_i=1_{U_i}$; or else
@@ -1014,12 +1015,12 @@ This the third general property stored in Magma's tensor category type
 
 We use the phrase tensor category exclusively for categories that describe tensors and tensor spaces.
 In other words, the data structure of a tensor category is a function 
-$A:\{0,\dots,v\}\rightarrow \{-1,0,1\}$ and a partition $P$ of $\{0,\dots,v\}$.
+$A:[\vav]\rightarrow \{-1,0,1\}$ and a partition $\mathcal{P}$ of $[\vav]$.
 It is useful to distinguish from tensors and cotensors at the categorical level,
 so a tensor category is either covariant or contravariant as well 
 (in the latter case, referred to as a cotensor category).
 
-\section{Creating tensor categories}~
+\section{Constructing tensor categories}~
 
 \index{TensorCategory!constructor}
 \begin{intrinsics}
@@ -1028,7 +1029,7 @@ TensorCategory(A, P) : Map, {SetEnum} -> TenCat
 \end{intrinsics}
 
 Sets up a covariant tensor space category with specified direction of
-arrows $A$, and a partition $P$ indicating variables to be treated as
+arrows $A$, and a partition $\mathcal{P}$ indicating variables to be treated as
 equivalent.  The fiber $A^{-1}(1)$ denotes the covariant variables,
 $A^{-1}(0)$ identifies the constant variables, and $A^{-1}(-1)$ marks
 the contra-variant variables.  
@@ -1040,10 +1041,31 @@ CotensorCategory(A, P) : Map, {SetEnum} -> TenCat
 \end{intrinsics}
 
 Sets up a contra-variant tensor space category with specified direction of
-arrows $A$, and a partition $P$ indicating variables to be treated as
+arrows $A$, and a partition $\mathcal{P}$ indicating variables to be treated as
 equivalent.  The fiber $A^{-1}(1)$ denotes the covariant variables,
 $A^{-1}(0)$ identifies the constant variables, and $A^{-1}(-1)$ marks
 the contra-variant variables.  
+
+\begin{example}[BasicCatConst]
+
+We demonstrate the basic tensor category constructor. 
+The only difference between \texttt{TensorCategory} and \texttt{CotensorCategory} is that the former is covariant and the latter is contravariant.
+\begin{code}
+> C := TensorCategory([1,0,-1], {{0},{1},{2}});
+> C;
+Tensor category of valence 3 (->,==,<-) ({ 1 },{ 2 },{ 0 })
+> IsCovariant(C);
+true
+> 
+> arrows := map< {1..5} -> {1} | x :-> 1 >;
+> C := CotensorCategory(arrows, {{1..5}});
+> C;
+Cotensor category of valence 6 (->,->,->,->,->,==) ({ 0 },{ 1 .. 5 })
+> IsContravariant(C);
+true
+\end{code}
+\end{example}
+
 
 \index{HomotopismCategory}
 \begin{intrinsics}
@@ -1071,41 +1093,28 @@ LinearCategory(v, s, t) :  RngIntElt, RngIntElt, RngIntElt -> TenCat
 \end{intrinsics}
 
 Returns the tensor category where all modules are constant except in position 
-$s$ and $t$.  Both $s$ and $t$ are in $\{0,\dots, v\}$.
+$s$ and $t$.  Both $s$ and $t$ are in $[v]$.
 Position $s$ is covariant, position $t$ is contravariant.
 
-\begin{example}[TenCat\_Const]
-We illustrate how to construct tensor categories.
+\begin{example}[TenCatSpecial]
 
+Now we look at a few special tensor category constructors.
+The default tensor category is the homotopism category, so we construct the homotopism category using \texttt{TensorCategory} and verify they are equivalent.
 \begin{code}
-> Cat := TensorCategory([1,-1,0],{{0},{1},{2}});
-> Cat;
-Tensor category of Valence 2 (->,<-,==) ({ 1 },{ 2 },{ 0 })
-> 
-> TS := KTensorSpace(GF(5),[5,3,4],Cat);
-> TS;
-Tensor space of dimension 60 over GF(5) with valence 2
-U2 : Full Vector space of degree 5 over GF(5)
-U1 : Full Vector space of degree 3 over GF(5)
-U0 : Full Vector space of degree 4 over GF(5)
-> TensorCategory(TS);
-Tensor category of Valence 2 (->,<-,==) ({ 1 },{ 2 },{ 0 })
-> 
-> IsContravariant(TS);
-false
+> C := TensorCategory([1,1,1,1], {{i} : i in [0..3]});
+> C;
+Tensor category of valence 4 (->,->,->,->) ({ 1 },{ 2 },{ 0 },{ 3 })
+> HomotopismCategory(4) eq C;
+true
 \end{code}
 
-All the tensor constructors that allow a {\tt TenCat} input can be used to make cotensors.
-
+The other special tensor categories can be constructed using \texttt{TensorCategory} as well, but we just construct a few to show their properties.
 \begin{code}
-> Cat := HomotopismCategory(2 : Contravariant := true);
-> Cat;
-Cotensor category of valence 2 (->,->) ({ 1 },{ 2 })
-> T := Tensor(GF(5),[2,2],[1..4],Cat);
-> T;
-Cotensor of valence 1, U2 x U1 >-> K
-U2 : Full Vector space of degree 2 over GF(5)
-U1 : Full Vector space of degree 2 over GF(5)
+> CohomotopismCategory(3);
+Tensor category of valence 3 (->,->,<-) ({ 1 },{ 2 },{ 0 })
+> 
+> AdjointCategory(5, 4, 1);
+Tensor category of valence 5 (<-,==,==,->,==) ({ 1 },{ 0, 2, 3 },{ 4 })
 \end{code}
 \end{example}
 
@@ -1150,61 +1159,64 @@ IsContravariant(C) : TenCat -> BoolElt
 
 Decides if the tensor category is covariant or contravariant.
 
-\begin{example}[TenCat\_Prop]
-We obtain basic properties of tensor categories.
+\begin{example}[TenCatProperties]
 
+We obtain basic properties of tensor categories.
 \begin{code}
-> C1 := TensorCategory([1,1,-1,1],{{0,3},{1},{2}});
-> C1;
-Tensor category of Valence 3 (->,->,<-,->) ({ 1 },{ 2 },
-{ 0, 3 })
+> C := CotensorCategory([1,0,-1,1],{{4,3},{1},{2}});
+> C;
+Cotensor category of valence 5 (->,==,<-,->,==) ({ 1 },{ 2 },{ 0 },{ 3, 4 })
 > 
-> A := map< {0..3} -> {-1,0,1} | x :-> 1 >;
-> C2 := TensorCategory(A,{{0..3}});
-> C2;
-Tensor category of Valence 3 (->,->,->,->) ({ 0 .. 3 })
-> 
-> C1 eq C2;
-false
-> RepeatPartition(C2);
+> Valence(C);
+5
+> Arrows(C);
+[ 1, 0, -1, 1 ]
+> IsContravariant(C);
+true
+> RepeatPartition(C);
 {
-    { 0 .. 3 }
+    { 1 },
+    { 2 },
+    { 3, 4 }
 }
-> Valence(C2);
-3
-> Arrows(C2);
-[ 1, 1, 1, 1 ]
 \end{code}
 \end{example}
+
+
 
 \section{Categorical operations}
 
 \subsection{Categorical operations on tensors}
 
 We include functions defined for the category of tensors.
-Most functions are currently defined only for Albert's homotopism category.
+Most functions are currently defined only for the homotopism category.
 
 \index{Subtensor}
 \begin{intrinsics}
-Subtensor(T, S) : TenSpcElt, List -> TenSpcElt
+Subtensor(t, S) : TenSpcElt, List -> TenSpcElt
 \end{intrinsics}
 
-Returns the smallest submap of $T$ containing $S$.
+Returns the smallest submap of $t$ containing $S$.
 
 \index{Subtensor}
 \begin{intrinsics}
-Subtensor(T, D, C) : TenSpcElt, List, Any -> TenSpcElt
+Subtensor(t, D, C) : TenSpcElt, List, Any -> TenSpcElt
 \end{intrinsics}
 
-Returns the smallest submap of $T$ containing $D$ in the domain and $C$ in the 
+Returns the smallest submap of $t$ containing $D$ in the domain and $C$ in the 
 codomain.
 
 \index{IsSubtensor}
 \begin{intrinsics}
-IsSubtensor(T, S) : TenSpcElt, TenSpcElt -> BoolElt
+IsSubtensor(t, s) : TenSpcElt, TenSpcElt -> BoolElt
 \end{intrinsics}
 
-Decides whether $S$ is a subtensor of $T$.
+Decides whether $s$ is a subtensor of $t$.
+
+\begin{example}[Subtensors]
+
+\end{example}
+
 
 \index{LocalIdeal}
 \begin{intrinsics}

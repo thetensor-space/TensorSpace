@@ -40,5 +40,9 @@ end intrinsic;
 intrinsic Arrows( C::TenCat ) -> SeqEnum
 {Returns the directions of the arrows of the category. 
 A -1 signifies an up arrow, a 0 signifies an equal arrow, and a 1 signifies a down arrow.}
-  return [ i @ C`Arrows : i in Reverse([0..C`Valence-1]) ];
+  if C`Contra then 
+    return [ i @ C`Arrows : i in Reverse([1..C`Valence-1]) ];
+  else
+    return [ i @ C`Arrows : i in Reverse([0..C`Valence-1]) ];
+  end if;
 end intrinsic;

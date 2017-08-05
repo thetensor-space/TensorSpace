@@ -12,23 +12,23 @@
 // ------------------------------------------------------------------------------
 //                                      Print
 // ------------------------------------------------------------------------------
-intrinsic Print( t::TenCat )
-{Print t}
-  if t`Contra then
+intrinsic Print( C::TenCat )
+{Print C}
+  if C`Contra then
     s := "Cotensor category of valence ";
   else
     s := "Tensor category of valence ";
   end if;
-  s cat:= Sprintf( "%o (", t`Valence );
-  a := t`Arrows;
-  i := t`Valence-1;
+  s cat:= Sprintf( "%o (", C`Valence );
+  a := C`Arrows;
+  i := C`Valence-1;
   while i ge 0 do
     s cat:= ( i @ a eq 1 ) select "->" else (i @ a eq -1) select "<-" else "==";
     i -:= 1;
     s cat:= (i eq -1) select ")" else ",";
   end while;
   
-  P := t`Repeats;
+  P := C`Repeats;
   i := #P;
   s cat:= " (";
   for X in P do
@@ -43,7 +43,7 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 //                                    Compare
 // ------------------------------------------------------------------------------
-intrinsic 'eq'(TC1::TenCat, TC2::TenCat) -> BoolElt
-{TC1 eq TC2}
-  return (TC1`Valence eq TC2`Valence) and (TC1`Repeats eq TC2`Repeats) and forall{ x : x in Domain(TC1`Arrows) | (x @ TC1`Arrows) eq (x @ TC2`Arrows) };
+intrinsic 'eq'(C1::TenCat, C2::TenCat) -> BoolElt
+{C1 eq C2}
+  return (C1`Valence eq C2`Valence) and (C1`Repeats eq C2`Repeats) and forall{ x : x in Domain(C1`Arrows) | (x @ C1`Arrows) eq (x @ C2`Arrows) };
 end intrinsic;

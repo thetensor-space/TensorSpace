@@ -411,59 +411,59 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 //                                     Submaps
 // ------------------------------------------------------------------------------
-intrinsic Subtensor( M::TenSpcElt, D::List, C::. ) -> TenSpcElt
-{Returns the smallest submap of M containing the Cartesian product of D in the domain and C in the codomain.}
-  require #D eq #M`Domain : "Argument 2 does not match the valence of argument 1.";
-  if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
-    passed, M, _, err := __TensorOnVectorSpaces(M);
+intrinsic Subtensor( t::TenSpcElt, D::List, C::. ) -> TenSpcElt
+{Returns the smallest submap of t containing the Cartesian product of D in the domain and C in the codomain.}
+  require #D eq #t`Domain : "Argument 2 does not match the valence of argument 1.";
+  if exists{ X : X in Frame(t) | Type(X) notin __LIST } then
+    passed, t, _, err := __TensorOnVectorSpaces(t);
     require passed : err;
   end if;
   // Get the domain and codomain down to standard objects. 
   // Also, check that they lie in the correct spaces.  
-  Dom := __GenerateDomain( M, D );
+  Dom := __GenerateDomain( t, D );
   require Type(Dom) ne BoolElt : "Argument 2 is not in the domain.";
-  Cod := __GenerateCodomain( M, C );
+  Cod := __GenerateCodomain( t, C );
   require Type(Cod) ne BoolElt : "Argument 3 is not in the codomain.";
 
   // Fill the image
-  gens := CartesianProduct( < Basis(Dom[i]) : i in [1..#M`Domain] > );
-  Cod := sub< M`Codomain | Cod, { g @ M : g in gens } >;
+  gens := CartesianProduct( < Basis(Dom[i]) : i in [1..#t`Domain] > );
+  Cod := sub< t`Codomain | Cod, { g @ t : g in gens } >;
   if __HasBasis(C) then // remove superfluous generators
-    Cod := sub< M`Codomain | Basis(Cod) >;
+    Cod := sub< t`Codomain | Basis(Cod) >;
   end if;
 
   F := function(x)
-    return < (M`Domain)[i]!(x[i]) : i in [1..#M`Domain] > @ M;
+    return < (t`Domain)[i]!(x[i]) : i in [1..#t`Domain] > @ t;
   end function;
 
-  S := __GetTensor( Dom, Cod, F : Cat := M`Cat );
-  return S;
+  s := __GetTensor( Dom, Cod, F : Cat := t`Cat );
+  return s;
 end intrinsic;
 
-intrinsic Subtensor( M::TenSpcElt, S::List ) -> TenSpcElt
-{Returns the smallest submap of M containing S. 
-The first v entries of S are contained in the domain of M, and the last entry of S is contained in the codomain of M.}
-  return Subtensor( M, S[1..M`Valence-1], S[M`Valence] );
+intrinsic Subtensor( t::TenSpcElt, S::List ) -> TenSpcElt
+{Returns the smallest submap of t containing S. 
+The first v entries of S are contained in the domain of t, and the last entry of S is contained in the codomain of t.}
+  return Subtensor( t, S[1..t`Valence-1], S[t`Valence] );
 end intrinsic;
 
-intrinsic IsSubtensor( M::TenSpcElt, N::TenSpcElt ) -> BoolElt
-{Decides if N is a subtensor of M.}
-  require M`Cat eq N`Cat : "Tensors not in the same category.";
-  if exists{ X : X in Frame(M) | Type(X) notin __LIST } then
-    passed, M, H2, err := __TensorOnVectorSpaces(M);
+intrinsic IsSubtensor( t::TenSpcElt, s::TenSpcElt ) -> BoolElt
+{Decides if s is a subtensor of t.}
+  require t`Cat eq s`Cat : "Tensors not in the same category.";
+  if exists{ X : X in Frame(t) | Type(X) notin __LIST } then
+    passed, t, H2, err := __TensorOnVectorSpaces(t);
     require passed : err;
   end if;
-  if exists{ X : X in Frame(N) | Type(X) notin __LIST } then
-    passed, N, _, err := __TensorOnVectorSpaces(N);
+  if exists{ X : X in Frame(s) | Type(X) notin __LIST } then
+    passed, s, _, err := __TensorOnVectorSpaces(s);
     require passed : err;
   end if;
-  if Parent(M) ne Parent(N) then
+  if Parent(t) ne Parent(s) then
     return false;
   end if;
 
-  d := forall{ i : i in [1..#N`Domain] | forall{ b : b in Basis(N`Domain[i]) | IsCoercible(M`Domain[i],b) } };
+  d := forall{ i : i in [1..#s`Domain] | forall{ b : b in Basis(s`Domain[i]) | IsCoercible(t`Domain[i],b) } };
   if d then
-    c := forall{ b : b in Basis(N`Codomain) | IsCoercible(M`Codomain,b) };
+    c := forall{ b : b in Basis(s`Codomain) | IsCoercible(t`Codomain,b) };
   else
     return false;
   end if;
