@@ -39,25 +39,25 @@ end function;
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Covariant
-intrinsic TensorCategory( a::Map, P::{SetEnum} ) -> TenCat
+intrinsic TensorCategory( A::Map, P::{SetEnum} ) -> TenCat
 {Create a tensor category with arrows oriented by arrows A and repeated module 
 partition P.}
-	require Codomain(a) subset {-1,0,1} : 
+	require Codomain(A) subset {-1,0,1} : 
 		"Arrows must be 1 ``right'', 0 ``constant'', or -1 ``left''";
-	D := Domain(a);
+	D := Domain(A);
 	v := #D-1;
 	require ({0..v} eq D ) : "Domain of arrows should be {0..v}.";
 	S := &join P;
 	require ({0..v} eq S) : "Repeats should partition {0..v}";
-    require not exists(t){ <A,B> : A, B in P | not ( ( A eq B ) 
-    	or IsEmpty(A meet B)) } : "Repeats should partition {0..v}";
+    require not exists(t){ <a,b> : a,b in P | not ( ( a eq b ) 
+    	or IsEmpty(a meet b)) } : "Repeats should partition {0..v}";
     
-    require not exists(t){ X : X in P | #{ x@a : x in X} gt 1} : 
+    require not exists(t){ X : X in P | #{ x@A : x in X} gt 1} : 
     	"Arrows must refine repeats.";
-  return __GetTensorCategory( a, P );
+  return __GetTensorCategory( A, P );
 end intrinsic;
 
-intrinsic TensorCategory(  A::[RngIntElt], P::{SetEnum}  ) -> TenCat
+intrinsic TensorCategory( A::[RngIntElt], P::{SetEnum} ) -> TenCat
 {Create a tensor category with arrows oriented by arrows A and repeated module partition P.}
   require Set(A) subset {-1,0,1} : "Arrows must be 1 ``right'', 0 ``constant'', or -1 ``left''";
   v := #A - 1; 
@@ -72,27 +72,27 @@ intrinsic TensorCategory(  A::[RngIntElt], P::{SetEnum}  ) -> TenCat
 end intrinsic;
 
 // Contravariant
-intrinsic CotensorCategory( a::Map, P::{SetEnum} ) -> TenCat
+intrinsic CotensorCategory( A::Map, P::{SetEnum} ) -> TenCat
 {Create a cotensor category with arrows oriented by arrows A and repeated module 
 partition P.}
 	require Codomain(a) subset {-1,0,1} : 
 		"Arrows must be 1 ``right'', 0 ``constant'', or -1 ``left''";
-	D := Domain(a);
+	D := Domain(A);
 	v := #D;
 	require ({1..v} eq D ) : "Domain of arrows should be {1..v}.";
 	S := &join P;
 	require ({1..v} eq S) : "Repeats should partition {1..v}";
-    require not exists(t){ <A,B> : A, B in P | not ( ( A eq B ) 
-    	or IsEmpty(A meet B)) } : "Repeats should partition {1..v}";
+    require not exists(t){ <a,b> : a,b in P | not ( ( a eq b ) 
+    	or IsEmpty(a meet b)) } : "Repeats should partition {1..v}";
     
-    require not exists(t){ X : X in P | #{ x@a : x in X} gt 1} : 
+    require not exists(t){ X : X in P | #{ x@A : x in X} gt 1} : 
     	"Arrows must refine repeats.";
-  a_map := map< {0..v} -> {-1,0,1} | x :-> (x eq 0) select 0 else x@a >;
+  a_map := map< {0..v} -> {-1,0,1} | x :-> (x eq 0) select 0 else x@A >;
   Include(~P,{0});
   return __GetTensorCategory( a_map, P : Con := true );
 end intrinsic;
 
-intrinsic CotensorCategory(  A::[RngIntElt], P::{SetEnum}  ) -> TenCat
+intrinsic CotensorCategory( A::[RngIntElt], P::{SetEnum} ) -> TenCat
 {Create a cotensor category with arrows oriented by arrows A and repeated module partition P.}
   require Set(A) subset {-1,0,1} : "Arrows must be 1 ``right'', 0 ``constant'', or -1 ``left''";
   v := #A; 

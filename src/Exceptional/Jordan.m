@@ -79,6 +79,7 @@ end intrinsic;
 
 intrinsic JordanSpinAlgebra( F::TenSpcElt ) -> AlgGen
 {Zorn's special Jordan algebra of spin type for given symmetric form.}
+  require F`Valence eq 3 : "Tensor must be valence 3.";
 	require IsSymmetric(F) : "Jordan spin algebras require symmetric forms.";
 	U := F`Domain[2];
 	V := F`Domain[1];
@@ -101,8 +102,8 @@ intrinsic JordanSpinAlgebra( F::TenSpcElt ) -> AlgGen
 end intrinsic;
 
 
-intrinsic JordanSpinAlgebra( f::Mtrx ) -> AlgGen
+intrinsic JordanSpinAlgebra( F::Mtrx ) -> AlgGen
 {Zorn's special Jordan algebra of spin type for given symmetric form.}
-	return JordanSpinAlgebra( Tensor([f], 2,1));
+	return JordanSpinAlgebra( Tensor([F], 2,1));
 end intrinsic;
 

@@ -138,7 +138,7 @@ end intrinsic;
 // ==============================================================================
 //                   Coordinatized Universal (Co)Tensor Spaces
 // ==============================================================================
-intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
+intrinsic RTensorSpace( R::Rng, S::[RngIntElt], C::TenCat ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and specified category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
@@ -147,12 +147,12 @@ intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
   return __GetTensorSpace( R, [* RSpace( R, s ) : s in S *], C );
 end intrinsic;
 
-intrinsic RTensorSpace( R::Rng, S::SeqEnum[RngIntElt] ) -> TenSpc
+intrinsic RTensorSpace( R::Rng, S::[RngIntElt] ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and homotopism category.}
   return RTensorSpace( R, S, HomotopismCategory(#S) );
 end intrinsic;
 
-intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
+intrinsic KTensorSpace( K::Fld, S::[RngIntElt], C::TenCat ) -> TenSpc
 {Universal tensor space with K-vector spaces of given dimenisions and specified category.}
   require #S eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
@@ -161,13 +161,13 @@ intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
   return __GetTensorSpace( K, [* KSpace( K, s ) : s in S *], C );
 end intrinsic;
 
-intrinsic KTensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
+intrinsic KTensorSpace( K::Fld, S::[RngIntElt] ) -> TenSpc
 {Universal tensor space with free R-modules of given ranks and homotopism category.}
   return KTensorSpace( K, S, HomotopismCategory(#S) );
 end intrinsic;
 
 
-intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
+intrinsic KCotensorSpace( K::Fld, S::[RngIntElt], C::TenCat ) -> TenSpc
 {Universal cotensor space with K-vector spaces of given dimenisions and specified category.}
   require #S+1 eq C`Valence : "Number of modules does not match tensor category valence.";
   require forall{ s : s in S | s ge 0 } : "Integers in argument 2 must be nonnegative.";
@@ -178,7 +178,7 @@ intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt], C::TenCat ) -> TenSpc
   return __GetTensorSpace( K, [* KSpace( K, s ) : s in S *], C );
 end intrinsic;
 
-intrinsic KCotensorSpace( K::Fld, S::SeqEnum[RngIntElt] ) -> TenSpc
+intrinsic KCotensorSpace( K::Fld, S::[RngIntElt] ) -> TenSpc
 {Universal cotensor space with free R-modules of given ranks and homotopism category.}
   return KCotensorSpace( K, S, HomotopismCategory(#S+1 : Contravariant := true) );
 end intrinsic;

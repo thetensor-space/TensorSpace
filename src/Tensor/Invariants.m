@@ -562,23 +562,23 @@ end function;
 // ==============================================================================
 //                             Linear algebra methods
 // ==============================================================================
-intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng
+intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
 {Returns the ith radical of t contained in Vi.}
   v := #t`Domain;
-  require i ge 1 : "Argument must be a positive integer.";
-  require i le v : "Argument exceeds valence of tensor.";
+  require a ge 1 : "Argument must be a positive integer.";
+  require a le v : "Argument exceeds valence of tensor.";
   require ISA(Type(BaseRing(t)),Fld) : "Radicals only implemented for tensors over fields.";
-  if Type(t`Radicals[v-i+1]) ne RngIntElt then
-    return t`Radicals[v-i+1][1],t`Radicals[v-i+1][2];
+  if Type(t`Radicals[v-a+1]) ne RngIntElt then
+    return t`Radicals[v-a+1][1],t`Radicals[v-a+1][2];
   end if;
 
   try 
-    F := Foliation(t,i);
+    F := Foliation(t,a);
   catch err
     error "Cannot compute structure constants.";
   end try;
 
-  D := t`Domain[v-i+1];
+  D := t`Domain[v-a+1];
   B := Basis(D);
   V := VectorSpace(BaseRing(t),#B);
   // is the map necessary?
@@ -591,24 +591,24 @@ intrinsic Radical( t::TenSpcElt, i::RngIntElt ) -> ModTupRng
     _, tvs := __TensorOnVectorSpaces(t);
     for j in [1..10] do
       x := < Random(X) : X in tvs`Domain >;
-      x[v-i+1] := Random(R);
+      x[v-a+1] := Random(R);
       assert x @ tvs eq tvs`Codomain!0;
     end for;
     printf "  DONE!\n";
   end if;
-  t`Radicals[v-i+1] := <R,phi>;
+  t`Radicals[v-a+1] := <R,phi>;
   return R;
 end intrinsic;
 
-intrinsic Coradical( M::TenSpcElt ) -> ModTupRng, Map
-{Returns the coradical of M.}
-  if Type(M`Radicals[M`Valence]) ne RngIntElt then
-    return M`Radicals[M`Valence][1],M`Radicals[M`Valence][2];
+intrinsic Coradical( t::TenSpcElt ) -> ModTupRng, Map
+{Returns the coradical of t.}
+  if Type(t`Radicals[t`Valence]) ne RngIntElt then
+    return t`Radicals[t`Valence][1],t`Radicals[t`Valence][2];
   end if;
-  require Type(M`Codomain) in __LIST : "Codomain not a vector space.";
-  I := Image(M);
-  C,pi := M`Codomain/I;
-  M`Radicals[M`Valence] := <C,pi>;
+  require Type(t`Codomain) in __LIST : "Codomain not a vector space.";
+  I := Image(t);
+  C,pi := t`Codomain/I;
+  t`Radicals[t`Valence] := <C,pi>;
   return C,pi;
 end intrinsic;
 

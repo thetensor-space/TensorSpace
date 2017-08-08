@@ -198,9 +198,9 @@ intrinsic IsCoercible( T::TenSpc, S::TenSpc ) -> BoolElt
 end intrinsic;
 
 // Only used to do T!0 to get the trivial tensor.
-intrinsic IsCoercible( T::TenSpc, t::RngIntElt ) -> BoolElt
-{Determines if t is coercible in T.}
-  if t eq 0 then
+intrinsic IsCoercible( T::TenSpc, n::RngIntElt ) -> BoolElt
+{Determines if n is coercible in T.}
+  if n eq 0 then
     return true, T!(Eltseq(Codomain(T`UniMap)!0));
   end if;
   return false, "Incompatible.";

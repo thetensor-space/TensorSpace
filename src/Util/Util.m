@@ -343,3 +343,8 @@ intrinsic Center( A::Alg ) -> Alg
   S := sub< A | [ c @@ B`Coerce[1] : c in Basis(C) ] >;
   return S;
 end intrinsic;
+
+intrinsic Centre( A::Alg ) -> Alg
+{Returns the center of A.}
+  return Center(A);
+end intrinsic;

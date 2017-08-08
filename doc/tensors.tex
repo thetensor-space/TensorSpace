@@ -276,10 +276,10 @@ See Chapter~\ref{ch:tensor-categories} for more details on tensor categories.
 
 \index{Tensor!structure constants}
 \begin{intrinsics}
-Tensor(D, S) : [RngElt], SeqEnum -> TenSpcElt
-Tensor(R, D, S) : Rng, [RngElt], SeqEnum -> TenSpcElt
-Tensor(D, S, Cat) : [RngElt], SeqEnum, TenCat -> TenSpcElt
-Tensor(R, D, S, Cat) : Rng, [RngElt], SeqEnum, TenCat -> TenSpcElt
+Tensor(D, S) : [RngIntElt], [RngElt] -> TenSpcElt
+Tensor(R, D, S) : Rng, [RngIntElt], [RngElt] -> TenSpcElt
+Tensor(D, S, Cat) : [RngIntElt], [RngElt], TenCat -> TenSpcElt
+Tensor(R, D, S, Cat) : Rng, [RngIntElt], [RngElt], TenCat -> TenSpcElt
 \end{intrinsics}
 
 Given dimensions $D=[d_{\vav},\dots,d_0]$, returns the tensor
@@ -347,6 +347,14 @@ Eltseq(t) : TenSpcElt -> SeqEnum
 
 Returns the sequence of structure constants of the given tensor $t$. 
 
+\index{Assign}
+\begin{intrinsics}
+Assign(t, ind, k) : TenSpcElt, [RngIntElt], Any -> TenSpcElt
+Assign(~t, ind, k) : TenSpcElt, [RngIntElt], Any -> 
+\end{intrinsics}
+
+Returns the tensor $t$ where the \texttt{ind} element (viewed as a multi-dimensional array) is replaced with $k$. 
+For example, replacing the $(a,b,c)$ entry of a $3$-tensor, set \texttt{ind}$\,=[a,b,c]$. 
 
 \begin{example}[SCFromBBTensors]
 
@@ -447,9 +455,9 @@ specified by
 
 \index{Tensor!bilinear}\index{Tensor!forms}
 \begin{intrinsics}
-Tensor(M, a, b) : Mtrx, RngIntElt, RngIntElt -> TenSpcElt 
+Tensor(M, a, b) : Mtrx, RngIntElt, RngIntElt -> TenSpcElt
 Tensor(M, a, b, Cat) : Mtrx, RngIntElt, RngIntElt, TenCat -> TenSpcElt
-Tensor(M, a, b) : [Mtrx], RngIntElt, RngIntElt -> TenSpcElt 
+Tensor(M, a, b) : [Mtrx], RngIntElt, RngIntElt -> TenSpcElt
 Tensor(M, a, b, Cat) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
 \end{intrinsics}
 
@@ -829,6 +837,7 @@ true
 \begin{intrinsics}
 pCentralTensor(G, p, a, b) : Grp, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt, List
 pCentralTensor(G, a, b) : Grp, RngIntElt, RngIntElt -> TenSpcElt, List
+pCentralTensor(G, a, b) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt, List
 pCentralTensor(G) : Grp -> TenSpcElt, List
 \end{intrinsics}
 
@@ -892,9 +901,9 @@ U0 : Full Vector space of degree 1 over GF(5^3)
 \index{Polarisation}\index{Polarization}
 \begin{intrinsics}
 Polarisation(f) : MPolElt -> TenSpcElt, MPolElt
-Polarisation(f) : RngUPolElt -> TenSpcElt, MPolElt
+Polarisation(f) : RngUPolElt -> TenSpcElt
 Polarization(f) : MPolElt -> TenSpcElt, MPolElt
-Polarization(f) : RngUPolElt -> TenSpcElt, MPolElt
+Polarization(f) : RngUPolElt -> TenSpcElt
 \end{intrinsics}
 
 Returns the polarization of the homogeneous multivariate polynomial (or univariate polynomial) $f$ as a tensor and as a multivariate polynomial. 
@@ -1192,7 +1201,7 @@ The valence is increased by $1$.
 \index{Compress}
 \begin{intrinsics}
 Compress(t) : TenSpcElt -> TenSpcElt
-Compress(~t) : TenSpcElt
+Compress(~t) : TenSpcElt -> 
 \end{intrinsics}
 
 Returns the compression of the tensor. This removes all 1-dimensional spaces in the domain.
@@ -1359,7 +1368,7 @@ Returns the underlying tensor category of $t$.
 \index{ChangeTensorCategory!tensor}
 \begin{intrinsics}
 ChangeTensorCategory(t, C) : TenSpcElt, TenCat -> TenSpcElt
-ChangeTensorCategory(~t, C) : TenSpcElt, TenCat
+ChangeTensorCategory(~t, C) : TenSpcElt, TenCat -> 
 \end{intrinsics}
 
 Returns the tensor with the given category.
@@ -2177,7 +2186,7 @@ true
 
 \index{SliceAsMatrices}
 \begin{intrinsics}
-SliceAsMatrices(t, grid, a, b) : TenSpcElt, [SetEnum], RngIntElt, RngIntElt -> [Mtrx]
+SliceAsMatrices(t, grid, a, b) : TenSpcElt, [SetEnum], RngIntElt, RngIntElt -> SeqEnum
 \end{intrinsics}
 
 Returns a sequence of matrices whose output is equivalent to composing \texttt{InducedTensor} and \texttt{AsMatrices}.
@@ -2410,12 +2419,12 @@ Vector space of degree 5 over Rational Field given by a rule
 
 \index{AsTensor}
 \begin{intrinsics}
-AsTensor(t) : TenSpc -> TenSpcElt
+AsTensor(T) : TenSpc -> TenSpcElt
 \end{intrinsics}
 
-Returns a tensor corresponding to the given tensor space. 
-If the given tensor space is contravariant, then the returned tensor has the frame $U_{\vav}\times \cdots \times U_1\rightarrowtail t$, where $t$ is thought of as a free $K$-module.
-If the given tensor space is covariant, then the returned tensor has the frame $t\times U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$.
+Returns a tensor corresponding to the given tensor space $T$. 
+If the given tensor space is contravariant, then the returned tensor has the frame $U_{\vav}\times \cdots \times U_1\rightarrowtail T$, where $T$ is thought of as a free $K$-module.
+If the given tensor space is covariant, then the returned tensor has the frame $T\times U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$.
 Note that \texttt{AsTensor} is ``inverse'' to \texttt{AsCotensorSpace} and \texttt{AsTensorSpace} when $a=\vav$.
 
 \begin{example}[SpacesToTensors]
@@ -3040,7 +3049,7 @@ Tensor of valence 3, U2 x U1 >-> U0
 U2 : Full Vector space of degree 20 over GF(2)
 U1 : Full Vector space of degree 20 over GF(2)
 U0 : Full Vector space of degree 10 over GF(2)
-\end{code}%$
+\end{code} 
 
 Even though our tensor right now is $\mathbb{F}_2^{20}\times \mathbb{F}_2^{20}\rightarrowtail\mathbb{F}_2^{10}$, we know it is the 2-dimensional alternating form over $\GF(2^{10})$. 
 We will construct the centroid, and then rewrite our tensor over the centroid to get the tensor we expect.

@@ -1,9 +1,7 @@
 Magma file discrepencies:
   '#'(T) : TenSpc -> RngIntElt
-  '*'(B, y) : TenSpcElt, Any -> Any
   '*'(H1, H2) : Hmtp, Hmtp -> Hmtp
   '*'(S, y) : TenSpc, Any -> Any
-  '*'(T, S) : TenSpcElt, TenSpcElt -> TenSpcElt
   '*'(X, Y) : BmpU, BmpU -> Any
   '*'(X, Y) : BmpU, BmpV -> Any
   '*'(X, Y) : BmpV, BmpU -> Any
@@ -13,27 +11,30 @@ Magma file discrepencies:
   '*'(X, y) : BmpV, BmpUElt -> Any
   '*'(X, y) : BmpV, BmpVElt -> Any
   '*'(t, f) : TenSpcElt, Map -> TenSpcElt
-  '*'(u, v) : BmpUElt, BmpVElt -> Any
-  '*'(x, B) : Any, TenSpcElt -> Any
-  '*'(x, B) : RngElt, TenSpcElt -> Any
+  '*'(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
+  '*'(t, y) : TenSpcElt, Any -> Any
   '*'(x, S) : Any, TenSpc -> Any
   '*'(x, Y) : BmpUElt, BmpU -> Any
   '*'(x, Y) : BmpUElt, BmpV -> Any
   '*'(x, Y) : BmpVElt, BmpU -> Any
   '*'(x, Y) : BmpVElt, BmpV -> Any
+  '*'(x, t) : Any, TenSpcElt -> Any
+  '*'(x, t) : RngElt, TenSpcElt -> Any
   '*'(x, y) : BmpUElt, BmpUElt -> Any
+  '*'(x, y) : BmpUElt, BmpVElt -> Any
   '*'(x, y) : BmpVElt, BmpUElt -> Any
   '*'(x, y) : BmpVElt, BmpVElt -> Any
   '+'(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
   '-'(t) : TenSpcElt -> TenSpcElt
   '-'(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
-  '/'(M, N) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
   '/'(T, S) : TenSpc, TenSpc -> TenSpc, Map
+  '/'(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
+  '@'(x, T) : Tup, TenSpc -> Any
   '@'(x, t) : Tup, TenSpcElt -> Any
   'Any'(H, i) : Hmtp, RngIntElt -> Map
   'Any'(T, i) : TenSpc, RngIntElt -> TenSpcElt
+  'eq'(C1, C2) : TenCat, TenCat -> BoolElt
   'eq'(T, S) : TenSpc, TenSpc -> BoolElt
-  'eq'(TC1, TC2) : TenCat, TenCat -> BoolElt
   'eq'(U1, U2) : BmpU, BmpU -> BoolElt
   'eq'(V1, V2) : BmpV, BmpV -> BoolElt
   'eq'(t, s) : TenSpcElt, TenSpcElt -> BoolElt
@@ -41,121 +42,17 @@ Magma file discrepencies:
   'eq'(v1, v2) : BmpVElt, BmpVElt -> BoolElt
   'in'(t, T) : TenSpcElt, TenSpc -> BoolElt
   'subset'(S, T) : TenSpc, TenSpc -> BoolElt
-  AdjointAlgebra(t) : TenSpcElt -> AlgMat
-  AdjointCategory(v, s, t) : RngIntElt, RngIntElt, RngIntElt -> TenCat
-  AlternatingTensor(t) : TenSpcElt -> TenSpcElt
-  AntisymmetricTensor(t) : TenSpcElt -> TenSpcElt
-  AsCotensorSpace(t) : TenSpcElt -> TenSpc, Mtrx
-  AsMatrices(t, i, j) : TenSpcElt, RngIntElt, RngIntElt -> SeqEnum
-  AsTensorSpace(t, i) : TenSpcElt, RngIntElt -> TenSpc, Mtrx
-  Assign(t, ind, k) : TenSpcElt, [RngIntElt], Any -> TenSpcElt
-  Assign(~t, ind, k) : TenSpcElt, [RngIntElt], Any -> 
-  AssociatedForm(M) : TenSpcElt -> TenSpcElt
-  BaseField(t) : TenSpcElt -> Fld
-  BaseRing(t) : TenSpcElt -> Rng
-  Centroid(t) : TenSpcElt -> AlgMat
-  ChangeTensorCategory(t, C) : TenSpcElt, TenCat -> TenSpcElt
-  ChangeTensorCategory(~H, C) : Hmtp, TenCat -> 
-  ChangeTensorCategory(~T, C) : TenSpc, TenCat -> 
-  ChangeTensorCategory(~t, C) : TenSpcElt, TenCat -> 
-  Codomain(t) : TenSpcElt -> Any
-  Compress(t) : TenSpcElt -> TenSpcElt
-  Compress(~t) : TenSpcElt -> 
-  Coradical(M) : TenSpcElt -> ModTupRng, Map
-  CotensorCategory(a, P) : Map, {SetEnum} -> TenCat
-  DerivationAlgebra(t) : TenSpcElt -> AlgMatLie
-  Discriminant(t) : TenSpcElt -> RngMPolElt
-  Domain(t) : TenSpcElt -> List
-  Eltseq(t) : TenSpcElt -> SeqEnum
-  Foliation(t, i) : TenSpcElt, RngIntElt -> Mtrx
-  Frame(t) : TenSpcElt -> List
-  FullyNondegenerateTensor(M) : TenSpcElt -> TenSpcElt, Hmtp
-  Homotopism(t, s, M : parameters) : TenSpcElt, TenSpcElt, List -> Hmtp
-  Homotopism(t, s, M, C : parameters) : TenSpcElt, TenSpcElt, List, TenCat -> Hmtp
-  Ideal(M, D, C) : TenSpcElt, List, Any -> TenSpcElt
-  Ideal(M, N) : TenSpcElt, TenSpcElt -> TenSpcElt
-  Ideal(M, S) : TenSpcElt, List -> TenSpcElt
-  Image(t) : TenSpcElt -> ModTupRng
-  InducedTensor(t, grid) : TenSpcElt, [SetEnum] -> TenSpcElt
-  IsAlternating(t) : TenSpcElt -> BoolElt
-  IsAntisymmetric(M) : TenSpcElt -> BoolElt
-  IsCoercible(T, S) : TenSpc, [RngElt] -> BoolElt
-  IsCoercible(T, t) : TenSpc, RngIntElt -> BoolElt
-  IsCoercible(T, t) : TenSpc, TenSpcElt -> BoolElt
-  IsCoercible(U, x) : BmpU, Any -> BoolElt, BmpUElt
-  IsCoercible(V, x) : BmpV, Any -> BoolElt, BmpVElt
-  IsContravariant(t) : TenSpcElt -> BoolElt
-  IsCovariant(t) : TenSpcElt -> BoolElt
   IsCyclic(R) : AlgAss -> BoolElt, AlgAssElt
-  IsCyclic(R) : AlgMat -> BoolElt, AlgAssElt
-  IsFullyNondegenerate(M) : TenSpcElt -> BoolElt
-  IsHomotopism(t, s, M) : TenSpcElt, TenSpcElt, List -> BoolElt
-  IsIdeal(M, N) : TenSpcElt, TenSpcElt -> BoolElt
-  IsLocalIdeal(M, N, S) : TenSpcElt, TenSpcElt, {RngIntElt} -> BoolElt
-  IsNondegenerate(M) : TenSpcElt -> BoolElt
-  IsSimilar(M, N) : ModRng, ModRng -> BoolElt, Map
-  IsSubtensor(M, N) : TenSpcElt, TenSpcElt -> BoolElt
-  IsSymmetric(M) : TenSpcElt -> BoolElt
-  JordanSpinAlgebra(f) : Mtrx -> AlgGen
-  KCotensorSpace(K, S) : Fld, SeqEnum[RngIntElt] -> TenSpc
-  KCotensorSpace(K, S, C) : Fld, SeqEnum[RngIntElt], TenCat -> TenSpc
-  KTensorSpace(K, S) : Fld, SeqEnum[RngIntElt] -> TenSpc
-  KTensorSpace(K, S, C) : Fld, SeqEnum[RngIntElt], TenCat -> TenSpc
-  LeftNucleus(t) : TenSpcElt -> AlgMat
-  LinearCategory(v, s, t) : RngIntElt, RngIntElt, RngIntElt -> TenCat
-  LocalIdeal(M, D, C, I) : TenSpcElt, List, Any, {RngIntElt} -> TenSpcElt
-  LocalIdeal(M, N, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt
-  LocalIdeal(M, S, I) : TenSpcElt, List, {RngIntElt} -> TenSpcElt
-  LocalQuotient(M, N, S : parameters) : TenSpcElt, TenSpcElt, SetEnum -> TenSpcElt, Hmtp
-  MidNucleus(t) : TenSpcElt -> AlgMat
-  NondegenerateTensor(M) : TenSpcElt -> TenSpcElt, Hmtp
-  Nucleus(t, i, j) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
-  Parent(U) : BmpU -> TenSpcElt
-  Parent(V) : BmpV -> TenSpcElt
-  Parent(t) : TenSpcElt -> TenSpc
-  Parent(u) : BmpUElt -> BmpU
-  Parent(v) : BmpVElt -> BmpV
-  Pfaffian(t) : TenSpcElt -> RngMPolElt
-  Polarisation(f) : RngUPolElt -> TenSpcElt
-  Polarization(f) : RngUPolElt -> TenSpcElt
+  Print(C) : TenCat -> 
   Print(H) : Hmtp -> 
   Print(T) : TenSpc -> 
   Print(U) : BmpU -> 
   Print(V) : BmpV -> 
-  Print(t) : TenCat -> 
   Print(t) : TenSpcElt -> 
   Print(u) : BmpUElt -> 
   Print(v) : BmpVElt -> 
-  QuoConstructor(T, X) : TenSpc, Any -> TenSpc, Map
-  Quotient(M, N : parameters) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
-  RTensorSpace(R, S) : Rng, SeqEnum[RngIntElt] -> TenSpc
-  RTensorSpace(R, S, C) : Rng, SeqEnum[RngIntElt], TenCat -> TenSpc
-  Radical(M) : TenSpcElt -> Tup
-  Radical(t, i) : TenSpcElt, RngIntElt -> ModTupRng
-  RandomTensor(R, S, Cat) : Rng, [RngIntElt], TenCat -> TenSpcElt
-  RightNucleus(t) : TenSpcElt -> AlgMat
-  Shuffle(M, g) : TenSpcElt, GrpPermElt -> TenSpcElt
-  Shuffle(M, g) : TenSpcElt, SeqEnum -> TenSpcElt
-  Slice(t, grid) : TenSpcElt, [SetEnum] -> SeqEnum
-  SliceAsMatrices(t, grid, i, j) : TenSpcElt, SeqEnum[SetEnum], RngIntElt, RngIntElt -> SeqEnum
-  StructureConstants(t) : TenSpcElt -> SeqEnum
-  Subtensor(M, D, C) : TenSpcElt, List, Any -> TenSpcElt
-  Subtensor(M, S) : TenSpcElt, List -> TenSpcElt
-  SymmetricTensor(t) : TenSpcElt -> TenSpcElt
-  SystemOfForms(t) : TenSpcElt -> SeqEnum
-  Tensor(D, S) : [RngIntElt], [RngElt] -> TenSpcElt
-  Tensor(D, S, Cat) : [RngIntElt], [RngElt], TenCat -> TenSpcElt
-  Tensor(M, s, t) : Mtrx, RngIntElt, RngIntElt -> TenSpcElt
-  Tensor(M, s, t) : [Mtrx], RngIntElt, RngIntElt -> TenSpcElt
-  Tensor(M, s, t, Cat) : Mtrx, RngIntElt, RngIntElt, TenCat -> TenSpcElt
-  Tensor(M, s, t, Cat) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
-  Tensor(Q) : RngUPolRes -> TenSpcElt, Map
-  Tensor(R, D, S) : Rng, [RngIntElt], [RngElt] -> TenSpcElt
-  Tensor(R, D, S, Cat) : Rng, [RngIntElt], [RngElt], TenCat -> TenSpcElt
-  TensorCategory(a, P) : Map, {SetEnum} -> TenCat
-  TensorCategory(t) : TenSpcElt -> TenCat
-  TensorOverCentroid(t) : TenSpcElt -> TenSpcElt, Hmtp
-  Valence(t) : TenSpcElt -> RngIntElt
+  SubtensorSpace(T, L) : TenSpc, [TenSpcElt] -> TenSpc, Map
+  SubtensorSpace(T, t) : TenSpc, TenSpcElt -> TenSpc, Map
   eMAGmaVersion() :  -> MonStgElt
 
 --------------------------------------------------------------------------------
@@ -163,111 +60,5 @@ Magma file discrepencies:
 --------------------------------------------------------------------------------
 
 Documentation file discrepencies:
-  %SubtensorSpace(T, L) : TenSpc, [TenSpcElt] -> TenSpc
-  %SubtensorSpace(T, t) : TenSpc, TenSpcelt -> TenSpc
-  AdjointAlgebra(B) : TenSpcElt -> AlgMat
-  AdjointCategory(v, s, t) :  RngIntElt, RngIntElt, RngIntElt -> TenCat
-  AlternatingTensor(T) : TenSpcElt -> TenSpcElt
-  AntisymmetricTensor(T) : TenSpcElt -> TenSpcElt
-  AsCotensorSpace(T) : TenSpcElt -> TenSpc, Mtrx
-  AsMatrices(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> SeqEnum
-  AsTensorSpace(T, i) : TenSpcElt, RngIntElt -> TenSpc, Mtrx
-  AssociatedForm(T) : TenSpcElt -> TenSpcElt
-  BaseField(T) : TenSpcElt -> Fld
-  BaseRing(T) : TenSpcElt -> Rng
-  Centre(A) : Alg -> Alg
-  Centroid(T) : TenSpcElt -> AlgMat
-  ChangeTensorCategory(T, C) : TenSpcElt, TenCat -> TenSpcElt
-  ChangeTensorCategory(~H, C) : Hmtp, TenCat -> Hmtp
-  ChangeTensorCategory(~T, C) : TenSpc, TenCat
-  ChangeTensorCategory(~T, C) : TenSpcElt, TenCat
-  Codomain(T) : TenSpcElt -> Any
-  Compress(T) : TenSpcElt -> TenSpcElt
-  Compress(~T) : TenSpcElt
-  Coradical(T) : TenSpcElt -> ModTupRng, Map
-  CotensorCategory(A, P) : Map, {SetEnum} -> TenCat
-  DerivationAlgebra(T) : TenSpcElt -> AlgMatLie
-  Discriminant(B) : TenSpcElt -> RngMPolElt
-  Domain(T) : TenSpcElt -> List
-  Eltseq(T) : TenSpcElt -> SeqEnum
-  Foliation(T, i) : TenSpcElt, RngIntElt -> Mtrx
-  Frame(T) : TenSpcElt -> List
-  FullyNondegenerateTensor(T) : TenSpcElt -> TenSpcElt, Hmtp
-  Homotopism(T, S, M : parameters) : TenSpcElt, TenSpcElt, List -> Hmtp
-  Homotopism(T, S, M, C : parameters) : TenSpcElt, TenSpcElt, List, TenCat -> Hmtp
-  Ideal(T, D, C) : TenSpcElt, List, Any -> TenSpcElt
-  Ideal(T, S) : TenSpcElt, List -> TenSpcElt
-  Ideal(T, S) : TenSpcElt, TenSpcElt -> TenSpcElt
-  Image(T) : TenSpcElt -> ModTupRng
-  InducedTensor(T, grid) : TenSpcElt, [SetEnum] -> TenSpcElt
-  IsAlternating(T) : TenSpcElt -> BoolElt
-  IsAntisymmetric(T) : TenSpcElt -> BoolElt
-  IsCoercible(S,x) : BmpU, Any -> BoolElt, BmpUElt
-  IsCoercible(S,x) : BmpV, Any -> BoolElt, BmpVElt
-  IsCoercible(TS, S) : TenSpc, SeqEnum -> BoolElt, TenSpcElt
-  IsCoercible(TS, T) : TenSpc, TenSpcElt -> BoolElt, TenSpcElt
-  IsCoercible(TS, n) : TenSpc, RngIntElt -> BoolElt, TenSpcElt
-  IsContravariant(T) : TenSpcElt -> BoolElt
-  IsCovariant(T) : TenSpcElt -> BoolElt
-  IsCyclic(R) : AlgAss  -> BoolElt, AlgAssElt
-  IsFullyNondegenerate(T) : TenSpcElt -> BoolElt
-  IsIdeal(T, S) : TenSpcElt, TenSpcElt -> BoolElt
-  IsLocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> BoolElt
-  IsNondegenerate(T) : TenSpcElt -> BoolElt
-  IsSimilar( M, N ) : ModRng, ModRng -> BoolElt, Map
-  IsSubtensor(T, S) : TenSpcElt, TenSpcElt -> BoolElt
-  IsSymmetric(T) : TenSpcElt -> BoolElt
-  JordanSpinAlgebra(F) : Any -> AlgGen
-  KCotensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
-  KCotensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
-  KTensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
-  KTensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
-  LeftNucleus(B) : TenSpcElt -> AlgMat
-  LinearCategory(v, s, t) :  RngIntElt, RngIntElt, RngIntElt -> TenCat
-  LocalIdeal(T, D, C, I) : TenSpcElt, List, Any, {RngIntElt} -> TenSpcElt
-  LocalIdeal(T, S, I) : TenSpcElt, List, {RngIntElt} -> TenSpcElt
-  LocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt
-  LocalQuotient(T, S, I : parameters) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSpcElt, Hmtp
-  MidNucleus(B) : TenSpcElt -> AlgMat
-  NondegenerateTensor(T) : TenSpcElt -> TenSpcElt, Hmtp
-  Nucleus(T, s, t) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
-  Parent(T) : TenSpcElt -> TenSpc
-  Parent(X) : BmpU -> TenSpcElt
-  Parent(X) : BmpV -> TenSpcElt
-  Parent(x) : BmpUElt -> BmpU
-  Parent(x) : BmpVElt -> BmpV
-  Pfaffian(B) : TenSpcElt -> RngMPolElt
-  Polarisation(f) : RngUPolElt -> TenSpcElt, MPolElt
-  Polarization(f) : RngUPolElt -> TenSpcElt, MPolElt
-  QuoConstructor(T, S) : TenSpc, TenSpc -> TenSpc, Map
-  Quotient(T, S : parameters) : TenSpcElt, TenSpcElt -> TenSpcElt, Hmtp
-  RTensorSpace(R, S) : Rng, [RngIntElt] -> TenSpc
-  RTensorSpace(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpc
-  Radical(T) : TenSpcElt -> Tup
-  Radical(T, i) : TenSpcElt, RngIntElt -> ModTupRng
-  RandomTensor(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpcElt
-  RightNucleus(B) : TenSpcElt -> AlgMat
   SetVerbose(MonStgElt, RngIntElt) : -> 
-  Shuffle(T, g) : TenSpcElt, GrpPermElt -> TenSpcElt
-  Shuffle(T, g) : TenSpcElt, SeqEnum -> TenSpcElt
-  Slice(T, grid) : TenSpcElt, [SetEnum] -> SeqEnum
-  SliceAsMatrices(T, grid, i, j) : TenSpcElt, [SetEnum], RngIntElt, RngIntElt -> [Mtrx]
-  StructureConstants(T) : TenSpcElt -> SeqEnum
-  Subtensor(T, D, C) : TenSpcElt, List, Any -> TenSpcElt
-  Subtensor(T, S) : TenSpcElt, List -> TenSpcElt
-  SymmetricTensor(T) : TenSpcElt -> TenSpcElt
-  SystemOfForms(T) : TenSpcElt -> SeqEnum
-  Tensor(A) : RngUPolRes -> TenSpcElt, Map
-  Tensor(D, S) : [RngElt], SeqEnum -> TenSpcElt
-  Tensor(D, S, Cat) : [RngElt], SeqEnum, TenCat -> TenSpcElt
-  Tensor(M, s, t) : Mtrx, RngIntElt, RngIntElt -> TenSpcElt 
-  Tensor(M, s, t) : [Mtrx], RngIntElt, RngIntElt -> TenSpcElt 
-  Tensor(M, s, t, C) : Mtrx, RngIntElt, RngIntElt, TenCat -> TenSpcElt
-  Tensor(M, s, t, C) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
-  Tensor(R, D, S) : Rng, [RngElt], SeqEnum -> TenSpcElt
-  Tensor(R, D, S, Cat) : Rng, [RngElt], SeqEnum, TenCat -> TenSpcElt
-  TensorCategory(A, P) : Map, {SetEnum} -> TenCat
-  TensorCategory(T) : TenSpcElt -> TenCat
-  TensorOverCentroid(T) : TenSpcElt -> TenSpcElt, Hmtp
-  Valence(T) : TenSpcElt -> RngIntElt
   eMAGmaVersion() : -> MonStgElt

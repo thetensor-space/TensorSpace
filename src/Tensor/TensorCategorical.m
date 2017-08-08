@@ -270,7 +270,7 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 //                                    Quotients
 // ------------------------------------------------------------------------------
-intrinsic LocalQuotient( t::TenSpcElt, s::TenSpcElt, A::SetEnum : Check := true ) -> TenSpcElt, Hmtp
+intrinsic LocalQuotient( t::TenSpcElt, s::TenSpcElt, A::{RngIntElt} : Check := true ) -> TenSpcElt, Hmtp
 {Returns the local quotient of t by the local ideal s. 
 Here, A is a subset of integers corresponding to the Cartesian factors in the domain.}
   require t`Cat eq s`Cat : "Tensors not in the same category.";

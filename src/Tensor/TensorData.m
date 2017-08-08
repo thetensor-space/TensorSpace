@@ -192,7 +192,7 @@ intrinsic AsMatrices( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> SeqEnum
   return __GetForms(sc, dims, Maximum([a, b]), Minimum([a, b]) : op := a eq Minimum([a, b]));
 end intrinsic;
 
-intrinsic SliceAsMatrices( t::TenSpcElt, grid::SeqEnum[SetEnum], a::RngIntElt, b::RngIntElt ) -> SeqEnum
+intrinsic SliceAsMatrices( t::TenSpcElt, grid::[SetEnum], a::RngIntElt, b::RngIntElt ) -> SeqEnum
 {Performs the slice of t with the given grid and returns the tensor as matrices with a and b.}
   if t`Cat`Contra and #grid+1 eq t`Valence then
     grid cat:= [{1}];

@@ -52,14 +52,14 @@ intrinsic Random( T::TenSpc ) -> TenSpcElt
   return t;
 end intrinsic;
 
-intrinsic RandomTensor( R::Rng, S::[RngIntElt], Cat::TenCat ) -> TenSpcElt
+intrinsic RandomTensor( R::Rng, S::[RngIntElt], C::TenCat ) -> TenSpcElt
 {Returns a random tensor of the finite R-tensor space with the given dimensions and category.}
   require __HasRandom(R) : "Base ring has no random algorithm.";
-  if Cat`Contra then
+  if C`Contra then
     require ISA(Type(R),Fld) : "Base ring must be a field for cotensors.";
-    return Random(KCotensorSpace(R,S,Cat));
+    return Random(KCotensorSpace(R,S,C));
   end if;
-  return Random(RTensorSpace(R,S,Cat));
+  return Random(RTensorSpace(R,S,C));
 end intrinsic;
 
 intrinsic RandomTensor( R::Rng, S::[RngIntElt] ) -> TenSpcElt
