@@ -1,4 +1,4 @@
-% !TEX root =  Multilinear.tex
+% !TEX root =  eMAGma.tex
 
 Magma provides functionality with common exceptional tensors.  Many are used in the
 construction of nonassociative algebras.  A few supporting functions for nonassociative algebras
@@ -22,9 +22,9 @@ Star(A) : AlgGen -> Map
 
 Returns involution of given $*$-algebra.
 
-\begin{example}[Star\_Alg]
-We demonstrate the functions dealing with involutions of nonassociative algebras.
+\begin{example}[StarAlgebra]
 
+We demonstrate the functions dealing with involutions of nonassociative algebras.
 \begin{code}
 > A := OctonionAlgebra(Rationals(),-1,-1,-1);
 > IsStarAlgebra(A);
@@ -75,10 +75,10 @@ GenericTracelessSubspaceBasis(A) : AlgGen -> Any
 
 Given a power associative algebra return a basis for the elements of generic trace 0.
 
-\begin{example}[Ten\_Generic]
+\begin{example}[TenGeneric]
+
 The trace $x+\bar{x}$ of a quaternion doubles the rational component, producing
 degenerate behavior in characteristic $2$.  The generic trace avoids this.
-
 \begin{code}
 > Q := QuaternionAlgebra(Rationals(), 1,1);
 > Trace(Q!1);        
@@ -119,7 +119,6 @@ CompositionAlgebra(K, a) : Fld, [RngIntElt] -> AlgGen
 
 Constructs the composition algebra with specified parameters.  The algebra returned
 has an involution.  
-
 The method is modestly intentional choosing Magma's favored representation of
 the individually classified algebras according to Hurwitz's theorem.  In the case of
 fields the type returned is an algebra with involution, possibly the identity.
@@ -144,7 +143,7 @@ SplitOctonionAlgebra(K) : Fld -> AlgGen
 Returns the split octonion algebra over the field $F$.
 
 
-\begin{example}[Ten\_Triality]
+\begin{example}[TenTriality]
 The following example demonstrates some of the mechanics by exploring
 the concept of triality \cite{Schafer}*{III.8}.
 
@@ -192,7 +191,7 @@ JordanSpinAlgebra(F) : Any -> AlgGen
 
 Returns the special Jordan algebra of spin type for given symmetric form.
 
-\begin{example}[Ten\_Jordan\_Basic]
+\begin{example}[JordanBasic]
 Jordan algebras have suggestive analogues of 
 commutative associative algebras, but experimenting shows serious 
 differences.
@@ -235,7 +234,7 @@ The exception central simple Jordan algebra over the given octonions.
 If a field is supplied instead then the split octonion algebra over the
 field is used.
 
-\begin{example}[Ten\_Chevalley\_Shafer\_F4]
+\begin{example}[ChevalleyShaferF4]
 In characteristic not $2$ or $3$, the exceptional central 
 simple Jordan algebra can be used to construct
 the exceptional Lie algebra of type $F_4$.
@@ -243,7 +242,7 @@ the exceptional Lie algebra of type $F_4$.
 \begin{code}
 > J := ExceptionalJordanCSA(Rationals());
 > T := Tensor(J);                                     
-> T := ChangeTensorCategory(T, HomotopismCategory(2));
+> T := ChangeTensorCategory(T, HomotopismCategory(3));
 > D := DerivationAlgebra(T);
 > D2 := Induce(D, 2);           // Represent D on U2.
 > F4 := D2*D2;                  // Commutator.
