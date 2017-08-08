@@ -17,7 +17,7 @@ IsSimilar(M, N) : ModRng, ModRng -> BoolElt, Map
 
 Decides if the given modules are similar; requires that one of the given modules have a cyclic coefficient ring.
 
-\begin{example}[Star\_Alg]
+\begin{example}[ModuleSimilarity]
 
 In magma modules of a group or algebra are defined by the action of a fixed
 generatoring set of the algebra.  Therefore isomorphism of modules in Magma 
@@ -30,7 +30,7 @@ in some situations.  Consider the following example comparing two
 > R := MatrixAlgebra(GF(3),2);     
 > A := sub<R| [R!1, R![0,1,2,0]]>;
 > B := sub<R| [R!1, R![1,1,2,1]]>;
-> A eq B;	// Both are a field GF(9).
+> A eq B;
 true
 > M := RModule(A); // A 1-dim. GF(9) vector space.
 > N := RModule(B); // A 1-dim. GF(9) vector space.
@@ -40,7 +40,7 @@ false
 $.1^2 + 1
 > MinimalPolynomial(B.2);
 $.1^2 + $.1 + 2
-\end{code} %$% editor does not recognize custom environment 
+\end{code}
 
 Isomorphism of the two modules $M$ and $N$ failed because the two
 vector spaces are specified by different generators of $GF(9)$, as confirmed
@@ -70,13 +70,12 @@ perhaps not equal.
 > IsIsomorphic(M,N);            // Not isomorphic as A and B are distinct.
 false
 > cyc, f := IsSimilar(M,N);     // But similar as A is isomorphic to B.
-> // f conjugates A into B?
+> // f conjugates A into B
 > forall { a : a in Generators (A) | f * a * f^-1 in B };
 true
-> // and f is a semilinear transform M->N ?
-> forall{ i : i in [1..Ngens (M)] | forall { j : j in [1..Ngens (A)] | (Vector\
-\
-> (M.i * A.j) * f) eq (Vector(M.i)*f)*(f^(-1)*A.j*f) } };
+> // and f is a semilinear transform M->N.
+> forall{ i : i in [1..Ngens (M)] | forall { j : j in [1..Ngens (A)] | \
+> (Vector(M.i * A.j) * f) eq (Vector(M.i)*f)*(f^(-1)*A.j*f) } };
 true
 \end{code}
 
@@ -87,9 +86,8 @@ a generator returned.
 > M := RandomMatrix(GF(9), 100, 100);
 > A := sub< Parent(M) | [ M^(Random(50)) : i in [1..10]] >;
 > Ngens(A);
-> IsCyclic(A);
-true
-...
+10
+> assert IsCyclic(A);
 \end{code}
 \end{example}
 

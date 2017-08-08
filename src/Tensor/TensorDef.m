@@ -151,6 +151,7 @@ intrinsic '@'( x::Tup, T::TenSpc ) -> .
 {x @ T}
   C := Codomain(T!0);
   Im := sub< C | [x @ t : t in Basis(T)] >;
+  Im := sub< Im | Basis(Im) >; // remove superfluous gens
   return Im;
 end intrinsic;
 // ------------------------------------------------------------------------------

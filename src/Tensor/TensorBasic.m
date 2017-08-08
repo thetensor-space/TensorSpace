@@ -230,12 +230,14 @@ intrinsic AssociatedForm( t::TenSpcElt ) -> TenSpcElt
   else
     Cat := TensorCategory( Arrows(t`Cat) cat [1], { {x+1 : x in S} : S in t`Cat`Repeats } join {{0}} );
   end if;
-  s := Tensor( D, C, F, Cat );
+  if assigned t`Coerce then
+    Coerce := t`Coerce cat [* hom< C -> C | <C.1,C.1> > *];
+  else
+    Coerce := false;
+  end if;
+  s := __GetTensor( D, C, F : Cat := Cat, Co := Coerce );
   if assigned t`CoordImages then
     s`CoordImages := Eltseq(t);
-  end if;
-  if assigned t`Coerce then
-    s`Coerce := t`Coerce cat [* hom< C -> C | <C.1,C.1> > *];
   end if;
 
   if __SANITY_CHECK then

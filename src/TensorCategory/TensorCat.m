@@ -75,7 +75,7 @@ end intrinsic;
 intrinsic CotensorCategory( A::Map, P::{SetEnum} ) -> TenCat
 {Create a cotensor category with arrows oriented by arrows A and repeated module 
 partition P.}
-	require Codomain(a) subset {-1,0,1} : 
+	require Codomain(A) subset {-1,0,1} : 
 		"Arrows must be 1 ``right'', 0 ``constant'', or -1 ``left''";
 	D := Domain(A);
 	v := #D;

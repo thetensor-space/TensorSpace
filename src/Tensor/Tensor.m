@@ -14,6 +14,7 @@ import "TensorDef.m" : __HasBasis;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 import "../Types.m" : __RF_BIMAP;
+import "TensorData.m" : __GetShuffle, __GetForms;
 
 __GetBimapRecord := function( B )
   D := B`Domain;
@@ -592,11 +593,6 @@ intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   else
     require Labelling(Parent(g)) eq {0..v-1} : "Permuation must act on {0..v-1}.";
   end if;
-  try
-    _ := Eltseq(t);
-  catch err
-    error "Cannot compute structure constants.";
-  end try;
   g_elt := Reverse([ v-i : i in Eltseq(g) ]);
   ginv_elt := Reverse([ v-i : i in Eltseq(g^-1) ]);
   spaces := __FRAME(t);
@@ -676,17 +672,27 @@ intrinsic AntisymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   if IsAntisymmetric(t) then
     return t;
   end if;
-  G := Sym( {0..t`Valence-1} );
-  Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
-  temp := [ K!0 : i in [1..#sc] ];
-  for g in Stab do
-    s := Shuffle(t,g);
-    seq := Eltseq(s);
-    k := Sign(g);
-    temp := [ temp[i] + k*seq[i] : i in [1..#seq] ];
-  end for;
-  spaces := Frame(t);
-  s := Tensor( K, [Dimension(X) : X in spaces], temp, t`Cat );
+  dims := [Dimension(X) : X in __FRAME(t)];
+
+  if t`Valence eq 3 then
+    Forms := __GetForms(sc, dims, 2, 1);
+    Forms := [X-Transpose(X) : X in Forms];
+    s := Tensor(Forms, 2, 1, t`Cat);
+  else
+    G := Sym(t`Valence-1);
+    temp := sc;
+    for g in G do
+      if g ne G!1 then
+        seq := __GetShuffle(sc, dims, [0] cat Eltseq(g));
+        k := Sign(g);
+        for i in [1..#seq] do
+          temp[i] +:= k*seq[i];
+        end for;
+      end if;
+    end for;
+    s := Tensor( K, dims, temp, t`Cat );
+  end if;
+
   if assigned t`Parent then
     s`Parent := t`Parent;
   end if;
@@ -721,16 +727,36 @@ intrinsic SymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   if IsSymmetric(t) then
     return t;
   end if;
-  G := Sym( {0..t`Valence-1} );
-  Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
-  temp := [ K!0 : i in [1..#sc] ];
-  for g in Stab do
-    s := Shuffle(t,g);
-    seq := Eltseq(s);
-    temp := [ temp[i] + seq[i] : i in [1..#seq] ];
-  end for;
-  spaces := Frame(t);
-  s := Tensor( K, [Dimension(X) : X in spaces], temp, t`Cat );
+//  G := Sym( {0..t`Valence-1} );
+//  Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
+//  temp := [ K!0 : i in [1..#sc] ];
+//  for g in Stab do
+//    s := Shuffle(t,g);
+//    seq := Eltseq(s);
+//    temp := [ temp[i] + seq[i] : i in [1..#seq] ];
+//  end for;
+//  spaces := Frame(t);
+//  s := Tensor( K, [Dimension(X) : X in spaces], temp, t`Cat );
+
+  dims := [Dimension(X) : X in __FRAME(t)];
+  if t`Valence eq 3 then
+    Forms := __GetForms(sc, dims, 2, 1);
+    Forms := [X+Transpose(X) : X in Forms];
+    s := Tensor(Forms, 2, 1, t`Cat);
+  else
+    G := Sym(t`Valence-1);
+    temp := sc;
+    for g in G do
+      if g ne G!1 then
+        seq := __GetShuffle(sc, dims, [0] cat Eltseq(g));
+        for i in [1..#seq] do
+          temp[i] +:= seq[i];
+        end for;
+      end if;
+    end for;
+    s := Tensor( K, dims, temp, t`Cat );
+  end if;
+
   if assigned t`Parent then
     s`Parent := t`Parent;
   end if;

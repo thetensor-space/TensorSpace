@@ -9,7 +9,7 @@
 */
 
 import "../GlobalVars.m" : __FRAME;
-import "Tensors.m" : __TensorOnVectorSpaces;
+import "Tensors.m" : __TensorOnVectorSpaces, __GetTensor;
 
 // s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], grid: sequence of subsets of {1..dim(V_a)}. 
 __GetSlice := function( s, dims, grid )
@@ -45,6 +45,17 @@ __GetForms := function( s, dims, m, n : op := false )
   return Forms;
 end function;
 
+// s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], g: permutation in Sym({0..vav}). 
+__GetShuffle := function( s, dims, g )
+  perm := Reverse([ #dims-i : i in Eltseq(g) ]);
+  dims_old := dims;
+  dims := dims[perm];
+  CP := CartesianProduct(< [1..dims[i]] : i in [1..#dims] >);
+  offsets_old := [ &*dims_old[i+1..#dims] : i in [1..#dims-1] ] cat [1]; 
+  indices := [ 1 + (&+[offsets_old[i]*(cp[perm[i]]-1): i in [1..#dims]]) : cp in CP ];
+  return s[indices];
+end function;
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,15 +65,8 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
     return t`CoordImages;
   elif assigned t`CoordImages then // came from shuffle but do not have to compute coord images from scratch
     g := t`Permutation^-1;
-    perm := Reverse([ t`Valence-i : i in Eltseq(g) ]); // CHECK THIS...
-    spaces := __FRAME(t);
-    spaces_old := spaces[perm];
-    dims := [ Dimension(X) : X in spaces ];
-    dims_old := [ Dimension(X) : X in spaces_old ];
-    CP := CartesianProduct(< [1..dims[i]] : i in [1..t`Valence] >);
-    offsets_old := [ &*dims_old[i+1..#dims] : i in [1..#dims-1] ] cat [1]; 
-    indices := [ 1 + (&+[offsets_old[i]*(cp[perm[i]]-1): i in [1..t`Valence]]) : cp in CP ];
-    t`CoordImages := t`CoordImages[indices];
+    dims := [Dimension(X) : X in __FRAME(t)];
+    t`CoordImages := __GetShuffle(t`CoordImages, dims, g);
     t`Permutation := Parent(t`Permutation)!1;
     if not assigned t`Element then
       t`Element := RSpace(BaseRing(t),#t`CoordImages)!(t`CoordImages);
@@ -286,9 +290,14 @@ intrinsic Compress( t::TenSpcElt ) -> TenSpcElt
   else
     Cat := TensorCategory( A[cmpl], part);
   end if;
-  s := Tensor( dom, t`Codomain, F, Cat );
+  if assigned t`Coerce then
+    Coerce := t`Coerce;
+  else
+    Coerce := false;
+  end if;
+  s := __GetTensor( dom, t`Codomain, F : Cat := Cat, Co := Coerce );
   if assigned t`CoordImages then
-    s`CoordImages := Eltseq(t);
+    s`CoordImages := t`CoordImages;
   end if;
   return s;
 end intrinsic;
