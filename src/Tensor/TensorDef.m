@@ -10,8 +10,16 @@
 
 
 import "Tensor.m" : __GetTensor;
-import "TensorBasic.m" : __HasBasis;
 import "BimapDef.m" : __GetTensorAction;
+
+__HasBasis := function( X )
+  try 
+    B := Basis(X);
+  catch e
+    return false;
+  end try;
+  return true;
+end function;
 
 // given a vector, a tensor, and a coordinate (in [1..v-1]),
 // returns 3 things: can be coerced into V_(v-1), the coreced elt, error message.

@@ -10,7 +10,7 @@
 
 
 import "../GlobalVars.m" : __LIST, __SANITY_CHECK;
-import "../Tensor/TensorBasic.m" : __HasBasis;
+import "../Tensor/TensorDef.m" : __HasBasis;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 
 __GetTensorSpace := function( R, L, C : Co := false )

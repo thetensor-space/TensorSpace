@@ -29,7 +29,7 @@ intrinsic Maps( H::Hmtp ) -> List
   return H`Maps;
 end intrinsic;
 
-intrinsic Kernel( H::Hmtp ) -> TenSpcElt 
+intrinsic Kernel( H::Hmtp ) -> TenSpcElt, List
 {Returns the kernel as a subtensor of the domain of H.}
   dom := Frame(H`Domain);
   cod := Frame(H`Codomain);
@@ -58,7 +58,7 @@ intrinsic Kernel( H::Hmtp ) -> TenSpcElt
   return Tensor(K_frame,F,H`Domain`Cat);
 end intrinsic;
 
-intrinsic Image( H::Hmtp ) -> TenSpcElt
+intrinsic Image( H::Hmtp ) -> TenSpcElt, List
 {Returns the image of H as a subtensor of the codomain of H.}
   dom := Frame(H`Domain);
   cod := Frame(H`Codomain);

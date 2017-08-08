@@ -15,6 +15,7 @@
     	Invariants.m
     	Tensor.m
     	TensorBasic.m
+      TensorCategorical.m
       TensorData.m
     	TensorDef.m
       TensorRandom.m

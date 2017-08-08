@@ -73,6 +73,15 @@ intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List : Check := true ) -> H
   return H;
 end intrinsic;
 
+intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum : Check := true ) -> Hmtp
+{Constructs the homotopisms from t to s given by the maps in M.}
+  require #M eq t`Valence : "Incorrect number of maps.";
+  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
+  H, isit := __GetHomotopism( t, s, [*f : f in M*] : Check := Check );
+  require isit : "Maps do not induce a homotopism.";
+  return H;
+end intrinsic;
+
 intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat : Check := true ) -> Hmtp
 {Constructs the homotopisms from t to s given by the maps in M and the tensor category C.}
   require #M eq t`Valence : "Incorrect number of maps.";
@@ -82,11 +91,31 @@ intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat : Check := 
   return H;
 end intrinsic;
 
+intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum, C::TenCat : Check := true ) -> Hmtp
+{Constructs the homotopisms from t to s given by the maps in M and the tensor category C.}
+  require #M eq t`Valence : "Incorrect number of maps.";
+  require #M eq C`Valence : "Valence does not match the valence of tensors.";
+  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
+  H, isit := __GetHomotopism( t, s, [*f : f in M*] : Cat := C, Check := Check );
+  return H;
+end intrinsic;
+
 intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> BoolElt
 {Decides if the given maps are a homotopism from t to s.}
   require #M eq t`Valence : "Incorrect number of maps.";
   require t`Cat eq s`Cat : "Tensor categories are incompatible.";
   H, isit := __GetHomotopism( t, s, M );
+  if isit then
+    return isit, H;
+  end if;
+  return false, _;
+end intrinsic;
+
+intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum ) -> BoolElt
+{Decides if the given maps are a homotopism from t to s.}
+  require #M eq t`Valence : "Incorrect number of maps.";
+  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
+  H, isit := __GetHomotopism( t, s, [*f : f in M*] );
   if isit then
     return isit, H;
   end if;

@@ -10,7 +10,7 @@
 
 
 import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
-import "TensorBasic.m" : __HasBasis;
+import "TensorDef.m" : __HasBasis;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 import "../Types.m" : __RF_BIMAP;

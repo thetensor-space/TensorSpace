@@ -11,7 +11,7 @@
 */
 
 import "Tensor.m" : __GetTensor;
-import "TensorBasic.m" : __HasBasis;
+import "TensorDef.m" : __HasBasis;
 import "../TensorCategory/TensorCat.m" : __GetTensorCategory;
 import "../TensorSpace/TensorSpc.m" : __GetTensorSpace;
 
