@@ -15,6 +15,16 @@ __FRAME := function( T ) // returns the 'domain' and the 'codomain'.
     return T`Frame;
   end if;
 end function;
+__FLAT := function( X ) 
+  try 
+    return Flat(X);
+  catch err
+    if Type(X) in {SetEnum, SetIndx} then
+      return $$([x : x in X]);
+    end if;
+  end try;
+  return X;
+end function;
 
 
 /*  Verbose names  */

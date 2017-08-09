@@ -9,7 +9,7 @@
 */
 
 import "../GlobalVars.m" : __FRAME;
-import "Tensors.m" : __TensorOnVectorSpaces, __GetTensor;
+import "Tensor.m" : __TensorOnVectorSpaces, __GetTensor;
 
 // s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], grid: sequence of subsets of {1..dim(V_a)}. 
 __GetSlice := function( s, dims, grid )

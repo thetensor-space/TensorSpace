@@ -501,7 +501,17 @@ U0 : Full Vector space of degree 1 over GF(5^3)
 Now we will compute the nucleus closure of both $s$ and $t$ at $\{2,1\}$.
 The dimension of the closure of $s$ will be 1-dimensional, while the dimension of the closure for $t$ will not.
 \begin{code}
-
+> NucleusClosure(Parent(s), s, 2, 1);
+Tensor space of dimension 1 over GF(5^3) with valence 3
+U2 : Full Vector space of degree 2 over GF(5^3)
+U1 : Full Vector space of degree 2 over GF(5^3)
+U0 : Full Vector space of degree 1 over GF(5^3)
+> 
+> NucleusClosure(Parent(t), t, 2, 1);
+Tensor space of dimension 9 over GF(5) with valence 3
+U2 : Full Vector space of degree 6 over GF(5)
+U1 : Full Vector space of degree 6 over GF(5)
+U0 : Full Vector space of degree 3 over GF(5)
 \end{code}
 \end{example}
 
@@ -1455,6 +1465,7 @@ Decides if $s$ is an ideal of $t$.
 First we will construct the tensor from the $\mathbb{Q}$-algebra, $\mathbb{Q}^5$. 
 \begin{code}
 > T := KTensorSpace(Rationals(), [5,5,5]);
+> A := VectorSpace(Rationals(), 5);
 > t := T!0;
 > for i in [1..5] do
 for>   Assign(~t, [i,i,i], 1);

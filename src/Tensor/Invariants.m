@@ -202,22 +202,22 @@ __AdjointOfBimap := function( t )
     Remove(~Fb_blocks,1);
   end for;
 
-  if exists(S){ S : S in t`Cat`Repeats | {1,2} subset S } then
-    S := { 1,2 };
-    inds := [a,b,c];
-    assert a eq b;
-    offset := [ 1,a^2+1,a^2+1 ];
-    s := Maximum(S);
-    Exclude(~S,s);
-    while #S gt 0 do
-      m := Maximum(S);
-      Exclude(~S,m);
-      X := ZeroMatrix(K,a^2+b^2,inds[s]^2);
-      InsertBlock(~X,-IdentityMatrix(K,inds[s]^2),offset[s],1);
-      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
-      M := HorizontalJoin(X,M);
-    end while;
-  end if;
+//  if exists(S){ S : S in t`Cat`Repeats | {1,2} subset S } then
+//    S := { 1,2 };
+//    inds := [a,b,c];
+//    assert a eq b;
+//    offset := [ 1,a^2+1,a^2+1 ];
+//    s := Maximum(S);
+//    Exclude(~S,s);
+//    while #S gt 0 do
+//      m := Maximum(S);
+//      Exclude(~S,m);
+//      X := ZeroMatrix(K,a^2+b^2,inds[s]^2);
+//      InsertBlock(~X,-IdentityMatrix(K,inds[s]^2),offset[s],1);
+//      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
+//      M := HorizontalJoin(X,M);
+//    end while;
+//  end if;
 
   vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
@@ -264,23 +264,23 @@ __LeftScalarsOfBimap := function( t )
   end for;
   delete Fb;
 
-  if exists(S){ S : S in t`Cat`Repeats | {0,2} subset S } then
-    S := { 1,3 };
-    inds := [a,b,c];
-    assert a eq c;
-    offset := [ 1,a^2+1,a^2+1 ];
-    s := Maximum(S);
-    Exclude(~S,s);
-    while #S gt 0 do
-      m := Maximum(S);
-      Exclude(~S,m);
-      X := ZeroMatrix(K,a^2+c^2,inds[s]^2);
-      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
-      InsertBlock(~X,-PermutationMatrix(K,perm),offset[s],1);
-      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
-      M := HorizontalJoin(X,M);
-    end while;
-  end if;
+//  if exists(S){ S : S in t`Cat`Repeats | {0,2} subset S } then
+//    S := { 1,3 };
+//    inds := [a,b,c];
+//    assert a eq c;
+//    offset := [ 1,a^2+1,a^2+1 ];
+//    s := Maximum(S);
+//    Exclude(~S,s);
+//    while #S gt 0 do
+//      m := Maximum(S);
+//      Exclude(~S,m);
+//      X := ZeroMatrix(K,a^2+c^2,inds[s]^2);
+//      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
+//      InsertBlock(~X,-PermutationMatrix(K,perm),offset[s],1);
+//      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
+//      M := HorizontalJoin(X,M);
+//    end while;
+//  end if;
 
   vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
@@ -327,23 +327,23 @@ __RightScalarsOfBimap := function( t )
   end for;
   delete Fb;
 
-  if exists(S){ S : S in t`Cat`Repeats | {0,1} subset S } then
-    S := { 2,3 };
-    inds := [a,b,c];
-    assert b eq c;
-    offset := [ 1,c^2+1,1 ];
-    s := Maximum(S);
-    Exclude(~S,s);
-    while #S gt 0 do
-      m := Maximum(S);
-      Exclude(~S,m);
-      X := ZeroMatrix(K,b^2+c^2,inds[s]^2);
-      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
-      InsertBlock(~X,PermutationMatrix(K,perm),offset[s],1);
-      InsertBlock(~X,-IdentityMatrix(K,inds[m]^2),offset[m],1);
-      M := HorizontalJoin(X,M);
-    end while;
-  end if;
+//  if exists(S){ S : S in t`Cat`Repeats | {0,1} subset S } then
+//    S := { 2,3 };
+//    inds := [a,b,c];
+//    assert b eq c;
+//    offset := [ 1,c^2+1,1 ];
+//    s := Maximum(S);
+//    Exclude(~S,s);
+//    while #S gt 0 do
+//      m := Maximum(S);
+//      Exclude(~S,m);
+//      X := ZeroMatrix(K,b^2+c^2,inds[s]^2);
+//      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
+//      InsertBlock(~X,PermutationMatrix(K,perm),offset[s],1);
+//      InsertBlock(~X,-IdentityMatrix(K,inds[m]^2),offset[m],1);
+//      M := HorizontalJoin(X,M);
+//    end while;
+//  end if;
 
   vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 

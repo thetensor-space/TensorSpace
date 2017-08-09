@@ -1,4 +1,5 @@
 T := KTensorSpace(Rationals(), [5,5,5]);
+A := VectorSpace(Rationals(), 5);
 t := T!0;
 for i in [1..5] do
   Assign(~t, [i,i,i], 1);

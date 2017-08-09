@@ -7,7 +7,7 @@ M := A![0, 1, 0, 0];
 M;
 s := M*t;
 s;
-AsMatrices(S, 1, 0);
+AsMatrices(s, 1, 0);
 
 
 M*t*[0, 0, 1, 0];
