@@ -3343,8 +3343,6 @@ Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given by
 If $t$ is alternating and the tensor category of $t$ forces equality between $U$ and $V$, then the group returned is an extension of $V$ by $W$, so $|G| = |V|\cdot |W|$. 
 Otherwise, the group returned is an extension of $U\oplus V$ by $W$, so $|G| = |U|\cdot |V| \cdot |W|$. 
 If $t$ is not full, then $G$ is an extension of $U\oplus V\oplus W/\im(t)$ (or $V\oplus W/\im(t)$) by $\im(t)$. 
-The intrinsic \texttt{HeisenbergGroupPC} uses the \texttt{pQuotient} functions to convert a finitely presented group into a polycyclic group. 
-Currently, \texttt{pQuotient} only returns groups of order $\leq p^{256}$, so an error is raised if the group will exceed this order.
 
 \begin{example}[CraftingPGroups]
 
@@ -3431,7 +3429,7 @@ U0 : Full Vector space of degree 4 over GF(5)
 
 Note that $t$ and $s$ are not the same tensor.
 However, they are pseudo-isometric (isotopic in the category with $U_2=U_1$). 
-This effect is exaggerated with \texttt{HeisenbergGroupPC} because it runs through \texttt{pQuotient}.
+This effect is exaggerated with \texttt{HeisenbergGroupPC} because of how PC-generators are organized.
 \begin{code}
 > SystemOfForms(s);
 [

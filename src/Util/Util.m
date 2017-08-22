@@ -103,7 +103,7 @@ Input a matrix M
 returns [  0   M ]
         [ -M^t 0 ].
 */
-__Scharlau := function( M );
+__Scharlau := function( M )
 	k := Parent(M[1][1]);
 	return MatrixAlgebra(k,Nrows(M)+Ncols(M))!VerticalJoin( HorizontalJoin( ZeroMatrix( k, Nrows(M), Nrows(M) ), M ), HorizontalJoin( -Transpose(M), ZeroMatrix( k, Ncols(M), Ncols(M) ) ) );
 end function;
@@ -122,6 +122,44 @@ intrinsic HeisenbergGroup( t::TenSpcElt ) -> GrpMat
   return __GetRepresentation(t);
 end intrinsic;
 
+//intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
+//{Returns the pc-group of class 2 and exponent p from the given tensor t over a finite field.}
+//  require t`Valence eq 3 : "Tensor must have valence 3.";
+//  try
+//    _ := Eltseq(t);
+//  catch err
+//    error "Cannot compute structure constants.";
+//  end try;
+//  Forms := SystemOfForms(t);
+//  K := BaseRing(Forms[1]);
+//  require ISA(Type(K), FldFin) : "Base field must be finite.";
+//  p := Characteristic(K);
+
+//  if #K gt p then
+//    Forms := __WriteOverPrimeField(Forms);
+//  end if;
+//  if t`Cat`Repeats eq {{2,1},{0}} and IsAlternating(t) then
+//    require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+//  else
+//    require Nrows(Forms[1]) + Ncols(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+//    Forms := [ __Scharlau(X) : X in Forms ];
+//  end if;
+
+//  d := Nrows(Forms[1]);
+//  e := #Forms;
+//  F := FreeGroup( d+e );
+//  powers := [ F.i^p = 1 : i in [1..d+e] ];
+//  commutators := [];
+//  for i in [1..d] do
+//    for j in [i+1..d] do
+//      commutators cat:= [ F.j^F.i = F.j * &*[ F.(d+k)^(Integers()!(Forms[k][i][j])) : k in [1..e] ] ];
+//    end for;
+//  end for;
+//  Q := quo< F | powers cat commutators >;
+//  P := pQuotient( Q, p, 2 : Exponent := p );
+//  return P;
+//end intrinsic;
+
 intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
 {Returns the pc-group of class 2 and exponent p from the given tensor t over a finite field.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
@@ -138,25 +176,21 @@ intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
   if #K gt p then
     Forms := __WriteOverPrimeField(Forms);
   end if;
-  if t`Cat`Repeats eq {{2,1},{0}} and IsAlternating(t) then
-    require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
-  else
-    require Nrows(Forms[1]) + Ncols(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
+  if not (t`Cat`Repeats eq {{2,1},{0}} and IsAlternating(t)) then
     Forms := [ __Scharlau(X) : X in Forms ];
   end if;
 
   d := Nrows(Forms[1]);
   e := #Forms;
   F := FreeGroup( d+e );
-  powers := [ F.i^p = 1 : i in [1..d] ];
+  powers := [ F.i^p = 1 : i in [1..d+e] ];
   commutators := [];
   for i in [1..d] do
     for j in [i+1..d] do
       commutators cat:= [ F.j^F.i = F.j * &*[ F.(d+k)^(Integers()!(Forms[k][i][j])) : k in [1..e] ] ];
     end for;
   end for;
-  Q := quo< F | powers cat commutators >;
-  P := pQuotient( Q, p, 2 : Exponent := p );
+  P := quo< GrpPC : F | powers cat commutators >;
   return P;
 end intrinsic;
 

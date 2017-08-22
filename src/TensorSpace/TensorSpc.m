@@ -241,7 +241,6 @@ intrinsic ExteriorCotensorSpace( V::ModTupFld, n::RngIntElt ) -> TenSpc
   Ex := KSpace(K,Binomial(d,n));
   subs := [ Sort([ x : x in s ]) : s in Subsets({1..d},n) ];
   G := Sym( {1..n} );
-  CP := CartesianProduct( < [1..d] : i in [1..n] > );
 
   IntoUniversal := function(x)
     temp := [ K!0 : i in [1..d^n] ];
@@ -284,7 +283,6 @@ intrinsic SymmetricCotensorSpace( V::ModTupFld, n::RngIntElt ) -> TenSpc
   Sy := KSpace(K,Binomial(d+n-1,n));
   subs := [ Sort([ x : x in s ]) : s in Multisets({1..d},n) ];
   G := Sym( {1..n} );
-  CP := CartesianProduct( < [1..d] : i in [1..n] > );
 
   IntoUniversal := function(x)
     temp := [ K!0 : i in [1..d^n] ];

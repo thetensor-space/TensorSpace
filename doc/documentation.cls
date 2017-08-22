@@ -117,7 +117,7 @@
 %      \@ifnotempty{##1}{, \ignorespaces##1\unskip}\/:\space
 %      ##2\par}\endgroup}%
   \def\email##1##2{\begingroup
-    \@ifnotempty{##2}{\nobreak\indent %\emailaddrname
+    \@ifnotempty{##2}{\nobreak%\indent %\emailaddrname
       \@ifnotempty{##1}{, \ignorespaces##1\unskip} %\/:\space
       \ttfamily##2\par}\vspace{50pt}\endgroup}% Added spacing
 %  \def\urladdr##1##2{\begingroup

@@ -791,6 +791,78 @@ U0 : Full Vector space of degree 2 over GF(3)
 \end{code}
 \end{example}
 
+\index{RandomAlternatingTensor}
+\begin{intrinsics}
+RandomAlternatingTensor(R, d, n, c) : Rng, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+RandomAlternatingTensor(R, S) : Rng, [RngIntElt] -> TenSpcElt
+\end{intrinsics}
+
+Returns a random alternating tensor from the universal tensor space $\prod_{k=1}^n R^d \rightarrowtail R^c$. 
+If $S$ is given instead, then we assume $S=[d,\dots,d,c]$.
+The returned tensor has the homotopism category but fuses every module in the domain.
+An error is raised if $R$ does not have a random algorithm in Magma.
+
+\index{RandomAntisymmetricTensor}
+\begin{intrinsics}
+RandomAntisymmetricTensor(R, d, n, c) : Rng, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+RandomAntisymmetricTensor(R, S) : Rng, [RngIntElt] -> TenSpcElt
+\end{intrinsics}
+
+Returns a random antisymmetric tensor from the universal tensor space $\prod_{k=1}^n R^d \rightarrowtail R^c$. 
+If $S$ is given instead, then we assume $S=[d,\dots,d,c]$.
+The returned tensor has the homotopism category but fuses every module in the domain.
+An error is raised if $R$ does not have a random algorithm in Magma.
+
+\index{RandomSymmetricTensor}
+\begin{intrinsics}
+RandomSymmetricTensor(R, d, n, c) : Rng, RngIntElt, RngIntElt, RngIntElt -> TenSpcElt
+RandomSymmetricTensor(R, S) : Rng, [RngIntElt] -> TenSpcElt
+\end{intrinsics}
+
+Returns a random symmetric tensor from the universal tensor space $\prod_{k=1}^n R^d \rightarrowtail R^c$. 
+If $S$ is given instead, then we assume $S=[d,\dots,d,c]$.
+The returned tensor has the homotopism category but fuses every module in the domain.
+An error is raised if $R$ does not have a random algorithm in Magma.
+
+\begin{example}[RandomSymTen]
+
+We just demonstrate how to use the \texttt{RandomSymmetricTensor}. 
+The other two intrinsics are the same.
+This is almost equivalent to constructing a random tensor whose category fuses all the modules in the domain and then applying \texttt{SymmetricTensor}.
+In characteristic 2, all entries on the diagonal will be 0, but with \texttt{RandomSymmetricTensor} this is not the case.
+\begin{code}
+> t := RandomSymmetricTensor(GF(2), 4, 2, 3);
+> t;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 4 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 3 over GF(2)
+> 
+> TensorCategory(t);
+Tensor category of valence 3 (->,->,->) ({ 0 },{ 1 .. 2 })
+> 
+> SystemOfForms(t);
+[
+    [1 0 0 1]
+    [0 1 1 1]
+    [0 1 1 0]
+    [1 1 0 0],
+
+    [1 0 0 0]
+    [0 1 0 1]
+    [0 0 0 0]
+    [0 1 0 1],
+
+    [0 0 0 0]
+    [0 0 1 0]
+    [0 1 0 0]
+    [0 0 0 1]
+]
+> IsSymmetric(t);
+true
+\end{code}
+\end{example}
+
 \subsection{Properties of tensor spaces}
 
 We define some functions to access basic properties of tensor spaces.
