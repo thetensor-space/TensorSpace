@@ -416,14 +416,14 @@ intrinsic Sprint( T::TenSpc ) -> MonStgElt
     return tenspc;
   end if;
 
-  bas := "[";
+  bas := "";
   if Dimension(T) eq 0 then
-    bas *:= "]";
+    bas *:= "";
   else
     for t in Basis(T) do
       bas *:= Sprint(t) * ", ";
     end for;
-    bas := bas[1..#bas-2] * "]";
+    bas := bas[1..#bas-2];
   end if;
 
   return "sub< " * tenspc * " | " * bas * " >";
