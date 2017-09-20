@@ -164,7 +164,9 @@ intrinsic IsCoercible( T::TenSpc, S::[RngElt] ) -> BoolElt
         return false, "Incompatible";
       end try;
     end if;
-    if assigned T`Coerce then s`Coerce := T`Coerce; end if;
+    if assigned T`Coerce then 
+      s`Coerce := T`Coerce; 
+    end if;
     return true, s;
   end if;
   return false, "Incompatible.";

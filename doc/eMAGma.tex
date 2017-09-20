@@ -10,7 +10,7 @@
 \address{Colorado State University}
 \email{james.wilson@colostate.edu}
 
-\version{1.2.1}
+\version{1.2.2}
 \date{\today}
 \copyrightyear{2016, 2017}
 
@@ -92,10 +92,10 @@ another assigns the same matrix to a bilinear form
 $K^d\times K^d\rightarrowtail K$.  Functors are provided to change
 tensor categories and to define standard categories.  
 
-\section{Verbose Printing and Version}
+\section{Printing and Version}
 
-We have included intrinsics to allow for verbose printing. 
-Currently, there is only one level of printing, so either it is on of off. 
+We have included intrinsics to allow for verbose printing and printing to strings. 
+Currently, there is only one level of printing, so either verbose printing is on or off. 
 
 \index{SetVerbose}
 \begin{intrinsics}
@@ -121,6 +121,71 @@ Solving up linear system: 3072 by 32768
 \end{code}
 \end{example}
 
+\index{eMAGmaSprint}
+\begin{intrinsics}
+Sprint(t) : TenSpcElt -> MonStgElt
+Sprint(T) : TenSpc -> MonStgElt
+Sprint(C) : TenCat -> MonStgElt
+\end{intrinsics}
+
+Returns strings that can be executed in Magma to construct the given object. 
+If $t$ is a black-box tensor where structure constants cannot be computed, then the returned string is equivalent to \texttt{print t}, which cannot be executed to construct $t$. 
+
+\begin{example}[PrintToString]
+
+We first construct a tensor category, tensor space, and a tensor contained in the tensor space.
+\begin{code}
+> C := TensorCategory([1, 1, 0], {{0}, {1,2}});
+> C;
+Tensor category of valence 3 (->,->,==) ({ 0 },{ 1, 2 })
+> 
+> T := KTensorSpace(GF(2), [10, 10, 2], C);
+> T;
+Tensor space of dimension 200 over GF(2) with valence 3
+U2 : Full Vector space of degree 10 over GF(2)
+U1 : Full Vector space of degree 10 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+> 
+> t := T![1..200];
+> t;
+Tensor of valence 3, U2 x U1 >-> U0
+U2 : Full Vector space of degree 10 over GF(2)
+U1 : Full Vector space of degree 10 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+\end{code}
+
+Now we will print to string each of the objects we created.
+\begin{code}
+> Sprint(C);
+TensorCategory(\[ 1, 1, 0 ], { PowerSet(IntegerRing()) |
+{ IntegerRing() | 0 },
+{ IntegerRing() | 1, 2 }
+})
+> 
+> Sprint(T);
+TensorSpace([*VectorSpace(GF(2), 10), VectorSpace(GF(2), 10), 
+VectorSpace(GF(2),2)*], TensorCategory(\[ 1, 1, 0 ], { 
+PowerSet(IntegerRing()) |
+{ IntegerRing() | 0 },
+{ IntegerRing() | 1, 2 }
+}))
+> 
+> Sprint(t);
+Tensor(GF(2), \[ 10, 10, 2 ], [ GF(2) | 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+0, 1, 0, 1, 0 ], TensorCategory(\[ 1, 1, 0 ], { PowerSet(IntegerRing()) |
+{ IntegerRing() | 0 },
+{ IntegerRing() | 1, 2 }
+}))
+\end{code}
+\end{example}
+
 \index{eMAGmaVersion}
 \begin{intrinsics}
 eMAGmaVersion() : -> MonStgElt
@@ -134,7 +199,7 @@ Even though {\tt eMAGmaVersion} has no arguments, {\tt ()} is still required.
 
 \begin{code}
 > eMAGmaVersion();
-1.2.1
+1.2.2
 \end{code}
 \end{example}
 

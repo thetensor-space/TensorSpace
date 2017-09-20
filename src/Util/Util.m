@@ -377,3 +377,54 @@ intrinsic Center( A::Alg ) -> Alg
   S := sub< A | [ c @@ B`Coerce[1] : c in Basis(C) ] >;
   return S;
 end intrinsic;
+
+
+// ------------------------------------------------------------------------------
+//                                    Printing
+// ------------------------------------------------------------------------------
+
+intrinsic Sprint( C::TenCat ) -> MonStgElt
+{Returns the string that can be executed in Magma to construct the tensor category.}
+  return "TensorCategory(" * Sprint(Arrows(C), "Magma") * ", " * Sprint(C`Repeats, "Magma") * ")";
+end intrinsic;
+
+intrinsic Sprint( t::TenSpcElt ) -> MonStgElt
+{Returns the string that can be executed in Magma to construct the tensor t.}
+  try
+    sc := Sprint(Eltseq(t), "Magma");
+  catch err
+    return Sprint(t, "Magma");
+  end try;
+  rng := Sprint(BaseRing(t), "Magma");
+  dim := Sprint([Dimension(X) : X in __FRAME(t)], "Magma");
+  ctg := Sprint(t`Cat);
+
+  return "Tensor(" * rng * ", " * dim * ", " * sc * ", " * ctg * ")"; 
+end intrinsic;
+
+intrinsic Sprint( T::TenSpc ) -> MonStgElt
+{Returns the string that can be executed in Magma to construct the tensor space T.}
+  frm := "[*";
+  for X in __FRAME(T) do
+    frm *:= Sprint(X, "Magma")*", ";
+  end for;
+  frm := frm[1..#frm-2] * "*]";
+  ctg := Sprint(T`Cat);
+  tenspc := "TensorSpace(" * frm * ", " * ctg * ")";
+  
+  if Dimension(T) eq &*[Dimension(X) : X in __FRAME(T)] then
+    return tenspc;
+  end if;
+
+  bas := "[";
+  if Dimension(T) eq 0 then
+    bas *:= "]";
+  else
+    for t in Basis(T) do
+      bas *:= Sprint(t) * ", ";
+    end for;
+    bas := bas[1..#bas-2] * "]";
+  end if;
+
+  return "sub< " * tenspc * " | " * bas * " >";
+end intrinsic;
