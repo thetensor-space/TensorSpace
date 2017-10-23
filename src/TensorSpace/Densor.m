@@ -29,9 +29,9 @@ __GetDensorTensors := function( O, a, b, c )
   offset := [1,a+1,a+b+1];
   blocks := [* [ ExtractBlock(X,offset[i],offset[i],dims[i],dims[i]) : X in O ] : i in [1..3] *];
   //blocks[2] := [ Transpose(X) : X in blocks[2] ];
-  Z := ZeroMatrix(K,a*b*c,a*b*c*d);
-  Y := ZeroMatrix(K,a*b*c*d,a*b*c);
-  X := ZeroMatrix(K,a*b*c*d,a*b*c);
+  Z := ZeroMatrix(K, a*b*c, a*b*c*d);
+  Y := ZeroMatrix(K, a*b*c*d, a*b*c);
+  X := ZeroMatrix(K, a*b*c*d, a*b*c);
   
   // Z Block
   jpos := 1;
