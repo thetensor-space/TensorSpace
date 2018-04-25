@@ -439,7 +439,7 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, a::RngIntElt, b::RngIntElt ) -> 
   require a gt 0 : "First index must be positive.";
   require b gt 0 : "Second index must be positive.";
   try
-    pcs := pCentralSeries(G,p);
+    pcs := pCentralSeries(G, p);
   catch err
     error "Cannot compute the p-central series.";
   end try;
@@ -496,7 +496,13 @@ intrinsic pCentralTensor( G::Grp, p::RngIntElt, a::RngIntElt, b::RngIntElt ) -> 
   else 
     C := HomotopismCategory(3);
   end if;
-  return __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C ), [* h1, h2, h3 *];
+  t := __GetTensor( [*V1, V2*], V3, F : Co := [* h1, h2, h3 *], Cat := C );
+  if a eq b then
+    t`Reflexive`Alternating := true;
+    t`Reflexive`Symmetric := IsEven(p);
+    t`Reflexive`Antisymmetric := IsOdd(p);
+  end if;
+  return t, [* h1, h2, h3 *];
 end intrinsic;
 
 intrinsic pCentralTensor( G::Grp, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, List
@@ -513,7 +519,7 @@ intrinsic pCentralTensor( G::Grp, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, Lis
   order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
-  return pCentralTensor(G,p,a,b);
+  return pCentralTensor(G, p, a, b);
 end intrinsic;
 
 // included to overwrite the old version standard in Magma.
@@ -527,7 +533,7 @@ intrinsic pCentralTensor( G::GrpPC, a::RngIntElt, b::RngIntElt ) -> TenSpcElt, L
   order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
-  return pCentralTensor(G,p,a,b);
+  return pCentralTensor(G, p, a, b);
 end intrinsic
 
 intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, List
@@ -544,7 +550,7 @@ intrinsic pCentralTensor( G::Grp ) -> TenSpcElt, List
   order := Factorization(ord);
   require #order eq 1 : "Group must be a p-group.";
   p := order[1][1];
-  return pCentralTensor(G,p,1,1);
+  return pCentralTensor(G, p, 1, 1);
 end intrinsic;
 
 intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt, Map
@@ -709,7 +715,47 @@ intrinsic AlternatingTensor( t::TenSpcElt ) -> TenSpcElt
   if assigned t`Reflexive`Alternating and t`Reflexive`Alternating then
     return t;
   end if;
-  return AntisymmetricTensor(t);
+
+  try 
+    sc := Eltseq(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+  require forall{ X : X in t`Domain | Dimension(X) eq Dimension(t`Domain[1]) } : "Modules in domain are not all isomorphic.";
+  K := BaseRing(t);
+  if IsAlternating(t) then
+    return t;
+  end if;
+  dims := [Dimension(X) : X in __FRAME(t)];
+
+  if t`Valence eq 3 then
+    Forms := __GetForms(sc, dims, 2, 1);
+    Forms := [X-Transpose(X) : X in Forms];
+    s := Tensor(Forms, 2, 1, t`Cat);
+  else
+    G := Sym(t`Valence-1);
+    temp := sc;
+    for g in G do
+      if g ne G!1 then
+        seq := __GetShuffle(sc, dims, [0] cat Eltseq(g));
+        k := Sign(g);
+        for i in [1..#seq] do
+          temp[i] +:= k*seq[i];
+        end for;
+      end if;
+    end for;
+    s := Tensor( K, dims, temp, t`Cat );
+  end if;
+
+  if assigned t`Parent then
+    s`Parent := t`Parent;
+  end if;
+  s`Reflexive`Alternating := true;
+  s`Reflexive`Antisymmetric := true;
+  if Characteristic(K) eq 2 then
+    s`Reflexive`Symmetric := true;
+  end if;
+  return s;
 end intrinsic;
 
 intrinsic SymmetricTensor( t::TenSpcElt ) -> TenSpcElt
