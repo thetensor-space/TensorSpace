@@ -2,7 +2,7 @@ The Experimental Multilinear Algebra Group's distribution of software for
 integration in the computer algebra system MAGMA, V2.22 and beyond.
 
 This software was created by Joshua Maglione and James B. Wilson, Copyright 
-2016, 2017. Distributed under GNU GPLv3.
+2016--2018. Distributed under GNU GPLv3.
 
 If you want a copy of the software under a different license, please contact the
 authors. 
@@ -46,7 +46,7 @@ authors.
 
 ==== Latest Versions ===========================================================
 
-  Current version: 1.2.3.
+  Current version: 1.2.4.
   Latest versions can be downloaded on GitHub at:
     https://github.com/algeboy/eMAGma
 

@@ -132,6 +132,15 @@ intrinsic DerivationClosure( T::TenSpc, t::TenSpcElt ) -> TenSpc
   return DerivationClosure(T, Basis(DerivationAlgebra(t)));
 end intrinsic;
 
+intrinsic UniversalDensorSubspace( t::TenSpcElt ) -> TenSpc
+{Returns the universal densor subsapce of t in the universal tensor space of t, with operators given by the derivation algebra of t.}
+  if not assigned t`Densor then
+    densor := DerivationClosure(Parent(t), Basis(DerivationAlgebra(t)));
+    t`Densor := densor;
+  end if;
+  return t`Densor;
+end intrinsic;
+
 intrinsic NucleusClosure( T::TenSpc, Delta::[Mtrx], a::RngIntElt, b::RngIntElt ) -> TenSpc
 {Returns the nucleus closure of the tensor space with the given operators Delta acting on Ua and Ub.}
   require T`Valence eq 3 : "Tensor space must have valence 3.";

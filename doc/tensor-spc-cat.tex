@@ -410,6 +410,16 @@ Returns the derivation closure of the given tensor space $T$, with frame $U_2\ti
 Currently, this only works for tensor spaces of valence 3.
 This is the subspace whose tensors' derivation algebra contains the derivation algebra of $t$.
 
+\index{UniversalDensorSubspace}
+\begin{intrinsics}
+UniversalDensorSubspace(t) : TenSpcElt -> TenSpc
+\end{intrinsics}
+
+Returns the universal densor subspace of the given tensor $t : U_2\times U_1 \rightarrowtail U_0$ as a subspace of the universal tensor space of $t$, whose operators are the derivation algebra of $t$. 
+Currently, this only works for tensor spaces of valence 3.
+This is equivalent to \texttt{DerivationClosure(Parent(t), t)}. 
+This tensor subspace is stored with $t$ once computed.
+
 \begin{example}[Rank1Densor]
 
 We illustrate the fact that the tensor for (hyper-)matrix multiplication spans its densor, see \cite{FMW:densors}*{Theorem~G}.

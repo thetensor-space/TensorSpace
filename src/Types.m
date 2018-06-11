@@ -46,7 +46,7 @@ declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 // ------------------------------------------------------------------------------
 //                                     Tensor
 // ------------------------------------------------------------------------------
-declare attributes TenSpcElt : Bimap, Cat, Centroids, Codomain, Coerce, CoordImages, Derivations, Domain, Element, FullyNondeg, 
+declare attributes TenSpcElt : Bimap, Cat, Centroids, Codomain, Coerce, CoordImages, Densor, Derivations, Domain, Element, FullyNondeg, 
 Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Valence;
 
 /* 
@@ -59,6 +59,7 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Val
     Codomain . . . . . . . The codomain of the tensor.
     Coerce . . . . . . . . If the multimap is created from some algebraic object, this will contain maps to the modules.
     CoordImages. . . . . . The sequence of images of the coordinates.
+    Densor . . . . . . . . The universal densor subspace of the tensor. 
     Derivations. . . . . . The associated Lie algebra of derivations.
     Domain . . . . . . . . A list of the modules in the domain.
     Element. . . . . . . . The corresponding element in the tensor space.
