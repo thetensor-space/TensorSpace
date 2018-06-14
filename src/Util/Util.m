@@ -13,10 +13,21 @@ import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
 import "../GlobalVars.m" : __FRAME;
 
 
+__CheckFuse := function( a, RP, inds )
+  assert exists(S){S : S in RP | a in S};
+  v := Maximum(&join(RP)) + 1;
+  T := {v - s : s in S};
+  int := T meet Set(inds);
+  if #int gt 0 then
+    return true, v - Maximum(int);
+  else
+    return false, _;
+  end if;
+end function;
+
 __GetInduction := function( X, i )
   t := X`DerivedFrom[1];
   v := t`Valence;
-//  j := v-i+1;
   j := v-i; // corrected after change in valence rules.
   gens := [ g : g in Generators(X) ];
   grp := Type(X) eq GrpMat;
@@ -264,15 +275,17 @@ intrinsic Induce( X::GrpMat, a::RngIntElt ) -> GrpMat, Map
 {Given a group of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
-  return __GetInduction(X,a);
+  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
+  require isit : "No restriction found.";
+  return __GetInduction(X, i);
 end intrinsic;
 
 intrinsic Induce( X::AlgMat, a::RngIntElt ) -> AlgMat, Map
 {Given an algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
+  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
+  require isit : "No restriction found.";
   return __GetInduction(X,a);
 end intrinsic;
 
@@ -280,7 +293,8 @@ intrinsic Induce( X::AlgMatLie, a::RngIntElt ) -> AlgMatLie, Map
 {Given a Lie algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
   require assigned X`DerivedFrom : "Cannot find the associated tensor.";
   require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  require X`DerivedFrom[1]`Valence-a in X`DerivedFrom[2] : "No restriction found.";
+  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
+  require isit : "No restriction found.";
   return __GetInduction(X,a);
 end intrinsic;
 
