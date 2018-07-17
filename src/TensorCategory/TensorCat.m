@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 

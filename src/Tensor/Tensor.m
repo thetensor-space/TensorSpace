@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 
@@ -185,7 +185,7 @@ intrinsic Tensor( D::SeqEnum, C::., F::UserProgram, Cat::TenCat ) -> TenSpcElt, 
 {Returns the tensor from the Cartesian product of the sequence D into C given by F with tensor category Cat. 
 The UserProgram F must take as input a tuple in D.
 A list of maps from the given frame to the returned frame is also returned.}
-  passed, err := __TensorCatSanity([* X : X in D *], Cat);
+  passed, err := __TensorCatSanity([* X : X in D *] cat [*C*], Cat);
   require passed : err;
   passed, err := __BlackBoxSanity([* X : X in D *] cat [*C*], F);
   require passed : err;
