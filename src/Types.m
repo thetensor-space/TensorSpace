@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 
@@ -8,8 +8,6 @@
   This file contains all the definitions of all the new types and attributes 
   of the Multilinear package.
 */
-
-import "GlobalVars.m" : __VERSION;
 
 
 // ------------------------------------------------------------------------------
@@ -140,15 +138,7 @@ declare attributes AlgGen : Star;
 
 /*
   Description of attributes:
-    DerivedFrom. . . . . . A tuple containing the tensor it came from and the indices of the spaces.
+    DerivedFrom. . . . . . A tuple containing the tensor it came from and the indices of the spaces (not coordinates).
     Star . . . . . . . . . An involution on the algebra.
 */
 
-// ------------------------------------------------------------------------------
-//                                     Version
-// ------------------------------------------------------------------------------
-
-intrinsic eMAGmaVersion() -> MonStgElt
-{Returns the version number of eMAGma.}
-  return __VERSION;
-end intrinsic;

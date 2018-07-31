@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 
@@ -10,7 +10,7 @@
 */
 
 import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
-import "../GlobalVars.m" : __FRAME;
+import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
 
 
 __CheckFuse := function( a, RP, inds )
@@ -28,7 +28,7 @@ end function;
 __GetInduction := function( X, i )
   t := X`DerivedFrom[1];
   v := t`Valence;
-  j := v-i; // corrected after change in valence rules.
+  j := v - i; 
   gens := [ g : g in Generators(X) ];
   grp := Type(X) eq GrpMat;
   lie := Type(X) eq AlgMatLie;
@@ -36,7 +36,7 @@ __GetInduction := function( X, i )
   spaces := Frame(t);
   d := Dimension(spaces[j]);
   s := &+([Dimension(spaces[k]) : k in [ x : x in X`DerivedFrom[2] | x lt j ]] cat [1]);
-  blocks := { ExtractBlock(g,s,s,d,d) : g in gens };
+  blocks := { ExtractBlock(g, s, s, d, d) : g in gens };
   if grp then
     if GL(d,K)!1 in blocks then
       Exclude(~blocks,GL(d,K)!1);
@@ -56,7 +56,7 @@ __GetInduction := function( X, i )
     end if;
   end if;
   proj := map< X -> Y | x :-> Y!ExtractBlock(x,s,s,d,d) >;
-  return Y, proj;
+  return proj, Y;
 end function;
 
 __WriteOverPrimeField := function( Forms )
@@ -119,6 +119,21 @@ __Scharlau := function( M )
 	return MatrixAlgebra(k,Nrows(M)+Ncols(M))!VerticalJoin( HorizontalJoin( ZeroMatrix( k, Nrows(M), Nrows(M) ), M ), HorizontalJoin( -Transpose(M), ZeroMatrix( k, Ncols(M), Ncols(M) ) ) );
 end function;
 
+__InduceTemplate := function(X, a)
+  if not assigned X`DerivedFrom then
+    return false, _, "Cannot find an associated tensor.";
+  end if;
+  if Type(X`DerivedFrom[1]) ne TenSpcElt then
+    return false, _, "Cannot recognize associated tensor.";
+  end if;
+  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
+  if not isit then 
+    return false, _, "No restriction found.";
+  else 
+    return true, i, _;
+  end if;
+end function;
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -132,44 +147,6 @@ intrinsic HeisenbergGroup( t::TenSpcElt ) -> GrpMat
   end try;
   return __GetRepresentation(t);
 end intrinsic;
-
-//intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
-//{Returns the pc-group of class 2 and exponent p from the given tensor t over a finite field.}
-//  require t`Valence eq 3 : "Tensor must have valence 3.";
-//  try
-//    _ := Eltseq(t);
-//  catch err
-//    error "Cannot compute structure constants.";
-//  end try;
-//  Forms := SystemOfForms(t);
-//  K := BaseRing(Forms[1]);
-//  require ISA(Type(K), FldFin) : "Base field must be finite.";
-//  p := Characteristic(K);
-
-//  if #K gt p then
-//    Forms := __WriteOverPrimeField(Forms);
-//  end if;
-//  if t`Cat`Repeats eq {{2,1},{0}} and IsAlternating(t) then
-//    require Nrows(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
-//  else
-//    require Nrows(Forms[1]) + Ncols(Forms[1]) + #Forms le 256 : "Cannot handle groups larger than p^256.";
-//    Forms := [ __Scharlau(X) : X in Forms ];
-//  end if;
-
-//  d := Nrows(Forms[1]);
-//  e := #Forms;
-//  F := FreeGroup( d+e );
-//  powers := [ F.i^p = 1 : i in [1..d+e] ];
-//  commutators := [];
-//  for i in [1..d] do
-//    for j in [i+1..d] do
-//      commutators cat:= [ F.j^F.i = F.j * &*[ F.(d+k)^(Integers()!(Forms[k][i][j])) : k in [1..e] ] ];
-//    end for;
-//  end for;
-//  Q := quo< F | powers cat commutators >;
-//  P := pQuotient( Q, p, 2 : Exponent := p );
-//  return P;
-//end intrinsic;
 
 intrinsic HeisenbergGroupPC( t::TenSpcElt ) -> GrpPC
 {Returns the pc-group of class 2 and exponent p from the given tensor t over a finite field.}
@@ -271,31 +248,26 @@ intrinsic HeisenbergLieAlgebra( t::TenSpcElt ) -> AlgLie
   return L;
 end intrinsic;
 
-intrinsic Induce( X::GrpMat, a::RngIntElt ) -> GrpMat, Map
-{Given a group of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
-  require assigned X`DerivedFrom : "Cannot find the associated tensor.";
-  require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
-  require isit : "No restriction found.";
+// UPDATE DOCUMENTATIONS!!
+intrinsic Induce( X::GrpMat, a::RngIntElt ) -> Map, GrpMat
+{Given a group of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
+  pass, i, E := __InduceTemplate(X, a);
+  require pass : E;
   return __GetInduction(X, i);
 end intrinsic;
 
-intrinsic Induce( X::AlgMat, a::RngIntElt ) -> AlgMat, Map
-{Given an algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
-  require assigned X`DerivedFrom : "Cannot find the associated tensor.";
-  require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
-  require isit : "No restriction found.";
-  return __GetInduction(X,a);
+intrinsic Induce( X::AlgMat, a::RngIntElt ) -> Map, AlgMat
+{Given an algebra of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
+  pass, i, E := __InduceTemplate(X, a);
+  require pass : E;
+  return __GetInduction(X, i);
 end intrinsic;
 
-intrinsic Induce( X::AlgMatLie, a::RngIntElt ) -> AlgMatLie, Map
-{Given a Lie algebra of matrices associated to a tensor, returns the restriction of the object onto the ath coordinate and a projection.}
-  require assigned X`DerivedFrom : "Cannot find the associated tensor.";
-  require Type(X`DerivedFrom[1]) eq TenSpcElt : "Cannot recognize associated tensor.";
-  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
-  require isit : "No restriction found.";
-  return __GetInduction(X,a);
+intrinsic Induce( X::AlgMatLie, a::RngIntElt ) -> Map, AlgMatLie
+{Given a Lie algebra of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
+  pass, i, E := __InduceTemplate(X, a);
+  require pass : E;
+  return __GetInduction(X, i);
 end intrinsic;
 
 intrinsic DerivationAlgebra( A::Alg ) -> AlgMatLie
@@ -442,3 +414,13 @@ intrinsic Sprint( T::TenSpc ) -> MonStgElt
 
   return "sub< " * tenspc * " | " * bas * " >";
 end intrinsic;
+
+// ------------------------------------------------------------------------------
+//                                     Version
+// ------------------------------------------------------------------------------
+
+intrinsic eMAGmaVersion() -> MonStgElt
+{Returns the version number of eMAGma.}
+  return __VERSION;
+end intrinsic;
+

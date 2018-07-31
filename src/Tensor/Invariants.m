@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 
@@ -7,7 +7,7 @@
 /*
   This file contains invariants for tensors. They come in two flavors: linear
   algebra and polynomial-based invariants. Most of the invariants have been 
-  optimized for bimaps (2-tensors).
+  optimized for bimaps (3-tensors).
 */
 
 
@@ -21,34 +21,63 @@ import "../Util/ConjugateCyclic.m" : __IsCyclic;
 __VectorToBlocks := function( v, d )
   F := BaseRing( v );
   v := Eltseq( v );
-  return < MatrixAlgebra( F, d[i] )![ v[ &+([0] cat [ d[j]^2 : j in [1..i-1] ]) + k] : k in [1..d[i]^2] ] : i in [1..#d] >;
+  return <MatrixAlgebra( F, d[i] )![ v[ &+([0] cat [ d[j]^2 : j in [1..i-1] ]) \
+    + k] : k in [1..d[i]^2] ] : i in [1..#d]>;
 end function;
 
-__SCentroid := function( M, S )
+
+// A function to remove superfluous blocks for fused coordinates. 
+__ReduceByFuse := function(basis, partition, coords)
+  K := BaseRing(basis[1][1]);
+  toFuse := [S : S in partition | #S gt 1];
+  newBasis := basis;
+  for S in toFuse do
+    T := S diff {Max(S)};
+    for t in T do
+      if t in coords then
+        i := Index(coords);
+        temp := [];
+        for B in newBasis do
+          blocks := B;
+          blocks[i] := IdentityMatrix(K, 0);
+          Append(~temp, blocks);
+        end for;
+        newBasis := temp;
+      end if;
+    end for;
+  end for;
+  return newBasis;
+end function;
+
+
+__SCentroid := function( t, S )
   S := Sort([ s : s in S ]);
-  C := Basis( M`Codomain );
+  C := Basis( t`Codomain );
   d := #C;
-  R := BaseRing( M`Codomain );
-  B := CartesianProduct( < [1..Dimension(X)] : X in M`Domain > );
-  dims := [ Dimension( M`Domain[s] ) : s in S ];
+  R := BaseRing( t`Codomain );
+  B := CartesianProduct( < [1..Dimension(X)] : X in t`Domain > );
+  dims := [ Dimension( t`Domain[s] ) : s in S ];
   V := RSpace( R, &+[ d^2 : d in dims ] + d^2 );
   mat := [];
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d*#S);
+  vprint eMAGma, 1 : "Setting up linear system: " cat \
+    IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d*#S);
 
   for x in B do
     for k in [1..d] do
       r := V!0; 
       for i in [1..d] do
         temp := [ x[l] : l in [1..#x] ] cat [i];
-        r[ &+[ d^2 : d in dims ] + k + (i-1)*d ] -:= Slice(M,[{t} : t in temp])[1];
+        r[ &+[ d^2 : d in dims ] + k + (i-1)*d ] -:= Slice(t, [{l} : \
+          l in temp])[1];
       end for;
       rows := [ r : i in [1..#S] ];
       for i in [1..#S] do
         for j in [1..dims[i]] do
           temp := [ x[l] : l in [1..#x] ] cat [k];
           temp[S[i]] := j;
-          rows[i][ &+([ dims[x]^2 : x in [1..i-1] ] cat [0]) + (x[S[i]]-1)*dims[i] + j ] +:= Slice(M,[{t} : t in temp])[1];
+          rows[i][ &+([ dims[x]^2 : x in [1..i-1] ] cat [0]) \
+            + (x[S[i]]-1)*dims[i] + j ] +:= Slice(t, [{l} : l in temp])[1];
         end for;
       end for;
       mat cat:= rows;
@@ -56,37 +85,41 @@ __SCentroid := function( M, S )
   end for;
   M := Matrix(mat);
 
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) \
+    cat " by " cat IntegerToString(Nrows(M));
 
-  T := NullspaceOfTranspose( M );
-  MA := MatrixAlgebra( R, &+(dims) + d );
-  C := sub< MA | [ MA!DiagonalJoin( __VectorToBlocks( T.i, dims cat [d] ) ) : i in [1..Dimension(T)] ] >;
-  return C;
+  N := NullspaceOfTranspose(M);
+  basis := [__VectorToBlocks(b, dims cat [d]) : b in Basis(N)];
+  return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
+    Reverse(Sort([s : s in S])) cat [0]);
 end function;
 
-__Derivations := function( M )
-  B := CartesianProduct( < [1..Dimension(X)] : X in M`Domain > );
-  C := Basis( M`Codomain );
+__Derivations := function( t )
+  B := CartesianProduct( < [1..Dimension(X)] : X in t`Domain > );
+  C := Basis( t`Codomain );
   d := #C;
-  R := BaseRing( M`Codomain );
-  dims := [ Dimension( X ) : X in M`Domain ];
+  R := BaseRing( t`Codomain );
+  dims := [ Dimension( X ) : X in t`Domain ];
   V := RSpace( R, &+[ d^2 : d in dims ] + d^2 );
   mat := [];
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d);
+  vprint eMAGma, 1 : "Setting up linear system: " cat \
+    IntegerToString(Dimension(V)) cat " by " cat IntegerToString(&*dims*d);
 
   for x in B do
     for k in [1..d] do
       r := V!0; 
       for i in [1..d] do
         temp := [ x[l] : l in [1..#x] ] cat [i];
-        r[ &+[ d^2 : d in dims ] + k + (i-1)*d ] -:= Slice(M,[{t} : t in temp])[1]; 
+        r[ &+[ d^2 : d in dims ] + k + (i-1)*d ] -:= Slice(t, [{l} : \
+          l in temp])[1]; 
       end for;
       for i in [1..#dims] do
         for j in [1..dims[i]] do
           temp := [ x[l] : l in [1..#x] ] cat [k];
-          temp[i] := j; // represents the endomorphism from x[i] to e_j (jth basis element)
-          r[ &+([ dims[t]^2 : t in [1..i-1] ] cat [0]) + (x[i]-1)*dims[i] + j ] +:= Slice(M,[{t} : t in temp])[1];
+          temp[i] := j; // represents the endomorphism from x[i] to e_j 
+          r[&+([dims[l]^2 : l in [1..i-1]] cat [0]) + (x[i]-1)*dims[i] + j] \
+            +:= Slice(t, [{l} : l in temp])[1];
         end for;
       end for;
       Append(~mat,r);
@@ -94,77 +127,68 @@ __Derivations := function( M )
   end for;
   M := Matrix(mat);
 
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) \
+    cat " by " cat IntegerToString(Nrows(M));
 
-  S := NullspaceOfTranspose( M );
-  MA := MatrixLieAlgebra( R, &+(dims) + d );
-  T := sub< MA | [ MA!DiagonalJoin( __VectorToBlocks( S.i, dims cat [d] ) ) : i in [1..Dimension(S)] ] >;
-  return T;
+  N := NullspaceOfTranspose(M);
+  basis := [__VectorToBlocks(b, dims cat [d]) : b in Basis(N)];
+  return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
+    Reverse([0..#Domain(t)]));
 end function;
 
-// Computes the nucleus of the first two terms. Therefore, it is n,(n-1) nucleus.
-__12Nucleus := function( M )
-  I := CartesianProduct( < [1..Dimension(X)] : X in M`Domain > );
-  M1 := M`Domain[1];
-  M2 := M`Domain[2];
-  R := BaseRing( M1 );
-  d1 := Dimension( M1 );
-  d2 := Dimension( M2 );
-  V := RSpace( R, d1^2 + d2^2 );
+// Computes the nucleus of the first two terms. 
+__21Nucleus := function( t )
+  I := CartesianProduct( < [1..Dimension(X)] : X in t`Domain > );
+  V2 := t`Domain[1];
+  V1 := t`Domain[2];
+  R := BaseRing(V2);
+  d2 := Dimension(V2);
+  d1 := Dimension(V1);
+  V := RSpace(R, d2^2 + d1^2);
   mat := [];
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(Dimension(V)) cat " by " cat IntegerToString(#I*Dimension(M`Codomain));
+  vprint eMAGma, 1 : "Setting up linear system: " cat \
+    IntegerToString(Dimension(V)) cat " by " cat \
+    IntegerToString(#I*Dimension(t`Codomain));
 
   for x in I do
-    for k in [1..Dimension(M`Codomain)] do
+    for k in [1..Dimension(t`Codomain)] do
       r := V!0;
       temp := [ x[l] : l in [1..#x] ];
-      for i in [1..d1] do
+      for i in [1..d2] do
         temp[1] := i;
-        r[ (x[1]-1)*d1 + i ] +:= Slice(M,[{t} : t in temp] cat [{k}])[1]; 
+        r[ (x[1]-1)*d2 + i ] +:= Slice(t, [{l} : l in temp] cat [{k}])[1]; 
       end for;
       temp := [ x[l] : l in [1..#x] ];
-      for j in [1..d2] do
+      for j in [1..d1] do
         temp[2] := j;
-        r[ d1^2 + (x[2]-1)*d2 + j ] -:= Slice(M,[{t} : t in temp] cat [{k}])[1];
+        r[ d2^2 + (x[2]-1)*d1 + j ] -:= Slice(t, [{l} : l in temp] cat [{k}])[1];
       end for;
       Append(~mat,r);
     end for;
   end for;
   M := Matrix(mat);
 
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) cat " by " cat IntegerToString(Nrows(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Ncols(M)) \
+    cat " by " cat IntegerToString(Nrows(M));
 
-  T := NullspaceOfTranspose( M );
-  blocks := [ __VectorToBlocks( T.i, [d1,d2] ) : i in [1..Dimension(T)] ];
-  MA := MatrixAlgebra( R, d1 + d2 );
-  N := sub< MA | [ MA!DiagonalJoin( b[1], Transpose(b[2]) ) : b in blocks ] >;  
-
-  return N;
+  T := NullspaceOfTranspose(M);
+  blocks := [__VectorToBlocks(T.i, [d2, d1]) : i in [1..Dimension(T)]];
+  basis := [<b[1], Transpose(b[2])> : b in blocks];  
+  return basis;
 end function;
 
-// Kantor's Lemma
-__GetFieldHom := function( E, F )
-  f := DefiningPolynomial(E);
-  R := PolynomialRing(F);
-  factors := Factorization(R!f);
-  assert exists(p){ g[1] : g in factors | Degree(g[1]) eq 1 };
-  p := LeadingCoefficient(p)^-1 * p;
-  phi := hom< E -> F | R.1-p >;
-  g := DefiningPolynomial(F);
-  R := PolynomialRing(E);
-  factors := Factorization(R!g);
-  i := 1;
-  repeat 
-    q := LeadingCoefficient(factors[i][1])^-1 * factors[i][1];
-    phi_inv := hom< F -> E | R.1-q >;
-    i +:= 1;
-  until (E.1 @ phi) @ phi_inv eq E.1 and (F.1 @ phi_inv) @ phi eq F.1;
-  return phi,phi_inv;
-end function;
 
-// Below are functions optimized for bimaps.
-__AdjointOfBimap := function( t )
+/* 
+  Below are functions optimized for bimaps.
+    They use array copy which is much faster than what is done above. 
+
+    They all take a tensor t and return a sequence of tuples of matrices 
+    corresponding to the basis of the matrix vector space satisfying the linear
+    equations. 
+*/
+
+__MidNucleusOfBimap := function( t )
   a := Dimension(t`Domain[1]);
   b := Dimension(t`Domain[2]);
   c := Dimension(t`Codomain);
@@ -172,7 +196,8 @@ __AdjointOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2) cat " by " cat IntegerToString(a*b*c);
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2) \
+    cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+b^2,a*b*c);
 
@@ -202,32 +227,16 @@ __AdjointOfBimap := function( t )
     Remove(~Fb_blocks,1);
   end for;
 
-//  if exists(S){ S : S in t`Cat`Repeats | {1,2} subset S } then
-//    S := { 1,2 };
-//    inds := [a,b,c];
-//    assert a eq b;
-//    offset := [ 1,a^2+1,a^2+1 ];
-//    s := Maximum(S);
-//    Exclude(~S,s);
-//    while #S gt 0 do
-//      m := Maximum(S);
-//      Exclude(~S,m);
-//      X := ZeroMatrix(K,a^2+b^2,inds[s]^2);
-//      InsertBlock(~X,-IdentityMatrix(K,inds[s]^2),offset[s],1);
-//      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
-//      M := HorizontalJoin(X,M);
-//    end while;
-//  end if;
-
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) \
+    cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
-  MA := MatrixAlgebra(K,a+b);
-  A := sub< MA | [ DiagonalJoin( Matrix(a,a,Eltseq(N[i])[b^2+1..a^2+b^2]), Transpose(Matrix(b,b,Eltseq(N[i])[1..b^2])) ) : i in [1..Nrows(N)] ] >;
-  return A;
+  basis := [<Matrix(a, a, Eltseq(N[i])[b^2+1..a^2+b^2]), Transpose(Matrix(b, \
+    b, Eltseq(N[i])[1..b^2]))> : i in [1..Nrows(N)]];
+  return basis;
 end function;
 
-__LeftScalarsOfBimap := function( t )
+__LeftNucleusOfBimap := function( t )
   a := Dimension(t`Domain[1]);
   b := Dimension(t`Domain[2]);
   c := Dimension(t`Codomain);
@@ -235,7 +244,8 @@ __LeftScalarsOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+c^2) cat " by " cat IntegerToString(a*b*c);
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+c^2) \
+    cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+c^2,a*b*c);
 
@@ -264,33 +274,16 @@ __LeftScalarsOfBimap := function( t )
   end for;
   delete Fb;
 
-//  if exists(S){ S : S in t`Cat`Repeats | {0,2} subset S } then
-//    S := { 1,3 };
-//    inds := [a,b,c];
-//    assert a eq c;
-//    offset := [ 1,a^2+1,a^2+1 ];
-//    s := Maximum(S);
-//    Exclude(~S,s);
-//    while #S gt 0 do
-//      m := Maximum(S);
-//      Exclude(~S,m);
-//      X := ZeroMatrix(K,a^2+c^2,inds[s]^2);
-//      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
-//      InsertBlock(~X,-PermutationMatrix(K,perm),offset[s],1);
-//      InsertBlock(~X,IdentityMatrix(K,inds[m]^2),offset[m],1);
-//      M := HorizontalJoin(X,M);
-//    end while;
-//  end if;
-
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) \
+    cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
-  MA := MatrixAlgebra(K,a+c);
-  A := sub< MA | [ DiagonalJoin( Transpose(Matrix(a,a,Eltseq(N[i])[c^2+1..a^2+c^2])), Matrix(c,c,Eltseq(N[i])[1..c^2]) ) : i in [1..Nrows(N)] ] >;
-  return A;
+  basis := [<Transpose(Matrix(a, a, Eltseq(N[i])[c^2+1..a^2+c^2])), Matrix(c, \
+    c, Eltseq(N[i])[1..c^2])> : i in [1..Nrows(N)]];
+  return basis;
 end function;
 
-__RightScalarsOfBimap := function( t )
+__RightNucleusOfBimap := function( t )
   a := Dimension(t`Domain[1]);
   b := Dimension(t`Domain[2]);
   c := Dimension(t`Codomain);
@@ -298,7 +291,8 @@ __RightScalarsOfBimap := function( t )
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(b^2+c^2) cat " by " cat IntegerToString(a*b*c);
+  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(b^2+c^2) \
+    cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,b^2+c^2,a*b*c);
 
@@ -327,30 +321,13 @@ __RightScalarsOfBimap := function( t )
   end for;
   delete Fb;
 
-//  if exists(S){ S : S in t`Cat`Repeats | {0,1} subset S } then
-//    S := { 2,3 };
-//    inds := [a,b,c];
-//    assert b eq c;
-//    offset := [ 1,c^2+1,1 ];
-//    s := Maximum(S);
-//    Exclude(~S,s);
-//    while #S gt 0 do
-//      m := Maximum(S);
-//      Exclude(~S,m);
-//      X := ZeroMatrix(K,b^2+c^2,inds[s]^2);
-//      perm := Eltseq(Transpose(Matrix(IntegerRing(),c,c,[1..c^2])));
-//      InsertBlock(~X,PermutationMatrix(K,perm),offset[s],1);
-//      InsertBlock(~X,-IdentityMatrix(K,inds[m]^2),offset[m],1);
-//      M := HorizontalJoin(X,M);
-//    end while;
-//  end if;
-
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) \
+    cat " by " cat IntegerToString(Ncols(M));
 
   N := NullspaceMatrix(M);
-  MA := MatrixAlgebra(K,b+c);
-  A := sub< MA | [ DiagonalJoin( Matrix(b,b,Eltseq(N[i])[c^2+1..b^2+c^2]), Transpose(Matrix(c,c,Eltseq(N[i])[1..c^2])) ) : i in [1..Nrows(N)] ] >;
-  return A;
+  basis := [<Matrix(b, b, Eltseq(N[i])[c^2+1..b^2+c^2]), Transpose(Matrix(c, \
+    c, Eltseq(N[i])[1..c^2]))> : i in [1..Nrows(N)]];
+  return basis;
 end function;
 
 __CentroidOfBimap := function(t)
@@ -444,14 +421,18 @@ __CentroidOfBimap := function(t)
     end while;
   end if;
 
-  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
+  vprint eMAGma, 1 : "Solving linear system: " cat IntegerToString(Nrows(M)) \
+    cat " by " cat IntegerToString(Ncols(M));
 
   /* Eventually fix this to not have to multiply matrices. */
-  D := DiagonalMatrix(K,[1 : i in [1..b^2]] cat [-1 : i in [1..a^2]] cat [1 : i in [1..c^2]]);
+  D := DiagonalMatrix(K, [1 : i in [1..b^2]] cat [-1 : i in [1..a^2]] cat \
+    [1 : i in [1..c^2]]);
   N := NullspaceMatrix(D*M);
-  MA := MatrixAlgebra(K,a+b+c);
-  A := sub< MA | [ DiagonalJoin( < Matrix(a,a,Eltseq(N[i])[w[1]+1..w[1]+a^2]), Matrix(b,b,Eltseq(N[i])[w[2]+1..w[2]+b^2]), Transpose(Matrix(c,c,Eltseq(N[i])[w[3]+1..w[3]+c^2])) > ) : i in [1..Nrows(N)] ] >;
-  return A;
+  basis := [<Matrix(a, a, Eltseq(N[i])[w[1]+1..w[1]+a^2]), Matrix(b, b, \
+    Eltseq(N[i])[w[2]+1..w[2]+b^2]), Transpose(Matrix(c, c, \
+    Eltseq(N[i])[w[3]+1..w[3]+c^2]))> : i in [1..Nrows(N)]];
+  return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
+    Reverse([0..2]));
 end function;
 
 __DerivationsOfBimap := function(t)
@@ -462,7 +443,8 @@ __DerivationsOfBimap := function(t)
   K := BaseRing(t);
   // t : K^a x K^b >-> K^c given by S
 
-  vprint eMAGma, 1 : "Setting up linear system: " cat IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
+  vprint eMAGma, 1 : "Setting up linear system: " cat \
+    IntegerToString(a^2+b^2+c^2) cat " by " cat IntegerToString(a*b*c);
 
   M := ZeroMatrix(K,a^2+b^2+c^2,a*b*c);
 
@@ -530,16 +512,45 @@ __DerivationsOfBimap := function(t)
     end while;
   end if;
 
-  vprint eMAGma, 1 : "Solving up linear system: " cat IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
+  vprint eMAGma, 1 : "Solving up linear system: " cat \
+    IntegerToString(Nrows(M)) cat " by " cat IntegerToString(Ncols(M));
 
   /* Eventually fix this to not have to multiply matrices. */
-  D := DiagonalMatrix(K,[1 : i in [1..a^2+b^2]] cat [-1 : i in [1..c^2]]);
+  D := DiagonalMatrix(K, [1 : i in [1..a^2+b^2]] cat [-1 : i in [1..c^2]]);
   N := NullspaceMatrix(D*M);
-  MA := MatrixLieAlgebra(K,a+b+c);
-  A := sub< MA | [ DiagonalJoin( < Matrix(a,a,Eltseq(N[i])[b^2+1..a^2+b^2]), Matrix(b,b,Eltseq(N[i])[1..b^2]), Transpose(Matrix(c,c,Eltseq(N[i])[a^2+b^2+1..a^2+b^2+c^2])) > ) : i in [1..Nrows(N)] ] >;
-  return A;
+  basis := [<Matrix(a, a, Eltseq(N[i])[b^2+1..a^2+b^2]), Matrix(b, b, \
+    Eltseq(N[i])[1..b^2]), Transpose(Matrix(c, c, \
+    Eltseq(N[i])[a^2+b^2+1..a^2+b^2+c^2]))> : i in [1..Nrows(N)]];
+  return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
+    Reverse([0..2]));
 end function;
 
+/* 
+  Kantor's Lemma as described in Brooksbank, Wilson, "The module isomorphism 
+    problem reconsidered, 2015.
+  Given isomorphic field extensions E and F of a common field k, return the 
+    isomorphisms from E to F and F to E.
+*/
+__GetFieldHom := function( E, F )
+  f := DefiningPolynomial(E);
+  R := PolynomialRing(F);
+  factors := Factorization(R!f);
+  assert exists(p){ g[1] : g in factors | Degree(g[1]) eq 1 };
+  p := LeadingCoefficient(p)^-1 * p;
+  phi := hom< E -> F | R.1-p >;
+  g := DefiningPolynomial(F);
+  R := PolynomialRing(E);
+  factors := Factorization(R!g);
+  i := 1;
+  repeat 
+    q := LeadingCoefficient(factors[i][1])^-1 * factors[i][1];
+    phi_inv := hom< F -> E | R.1-q >;
+    i +:= 1;
+  until (E.1 @ phi) @ phi_inv eq E.1 and (F.1 @ phi_inv) @ phi eq F.1;
+  return phi, phi_inv;
+end function;
+
+// A function to reduce the number of generators of a group or algebra.
 __GetSmallerRandomGenerators := function( X ) 
   if not IsFinite(BaseRing(X)) then
     return X;
@@ -556,6 +567,7 @@ __GetSmallerRandomGenerators := function( X )
   return S;
 end function;
 
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                   Intrinsics
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -566,10 +578,10 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
 {Returns the ith radical of t contained in Vi.}
   v := #t`Domain;
   require a ge 1 : "Argument must be a positive integer.";
-  require a le v : "Argument exceeds valence of tensor.";
+  require a le v : "Argument exceeds coordinates in the domain.";
   require ISA(Type(BaseRing(t)),Fld) : "Radicals only implemented for tensors over fields.";
   if Type(t`Radicals[v-a+1]) ne RngIntElt then
-    return t`Radicals[v-a+1][1],t`Radicals[v-a+1][2];
+    return t`Radicals[v-a+1];
   end if;
 
   try 
@@ -581,8 +593,6 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
   D := t`Domain[v-a+1];
   B := Basis(D);
   V := VectorSpace(BaseRing(t),#B);
-  // is the map necessary?
-  phi := map< D -> V | x:-> &+[ Coordinates( D, x )[j]*V.j : j in [1..#B] ], y:-> &+[ Coordinates( V, y )[j]*B[j] : j in [1..#B] ] >;
   vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
@@ -596,7 +606,7 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
     end for;
     printf "  DONE!\n";
   end if;
-  t`Radicals[v-a+1] := <R,phi>;
+  t`Radicals[v-a+1] := R;
   return R;
 end intrinsic;
 
@@ -607,9 +617,9 @@ intrinsic Coradical( t::TenSpcElt ) -> ModTupRng, Map
   end if;
   require Type(t`Codomain) in __LIST : "Codomain not a vector space.";
   I := Image(t);
-  C,pi := t`Codomain/I;
-  t`Radicals[t`Valence] := <C,pi>;
-  return C,pi;
+  C, pi := t`Codomain/I;
+  t`Radicals[t`Valence] := <C, pi>;
+  return C, pi;
 end intrinsic;
 
 intrinsic Radical( t::TenSpcElt ) -> Tup
@@ -628,30 +638,37 @@ intrinsic Centroid( t::TenSpcElt ) -> AlgMat
     error "Cannot compute structure constants.";
   end try;
   if t`Valence eq 3 then
-    C := __CentroidOfBimap( t );
+    basis := __CentroidOfBimap( t );
   else
-    C := __SCentroid( t, {1..#t`Domain} );
+    basis := __SCentroid( t, {1..#t`Domain} );
   end if;
+  basis := [DiagonalJoin(T) : T in basis];
+  MA := MatrixAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
+  C := sub< MA | basis >;
   C := __GetSmallerRandomGenerators(C);
+  C`DerivedFrom := <t, [1..t`Valence]>; 
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Centroid)";
-    _, tvs := __TensorOnVectorSpaces(t);
-    spaces := __FRAME(tvs);
-    dims := [ Dimension(X) : X in spaces ];
-    MultiplyByBlock := function(x,B,i)
-      x[i] := x[i]*B;
-      return x;
+    spaces := __FRAME(t);
+    dims := [Dimension(X) : X in spaces];
+    proj := [*Induce(C, a) : a in Reverse([0..t`Valence])*];
+    basis := CartesianProduct(<Basis(spaces[i]) : i in [1..#spaces-1]>);
+
+    MultByMat := function(x, B, i)
+      y := x;
+      y[i] := y[i]*B;
+      return y;
     end function;
-    for c in Generators(C) do
-      blocks := [* ExtractBlock( c, &+(dims[1..i-1] cat [0])+1, &+(dims[1..i-1] cat [0])+1, dims[i], dims[i] ) : i in [1..#dims] *];
-      assert forall{ x : x in CartesianProduct( < Basis(spaces[i]) : i in [1..#spaces-1] > ) |
-              (&and[ (MultiplyByBlock(x,blocks[i],i) @ tvs) eq (MultiplyByBlock(x,blocks[1],1) @ tvs) : i in [2..#tvs`Domain] ]) and
-              ( ((x @ tvs)*blocks[#blocks]) eq (MultiplyByBlock(x,blocks[1],1) @ tvs) ) };
-    end for;
-    printf "  DONE!\n";
+
+    // Checking satisfaction of (x_vav - x_0) * ... * (x_1 - x_0).
+    assert forall{c : c in Generators(C) | forall{x : x in basis | forall{i : 
+      i in [1..t`Valence] | 
+      MultByMat(x, c @ proj[i], i) @ t eq (x @ t)*(c @ proj[#proj])}}};
+
+    printf "  passed!\n";
   end if;
-  C`DerivedFrom := < t, [1..t`Valence] >;
+
   t`Centroids[2][1] := C;
   return C;
 end intrinsic;
@@ -721,11 +738,11 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
 
   if t`Valence eq 3 then
     if {a,b} eq {0,1} then
-      Nab := __RightScalarsOfBimap(t);
+      Nab := __RightNucleusOfBimap(t);
     elif {a,b} eq {0,2} then
-      Nab := __LeftScalarsOfBimap(t);
+      Nab := __LeftNucleusOfBimap(t);
     elif {a,b} eq {1,2} then
-      Nab := __AdjointOfBimap(t);
+      Nab := __MidNucleusOfBimap(t);
     end if;
   else
     // shuffle x,y to v,v-1.
@@ -745,7 +762,7 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
       perm[k+1] := l;
     end if;
     s := Shuffle( t, perm ); 
-    Nab := __12Nucleus(s);
+    Nab := __21Nucleus(s);
   end if;
   
   if __SANITY_CHECK then
@@ -794,8 +811,6 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   isit,X := __IsCyclic(S);
   require isit : "Centroid is not a commutative local ring.";
   
-//  passed, t, H2, err := __TensorOnVectorSpaces(t);  // Not needed?
-//  require passed : err;
   D := t`Domain;
   C := t`Codomain;
   dims := [ Dimension(X) : X in D ] cat [ Dimension(C) ];
@@ -859,9 +874,6 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
   if assigned t`Coerce then
     s`Coerce := [* t`Coerce[i] * Maps[i] : i in [1..#t`Coerce] *];
   end if;
-//  if assigned H2 then // Not needed? See above.
-//    H := H2*H;
-//  end if;
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (TensorOverCentroid)";
@@ -925,7 +937,7 @@ intrinsic LeftNucleus( t::TenSpcElt ) -> AlgMat
   catch err
     error "Cannot compute structure constants.";
   end try;
-  L := __LeftScalarsOfBimap(t);
+  L := __LeftNucleusOfBimap(t);
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (LeftScalars)";
@@ -960,7 +972,7 @@ intrinsic RightNucleus( t::TenSpcElt ) -> AlgMat
   catch err
     error "Cannot compute structure constants.";
   end try;
-  R := __RightScalarsOfBimap(t);
+  R := __RightNucleusOfBimap(t);
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (RightScalars)";
