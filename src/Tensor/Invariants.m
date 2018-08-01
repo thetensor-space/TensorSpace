@@ -14,7 +14,7 @@
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
 import "TensorData.m" : __GetForms;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
-import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
+import "../GlobalVars.m" : __SANITY_CHECK, __FRAME;
 import "../Util/ConjugateCyclic.m" : __IsCyclic;
 
 // Given vectors return blocks
@@ -576,37 +576,40 @@ end function;
 // ==============================================================================
 intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
 {Returns the ith radical of t contained in Vi.}
-  v := #t`Domain;
+  v := t`Valence;
   require a ge 1 : "Argument must be a positive integer.";
-  require a le v : "Argument exceeds coordinates in the domain.";
-  require ISA(Type(BaseRing(t)),Fld) : "Radicals only implemented for tensors over fields.";
-  if Type(t`Radicals[v-a+1]) ne RngIntElt then
-    return t`Radicals[v-a+1];
+  require a lt v : "Argument exceeds coordinates in the domain.";
+  require ISA(Type(BaseRing(t)), Fld) : "Radicals only implemented for tensors over fields.";
+  if Type(t`Radicals[v - a]) ne RngIntElt then
+    return t`Radicals[v - a];
   end if;
 
   try 
-    F := Foliation(t,a);
+    F := Foliation(t, a);
   catch err
     error "Cannot compute structure constants.";
   end try;
 
-  D := t`Domain[v-a+1];
+  D := t`Domain[v - a];
   B := Basis(D);
-  V := VectorSpace(BaseRing(t),#B);
-  vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
+  V := VectorSpace(BaseRing(t), #B);
+  vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) \
+    cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
   if __SANITY_CHECK then
     printf "Sanity check turned on... (Radical)";
-    _, tvs := __TensorOnVectorSpaces(t);
-    for j in [1..10] do
-      x := < Random(X) : X in tvs`Domain >;
-      x[v-a+1] := Random(R);
-      assert x @ tvs eq tvs`Codomain!0;
-    end for;
-    printf "  DONE!\n";
+    T := <Basis(X) : X in Domain(t)>;
+    T[v - a] := Basis(R);
+    basis := CartesianProduct(T);
+
+    assert forall{x : x in basis | \
+      x @ t eq Codomain(t)!0 \
+      };
+    printf "  passed!\n";
   end if;
-  t`Radicals[v-a+1] := R;
+
+  t`Radicals[v - a] := R;
   return R;
 end intrinsic;
 
@@ -615,10 +618,10 @@ intrinsic Coradical( t::TenSpcElt ) -> ModTupRng, Map
   if Type(t`Radicals[t`Valence]) ne RngIntElt then
     return t`Radicals[t`Valence][1],t`Radicals[t`Valence][2];
   end if;
-  require Type(t`Codomain) in __LIST : "Codomain not a vector space.";
   I := Image(t);
   C, pi := t`Codomain/I;
   t`Radicals[t`Valence] := <C, pi>;
+
   return C, pi;
 end intrinsic;
 
@@ -629,202 +632,259 @@ end intrinsic;
 
 intrinsic Centroid( t::TenSpcElt ) -> AlgMat
 {Returns the centroid of the tensor t.}
+  // Check if the centroid has been computed before.
   if Type(t`Centroids[2][1]) ne RngIntElt then
     return t`Centroids[2][1];
   end if;
+   
+  // Make sure we can obtain the structure constants. 
   try
     _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
+
+  // Determine which algorithm to use. 
   if t`Valence eq 3 then
     basis := __CentroidOfBimap( t );
   else
     basis := __SCentroid( t, {1..#t`Domain} );
   end if;
+  
+  // Take the block-basis and construct the corresponding matrix algebra.
   basis := [DiagonalJoin(T) : T in basis];
   MA := MatrixAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
   C := sub< MA | basis >;
   C := __GetSmallerRandomGenerators(C);
   C`DerivedFrom := <t, [1..t`Valence]>; 
 
+  // Sanity check
   if __SANITY_CHECK then
+    // Preliminaries  
     printf "Sanity check turned on... (Centroid)";
-    spaces := __FRAME(t);
-    dims := [Dimension(X) : X in spaces];
     proj := [*Induce(C, a) : a in Reverse([0..t`Valence])*];
-    basis := CartesianProduct(<Basis(spaces[i]) : i in [1..#spaces-1]>);
+    basis := CartesianProduct(<Basis(X) : X in Domaint(t)>);
 
+    // A function to only change one coordinate.
     MultByMat := function(x, B, i)
       y := x;
       y[i] := y[i]*B;
       return y;
     end function;
 
-    // Checking satisfaction of (x_vav - x_0) * ... * (x_1 - x_0).
-    assert forall{c : c in Generators(C) | forall{x : x in basis | forall{i : 
-      i in [1..t`Valence] | 
-      MultByMat(x, c @ proj[i], i) @ t eq (x @ t)*(c @ proj[#proj])}}};
+    // Checking satisfaction of (x_vav - x_0) meet ... meet (x_1 - x_0).
+    assert forall{c : c in Generators(C) | forall{x : x in basis | forall{i : \
+      i in [1..t`Valence] | \
+      MultByMat(x, c @ proj[i], i) @ t eq (x @ t)*(c @ proj[#proj]) \
+      }}};
 
     printf "  passed!\n";
   end if;
 
+  // Save and return.
   t`Centroids[2][1] := C;
   return C;
 end intrinsic;
 
 intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
 {Returns the derivation algebra of the tensor t.}
+  // Check if the derivations have been computed before.
   if assigned t`Derivations then
     return t`Derivations;
   end if;
+
+  // Make sure we can obtain the structure constants. 
   try
     _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
   
+  // Determine which algorithm to use. 
   if t`Valence eq 3 then
-    D := __DerivationsOfBimap( t );
+    basis := __DerivationsOfBimap( t );
   else
-    D := __Derivations( t );
+    basis := __Derivations( t );
   end if;
+
+  // Take the block-basis and construct the corresponding matrix Lie algebra.
+  basis := [DiagonalJoin(T) : T in basis];
+  MLA := MatrixLieAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
+  D := sub< MLA | basis >;
   D := __GetSmallerRandomGenerators(D);
+  D`DerivedFrom := < t, [1..t`Valence] >;
 
+  // Sanity check
   if __SANITY_CHECK then
+    // Preliminaries
     printf "Sanity check turned on... (DerivationAlgebra)";
-    _, tvs := __TensorOnVectorSpaces(t);
-    spaces := __FRAME(tvs);
-    dims := [ Dimension(X) : X in spaces ];
-    MultiplyByBlock := function(x,B,i)
-      x[i] := x[i]*B;
-      return x;
+    proj := [*Induce(D, a) : a in Reverse([0..t`Valence])*];
+    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+
+    // A function to only change one coordinate.
+    MultByMat := function(x, B, i)
+      y := x;
+      y[i] := y[i]*B;
+      return y;
     end function;
-    for d in Generators(D) do
-      blocks := [* ExtractBlock( d, &+(dims[1..i-1] cat [0])+1, &+(dims[1..i-1] cat [0])+1, dims[i], dims[i] ) : i in [1..#dims] *];
-      assert forall{ x : x in CartesianProduct( < Basis(X) : X in tvs`Domain > ) |
-              &+[ MultiplyByBlock(x,blocks[i],i) @ tvs : i in [1..#dims-1] ] eq (x @ tvs)*blocks[#blocks] };
-    end for;
-    printf "  DONE!\n";
+
+    // Checking satisfaction of (x_vav + ... + x_1 - x_0).
+    assert forall{d : d in Generators(D) | forall{x : x in basis | \
+      &+[MultByMat(x, d @ proj[i], i) @ t : i in [1..#proj-1]] eq \
+      (x @ t)*(d @ proj[#proj]) \
+      }};
+
+    printf "  passed!\n";
   end if;
 
-  D`DerivedFrom := < t, [1..t`Valence] >;
+  // Save and return.
   t`Derivations := D;
   return D;
 end intrinsic;
 
 intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
 {Returns the ab-nucleus of the tensor t.}
+  // Make sure {a,b} make sense.
   require a ne b : "Integers must be distinct.";
   v := #t`Domain;
-  require {a,b} subset {0..v} : "Integers must correspond to Cartesian factors.";
+  require {a,b} subset {0..v} : \
+    "Integers must correspond to Cartesian factors.";
   if t`Cat`Contra then
     require 0 notin {a,b} : "Integers must be positive for cotensors.";
   end if;
 
-  // has it been computed before?
-  ind := Index(t`Nuclei[1],{a,b});
+  // Check if it has been computed before.
+  ind := Index(t`Nuclei[1], {a,b});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
   end if;
 
-  x := Maximum([a,b]);
-  y := Minimum([a,b]);
+  // Make sure we can obtain the structure constants. 
   try 
     _ := Eltseq(t);
   catch err
     error "Cannot compute structure constants.";
   end try;
 
+  // Standardize {a, b}  
+  max := Maximum([a,b]);
+  min := Minimum([a,b]);
+
+  // Determine which algorithm to use. 
   if t`Valence eq 3 then
+
+    // If t is a 3-tensor, use one of the specialized algorithms.
     if {a,b} eq {0,1} then
-      Nab := __RightNucleusOfBimap(t);
+      basis := __RightNucleusOfBimap(t);
     elif {a,b} eq {0,2} then
-      Nab := __LeftNucleusOfBimap(t);
+      basis := __LeftNucleusOfBimap(t);
     elif {a,b} eq {1,2} then
-      Nab := __MidNucleusOfBimap(t);
+      basis := __MidNucleusOfBimap(t);
     end if;
+
   else
-    // shuffle x,y to v,v-1.
+
+    // Shuffle coordinates (max, min) to (vav, vav - 1).
     perm := [0..v];
-    if #{x,y,v,v-1} eq 2 then
-      perm := [ k : k in [0..v] ];
-    elif #{x,y,v,v-1} ne 3 then
-      perm[v+1] := x;
-      perm[v] := y;
+    numDistinct := #{max, min, v, v-1};
+    if numDistinct gt 3 then
+      perm[v+1] := max;
+      perm[v] := min;
       perm[a+1] := v;
       perm[b+1] := v-1;
-    else
-      k := Random(Exclude(Exclude({x,y,v-1,v},v-1),v));
-      l := Random(Exclude(Exclude({x,y,v-1,v},a),b));
-      perm[v+1] := x;
-      perm[v] := y;
+    end if;
+    if numDistinct eq 3 then
+      k := Random(Exclude(Exclude({max, min, v-1, v}, v-1), v));
+      l := Random(Exclude(Exclude({max, min, v-1, v}, a), b));
+      perm[v+1] := max;
+      perm[v] := min;
       perm[k+1] := l;
     end if;
-    s := Shuffle( t, perm ); 
-    Nab := __21Nucleus(s);
+    s := Shuffle(t, perm); 
+    basis := __21Nucleus(s);
   end if;
-  
+
+  // Take the block-basis and construct the corresponding matrix algebra.
+  basis := [DiagonalJoin(T) : T in basis];
+  MA := MatrixLieAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
+  N_ab := sub< MA | basis >;
+  N_ab := __GetSmallerRandomGenerators(N_ab);
+  N_ab`DerivedFrom := <t, [v-max+1, v-min+1]>;
+
+  // Sanity check  
   if __SANITY_CHECK then
+    // Preliminaries
     printf "Sanity check turned on... (Nucleus)";
-    _, tvs := __TensorOnVectorSpaces(t);
-    spaces := Reverse(__FRAME(tvs));
-    MultiplyByBlock := function(x,B,k)
-      x[k] := x[k]*B;
-      return x;
-    end function;
-    for z in [Random(Nab) : r in [1..20]] do
-      X := ExtractBlock( z, 1, 1, Dimension(spaces[x+1]), Dimension(spaces[x+1]) );
-      Y := ExtractBlock( z, Dimension(spaces[x+1])+1, Dimension(spaces[x+1])+1, Dimension(spaces[y+1]), Dimension(spaces[y+1]) );
-      if x eq 0 then
-        assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          (B @ tvs) * X eq MultiplyByBlock(B,Y,v-y+1) @ tvs };
-      elif y eq 0 then
-        assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          MultiplyByBlock(B,X,v-x+1) @ tvs eq (B @ tvs) * Y };
+    f := AssociatedForm(t);
+    spaces := Domain(f);
+    dims := [Dimension(X) : X in spaces];
+    proj := [*Induce(N_ab, max), Induce(N_ab, min)*];
+    basis := CartesianProduct(<Basis(spaces[i]) : i in [1..#spaces-1]>);
+
+    // A function to only change one coordinate.
+    MultByMat := function(x, B, i)
+      y := x;
+      if i eq #x then
+        y[i] := y[i]*Transpose(B);
       else
-        assert forall{ B : B in CartesianProduct( < Basis(X) : X in tvs`Domain > ) | 
-          MultiplyByBlock(B,X,v-x+1) @ tvs eq MultiplyByBlock(B,Transpose(Y),v-y+1) @ tvs };
+        y[i] := y[i]*B;
       end if;
-    end for;
-    printf "  DONE!\n";
+      return y;
+    end function;
+
+    // Checking satisfaction of (x_a - x_b).
+    assert forall{A : A in Generators(N_ab) | forall{x : x in basis | \
+      MultByMat(x, A @ proj[1], max) @ s eq MultByMat(x, \
+      Transpose(A @ proj[2]), min) @ s \
+      }};
+
+    printf "  passed!\n";
   end if;
-  Nab`DerivedFrom := < t, [v-x+1,v-y+1] >;
-  t`Nuclei[2][ind] := Nab;
-  return Nab;
+
+  // Save and return
+  t`Nuclei[2][ind] := N_ab;
+  return N_ab;
 end intrinsic;
 
 intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
 {Returns the tensor of t as a tensor over its centroid.}
+  // If co-tensor, then stop as t is a form.
   if t`Cat`Contra then
     return t;
   end if;
+
+  // Compute centroid and make sure it is suitable.
   C := Centroid(t);
   K := BaseRing(C);
-  require IsFinite(K) : "Base ring must be finite.";
+  require IsFinite(K) : "Base ring must be finite."; // __IsCyclic needs finite.
   n := Nrows(C.1);
-  J,S := WedderburnDecomposition(C);
+  J, S := WedderburnDecomposition(C);
   require IsCommutative(S) : "Centroid is not a commutative ring.";
-  if Generators(S) eq { Generic(S)!1 } then
-    return t,_;
+  if Generators(S) eq {Generic(S)!1} then
+    // It is already written over its centroid.
+    return t, _;
   end if;
-  isit,X := __IsCyclic(S);
+  isit, X := __IsCyclic(S);
   require isit : "Centroid is not a commutative local ring.";
   
+  // Construct field extensions and one "standard" field ext (given by 'GF').
   D := t`Domain;
   C := t`Codomain;
-  dims := [ Dimension(X) : X in D ] cat [ Dimension(C) ];
-  blocks := [* ExtractBlock( X, &+(dims[1..i-1] cat [0]) + 1, &+(dims[1..i-1] cat [0]) + 1, dims[i], dims[i] ) : i in [1..#dims] *];
-  Exts := [* ext< K | MinimalPolynomial(blocks[i]) > : i in [1..#dims] *];
-  E := GF( #Exts[1] );
-  phi := [* *]; 
-  phi_inv := [* *];
+  dims := [Dimension(X) : X in D] cat [Dimension(C)];
+  proj := [*Induce(C, a) : a in Reverse([0..#D])*];
+  blocks := [*X @ proj[i] : i in [1..#dims]*];
+  Exts := [*ext< K | MinimalPolynomial(blocks[i]) > : i in [1..#dims]*];
+  E := GF(#Exts[1]); // standard extension
+
+  // Construct isomorphisms to and from each Exts[i] and E.
+  phi := [**]; 
+  phi_inv := [**];
   for i in [1..#Exts] do
-    f,g := __GetFieldHom( Exts[i], E );
-    Append(~phi,f);
-    Append(~phi_inv,g);
+    f, g := __GetFieldHom(Exts[i], E);
+    Append(~phi, f);
+    Append(~phi_inv, g);
   end for;
-  e := Degree( E, K );
+  e := Degree(E, K);
   Y := [* &+[ Eltseq(E.1@phi_inv[j])[i]*blocks[j]^(i-1) : i in [1..e] ] : j in [1..#phi] *];
   
   Spaces := __FRAME(t);
@@ -877,30 +937,36 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
 
   if __SANITY_CHECK then
     printf "Sanity check turned on... (TensorOverCentroid)";
-    assert forall{ x : x in CartesianProduct( < Basis( X ) : X in t`Domain > ) |
-           (< x[i] @ Maps[i] : i in [1..#x] > @ s) eq ((x @ t) @ Maps[#Maps]) };
-    // verifies if multilinear.
+    basis := CartesianProduct(<Basis(X) : X in t`Domain>);
+
+    // First verify that the maps produce an actual homotopism from t to s.
+    assert forall{x : x in basis | 
+      <x[i] @ Maps[i] : i in [1..#x]> @ s eq (x @ t) @ Maps[#Maps]
+      };
+
+    // Now verify that s is E-multilinear.
     D := Domain(s);
-    K := BaseRing(s);
-    U := { k : k in K | k ne 0 };
+    E := BaseRing(s);
+    U, phi := UnitGroup(E);
     for i in [1..10] do
-      C := [ Random(U) : i in [1..#D] ];
-      x := < Random(d) : d in D >;
-      y := < Random(d) : d in D >;
+      C := [Random(U) @ phi : i in [1..#D]];
+      x := <Random(d) : d in D>;
+      y := <Random(d) : d in D>;
       k := &*C;
-      z := < C[i]*x[i] + y[i] : i in [1..#x] >;
+      z := <C[i]*x[i] + y[i] : i in [1..#x]>;
       for i in [1..#D] do
         u := z;
         v := z;
         u[i] := x[i];
         v[i] := y[i];
-        assert z@s eq C[i]*(u@s)+(v@s);
+        assert z @ s eq C[i]*(u @ s) + (v @ s);
       end for;
     end for;
-    printf "  DONE!\n";
+
+    printf "  passed!\n";
   end if;
 
-  return s,H;
+  return s, H;
 end intrinsic;
 
 // ==============================================================================
@@ -920,7 +986,7 @@ intrinsic AdjointAlgebra( t::TenSpcElt ) -> AlgMat
   
   S := SystemOfForms(t);
   A := AdjointAlgebra(S);
-  A`DerivedFrom := < t, [1,2] >;
+  A`DerivedFrom := <t, [1, 2]>;
   t`Bimap`Adjoint := A;
   return A;
 end intrinsic;
@@ -928,6 +994,8 @@ end intrinsic;
 intrinsic LeftNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the left nucleus of the 2-tensor t.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
+  return Nucleus(t, 2, 0);
+/*
   ind := Index(t`Nuclei[1], {0,2});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
@@ -952,17 +1020,20 @@ intrinsic LeftNucleus( t::TenSpcElt ) -> AlgMat
   L`DerivedFrom := < t, [1,3] >;
   t`Nuclei[2][ind] := L;
   return L;
+*/
 end intrinsic;
 
 intrinsic MidNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the mid nucleus of the 2-tensor t.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
-  return Nucleus(t,2,1);
+  return Nucleus(t, 2, 1);
 end intrinsic;
 
 intrinsic RightNucleus( t::TenSpcElt ) -> AlgMat
 {Returns the right nucleus of the 2-tensor t.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
+  return Nucleus(t, 1, 0);
+/*
   ind := Index(t`Nuclei[1], {0,1});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
     return t`Nuclei[2][ind];
@@ -987,6 +1058,7 @@ intrinsic RightNucleus( t::TenSpcElt ) -> AlgMat
   R`DerivedFrom := < t, [2,3] >;
   t`Nuclei[2][ind] := R;
   return R;
+*/
 end intrinsic;
 
 // ==============================================================================

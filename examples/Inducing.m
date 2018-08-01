@@ -6,7 +6,7 @@ IsAlternating(t);
 D := DerivationAlgebra(t);
 D.1;
 D.2;
-D1, pi := Induce(D, 1);
+pi, D1 := Induce(D, 1);
 D1;
 pi;
 

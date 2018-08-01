@@ -15,8 +15,8 @@ N32;
 
 Omega_10 := KMatrixSpace(GF(2), 10, 10);
 D_vs := sub< KMatrixSpace(GF(2), 30, 30) | Basis(D) >;
-D1, pi1 := Induce(D, 1);
-D0, pi0 := Induce(D, 0);
+pi1, D1 := Induce(D, 1);
+pi0, D0 := Induce(D, 0);
 res := hom< D_vs -> Omega_10 | 
     [<x, DiagonalJoin(x @ pi1, x @ pi0)> : x in Basis(D)] >;
 res;

@@ -248,7 +248,6 @@ intrinsic HeisenbergLieAlgebra( t::TenSpcElt ) -> AlgLie
   return L;
 end intrinsic;
 
-// UPDATE DOCUMENTATIONS!!
 intrinsic Induce( X::GrpMat, a::RngIntElt ) -> Map, GrpMat
 {Given a group of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
   pass, i, E := __InduceTemplate(X, a);

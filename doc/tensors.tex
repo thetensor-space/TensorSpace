@@ -2498,14 +2498,12 @@ To access the projections or the objects acting on a specific factor $U_i$, the 
 
 \index{Induce}
 \begin{intrinsics}
-Induce(X, a) : AlgMat, RngIntElt -> AlgMat, Map
-Induce(X, a) : AlgMatLie, RngIntElt -> AlgMatLie, Map
-Induce(X, a) : GrpMat, RngIntElt -> GrpMat, Map
+Induce(X, a) : AlgMat, RngIntElt -> Map, AlgMat
+Induce(X, a) : AlgMatLie, RngIntElt -> Map, AlgMatLie
+Induce(X, a) : GrpMat, RngIntElt -> Map, GrpMat
 \end{intrinsics}
 
-Returns the induced sub-object associated to the $a$th factor of the 
-associated 
-tensor and a projection from the given object to the returned sub-object.
+Returns the projection from the given object to the induced sub-object on the $a$th coordinate and the induced sub-object of the associated tensor.
 
 \begin{example}[Inducing]
 
@@ -2538,7 +2536,7 @@ We will induce the action on the $1$st coordinate.
 [0 0 0 0 0]
 [0 0 0 2 0]
 [0 0 0 0 1]
-> D1, pi := Induce(D, 1);
+> pi, D1 := Induce(D, 1);
 > D1;
 Matrix Lie Algebra of degree 2 over Finite field of size 3
 > pi;
@@ -2754,20 +2752,20 @@ Now we will embed these nuclei into the derivation algebra of $t$.
 \begin{code}
 > Omega := KMatrixSpace(K, 47, 47);
 > Z1 := ZeroMatrix(K, 20, 20);
-> L2, L_L2 := Induce(L, 2);
-> L0, L_L0 := Induce(L, 0);
+> L_L2, L2 := Induce(L, 2);
+> L_L0, L0 := Induce(L, 0);
 > embedL := map< L -> Omega | x :-> 
 >     DiagonalJoin(<Transpose(x @ L_L2), Z1, Transpose(x @ L_L0)>) >;
 > 
 > Z0 := ZeroMatrix(K, 15, 15);
-> M2, M_M2 := Induce(M, 2);
-> M1, M_M1 := Induce(M, 1);
+> M_M2, M2 := Induce(M, 2);
+> M_M1, M1 := Induce(M, 1);
 > embedM := map< M -> Omega | x :->
 >     DiagonalJoin(<x @ M_M2, -Transpose(x @ M_M1), Z0>) >;
 > 
 > Z2 := ZeroMatrix(K, 12, 12);
-> R1, R_R1 := Induce(R, 1);
-> R0, R_R0 := Induce(R, 0);
+> R_R1, R1 := Induce(R, 1);
+> R_R0, R0 := Induce(R, 0);
 > embedR := map< R -> Omega | x :->
 >     DiagonalJoin(<Z2, x @ R_R1, x @ R_R0>) >;
 > 
@@ -3008,8 +3006,8 @@ To construct the restriction of $\Der(t)$ into $\mathfrak{gl}(U_1)\times\mathfra
 \begin{code}
 > Omega_10 := KMatrixSpace(GF(2), 10, 10);
 > D_vs := sub< KMatrixSpace(GF(2), 30, 30) | Basis(D) >;
-> D1, pi1 := Induce(D, 1);
-> D0, pi0 := Induce(D, 0);
+> pi1, D1 := Induce(D, 1);
+> pi0, D0 := Induce(D, 0);
 > res := hom< D_vs -> Omega_10 | 
 >     [<x, DiagonalJoin(x @ pi1, x @ pi0)> : x in Basis(D)] >;
 > res;
