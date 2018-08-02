@@ -240,12 +240,6 @@ intrinsic AssociatedForm( t::TenSpcElt ) -> TenSpcElt
     s`CoordImages := Eltseq(t);
   end if;
 
-  if __SANITY_CHECK then
-    printf "Sanity check turned on... (AssociatedForm)";
-    I := CartesianProduct( < Basis(X) : X in __FRAME(t) > );
-    assert forall{ x : x in I | Coordinates(t`Codomain,< x[i] : i in [1..#x-1]> @ t)[Index(Basis(t`Codomain),x[#x])] eq (x@s)[1] };
-    printf "  DONE!\n";
-  end if;
   return s;
 end intrinsic;
 

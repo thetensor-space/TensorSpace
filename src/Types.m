@@ -138,7 +138,16 @@ declare attributes AlgGen : Star;
 
 /*
   Description of attributes:
-    DerivedFrom. . . . . . A tuple containing the tensor it came from and the indices of the spaces (not coordinates).
+    DerivedFrom. . . . . . The record of tensor information.
     Star . . . . . . . . . An involution on the algebra.
+*/
+
+__RF_DERIVED_FROM := recformat< Tensor : TenSpcElt, Indices : SeqEnum, Fused : BoolElt >;
+
+/*
+  DerivedFrom record:
+    Tensor . . . . . . . . The tensor from where the object wsa derived from.
+    Indices. . . . . . . . The indices that can be induced.
+    Fused. . . . . . . . . Whether or not the tensor category was incorporated.
 */
 

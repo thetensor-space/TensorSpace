@@ -100,9 +100,8 @@ intrinsic DerivationClosure( T::TenSpc, Delta::[Mtrx] ) -> TenSpc
   S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
   S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
   if __SANITY_CHECK and Dimension(S) gt 0 then
-    printf "Sanity check turned on... (DerivationClosure)";
+    printf "Running sanity check (DerivationClosure)\n";
     assert forall{ i : i in [1..10] | Delta subset DerivationAlgebra(Random(S)) };
-    printf "  DONE!\n";
   end if;
   return S;
 end intrinsic;
@@ -160,9 +159,8 @@ intrinsic NucleusClosure( T::TenSpc, Delta::[Mtrx], a::RngIntElt, b::RngIntElt )
   S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
   S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
   if __SANITY_CHECK and Dimension(S) gt 0 then
-    printf "Sanity check turned on... (NucleusClosure)";
+    printf "Running sanity check (NucleusClosure)\n";
     assert forall{ i : i in [1..10] | Delta subset Nucleus(Random(S), 3-a, 3-b) };
-    printf "  DONE!\n";
   end if;
   return S;
 end intrinsic;

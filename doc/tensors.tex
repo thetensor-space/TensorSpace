@@ -1665,7 +1665,7 @@ We will also change the tensor category so that all the coordinates are fused to
 > A := MatrixAlgebra(GF(3), 3);
 > JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
 > Cat := TensorCategory([1 : i in [0..3]], {{0..3}});
-> t, Maps := Tensor([A : i in [0..3]], JacobiID, Cat);
+> t, maps := Tensor([A : i in [0..3]], JacobiID, Cat);
 > t;
 Tensor of valence 4, U3 x U2 x U1 >-> U0
 U3 : Full Vector space of degree 9 over GF(3)
@@ -1699,7 +1699,7 @@ The second output at construction, the \texttt{List} of maps, can be used to map
 > x @ t;
 (2 0 0 0 1 0 0 0 0)
 > 
-> phi := Maps[1];
+> phi := maps[1];
 > x := <A.1 @ phi, A.2 @ phi, (A.2^2) @ phi>;
 > x;
 <(1 0 0 0 0 0 0 0 0), (0 1 0 0 0 1 1 0 0), (0 0 1 1 0 0 0 1 0)>
@@ -1751,7 +1751,7 @@ We start with the same tensor as the previous example: the tensor given by the J
 > A := MatrixAlgebra(GF(3), 3);
 > JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
 > Cat := TensorCategory([1 : i in [0..3]], {{0..3}});
-> t, Maps := Tensor([A : i in [0..3]], JacobiID, Cat);
+> t, maps := Tensor([A : i in [0..3]], JacobiID, Cat);
 > t;
 Tensor of valence 4, U3 x U2 x U1 >-> U0
 U3 : Full Vector space of degree 9 over GF(3)
@@ -1768,7 +1768,7 @@ If we compose $t$ with $\phi^{-1}$, the returned tensor is \emph{still} over vec
 The codomain is \emph{not} $A$; this is because all tensors are over vector spaces.
 In fact, the returned tensor is exactly the same as $t$.
 \begin{code}
-> phi := Maps[1];
+> phi := maps[1];
 > t * (phi^-1);
 Tensor of valence 4, U3 x U2 x U1 >-> U0
 U3 : Full Vector space of degree 9 over GF(3)

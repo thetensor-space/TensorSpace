@@ -1,5 +1,5 @@
 P := ClassicalSylow(SL(3,125),5);
-Q := PCGroup(P); // Loose track of GF(125).
+Q := PCGroup(P); // Lose track of GF(125).
 Q;
 t := pCentralTensor(Q);
 t;

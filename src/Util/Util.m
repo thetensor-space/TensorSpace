@@ -14,28 +14,40 @@ import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
 
 
 __CheckFuse := function( a, RP, inds )
-  assert exists(S){S : S in RP | a in S};
+  if not exists(S){S : S in RP | a in S} then
+    return false, _;
+  end if;
   v := Maximum(&join(RP)) + 1;
   T := {v - s : s in S};
-  int := T meet Set(inds);
-  if #int gt 0 then
-    return true, v - Maximum(int);
+  inter := T meet Set(inds);
+  if #inter gt 0 then
+    return true, Minimum(inter);
   else
     return false, _;
   end if;
 end function;
 
+// Given the object and the index (not coordinate), return the induced object on the i-th index (or (v-i)-th coordinate). 
 __GetInduction := function( X, i )
-  t := X`DerivedFrom[1];
-  v := t`Valence;
-  j := v - i; 
-  gens := [ g : g in Generators(X) ];
+  t := X`DerivedFrom`Tensor;
+  gens := [g : g in Generators(X)];
   grp := Type(X) eq GrpMat;
   lie := Type(X) eq AlgMatLie;
   K := BaseRing(t);
   spaces := Frame(t);
-  d := Dimension(spaces[j]);
-  s := &+([Dimension(spaces[k]) : k in [ x : x in X`DerivedFrom[2] | x lt j ]] cat [1]);
+  v := t`Valence;
+  d := Dimension(spaces[i]);
+  if X`DerivedFrom`Fused then
+    s := 1;
+    for x in [x : x in X`DerivedFrom`Indices | x lt i] do
+      assert exists(S){S : S in t`Cat`Repeats | v-x in S};
+      if Max(S) eq v-x then
+        s +:= Dimension(spaces[x]);
+      end if;
+    end for;
+  else
+    s := &+([Dimension(spaces[k]) : k in [ x : x in X`DerivedFrom`Indices | x lt i ]] cat [1]); 
+  end if;
   blocks := { ExtractBlock(g, s, s, d, d) : g in gens };
   if grp then
     if GL(d,K)!1 in blocks then
@@ -123,10 +135,15 @@ __InduceTemplate := function(X, a)
   if not assigned X`DerivedFrom then
     return false, _, "Cannot find an associated tensor.";
   end if;
-  if Type(X`DerivedFrom[1]) ne TenSpcElt then
+  if not assigned X`DerivedFrom`Tensor then
     return false, _, "Cannot recognize associated tensor.";
   end if;
-  isit, i := __CheckFuse(a, X`DerivedFrom[1]`Cat`Repeats, X`DerivedFrom[2]);
+  if X`DerivedFrom`Fused then
+    isit, i := __CheckFuse(a, X`DerivedFrom`Tensor`Cat`Repeats, X`DerivedFrom`Indices);
+  else
+    i := X`DerivedFrom`Tensor`Valence - a;
+    isit := i in X`DerivedFrom`Indices;
+  end if;
   if not isit then 
     return false, _, "No restriction found.";
   else 
@@ -279,8 +296,7 @@ intrinsic DerivationAlgebra( A::Alg ) -> AlgMatLie
   end if;
   B := Tensor(A);
   D := DerivationAlgebra(B);
-  Der := Induce(D,2);
-  return Der;
+  return D;
 end intrinsic;
 
 intrinsic Centroid( A::Alg ) -> AlgMat
@@ -293,8 +309,7 @@ intrinsic Centroid( A::Alg ) -> AlgMat
   end if;
   B := Tensor(A);
   C := Centroid(B);
-  Cent := Induce(C,2);
-  return Cent;
+  return C;
 end intrinsic;
 
 intrinsic LeftNucleus( A::Alg ) -> AlgMat
@@ -308,7 +323,7 @@ intrinsic LeftNucleus( A::Alg ) -> AlgMat
   K := BaseRing(A);
   d := Dimension(A);
   B := Tensor(A);
-  N := Induce(Nucleus(B,2,0),2);
+  N := Codomain(Induce(Nucleus(B, 2, 0), 2));
   bas := Basis(sub<KMatrixSpace(K,d,d)|[ Transpose(X) : X in Basis(N) ]> meet sub<KMatrixSpace(K,d,d)|AsMatrices(B,2,0)>);
   L := sub< MatrixAlgebra(K,d) | bas >;
   return L;
@@ -325,7 +340,7 @@ intrinsic RightNucleus( A::Alg ) -> AlgMat
   K := BaseRing(A);
   d := Dimension(A);
   B := Tensor(A);
-  N := Induce(Nucleus(B,1,0),1);
+  N := Codomain(Induce(Nucleus(B, 1, 0), 1));
   bas := Basis(sub<KMatrixSpace(K,d,d)|Basis(N)> meet sub<KMatrixSpace(K,d,d)|AsMatrices(B,2,0)>);
   R := sub< MatrixAlgebra(K,d) | bas >;
   return R;
@@ -342,7 +357,7 @@ intrinsic MidNucleus( A::Alg ) -> AlgMat
   K := BaseRing(A);
   d := Dimension(A);
   B := Tensor(A);
-  N := Induce(Nucleus(B,2,1),2);
+  N := Codomain(Induce(Nucleus(B, 2, 1), 2));
   bas := Basis(sub<KMatrixSpace(K,d,d)|Basis(N)> meet sub<KMatrixSpace(K,d,d)|AsMatrices(B,2,0)>);
   M := sub< MatrixAlgebra(K,d) | bas >;
   return M;

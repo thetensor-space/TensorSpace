@@ -1,12 +1,12 @@
 A := MatrixAlgebra(GF(3), 3);
 JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
 Cat := TensorCategory([1 : i in [0..3]], {{0..3}});
-t, Maps := Tensor([A : i in [0..3]], JacobiID, Cat);
+t, maps := Tensor([A : i in [0..3]], JacobiID, Cat);
 t;
 TensorCategory(t);
 
 
-phi := Maps[1];
+phi := maps[1];
 t * (phi^-1);
 t * (phi^-1) eq t;
 
