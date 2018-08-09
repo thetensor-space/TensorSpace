@@ -598,17 +598,6 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
     cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
-  if __SANITY_CHECK then
-    printf "Running sanity check (Radical)\n";
-    T := <Basis(X) : X in Domain(t)>;
-    T[v - a] := Basis(R);
-    basis := CartesianProduct(T);
-
-    assert forall{x : x in basis | \
-      x @ t eq Codomain(t)!0 \
-      };
-  end if;
-
   t`Radicals[v - a] := R;
   return R;
 end intrinsic;

@@ -14,13 +14,14 @@
 //                             Tensor space categories.
 // ------------------------------------------------------------------------------
 declare type TenCat; 	
-declare attributes TenCat : Arrows, Contra, Repeats, Valence;
+declare attributes TenCat : Arrows, Contra, Repeats, Symmetries, Valence;
 
 /*
   Description of attributes:
     Arrows . . . . . . . . The function from Repeats to {-1,0,1} detailing which spaces are dualized.
     Contra . . . . . . . . True/false whether the category is contravariant.
     Repeats. . . . . . . . A partition of {0..v}.
+    Symmetries . . . . . . The subgroup of Sym({0..v}) which act on the coordinates as symmetries.
     Valence. . . . . . . . The valence v.
 */
 
@@ -45,10 +46,10 @@ declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 //                                     Tensor
 // ------------------------------------------------------------------------------
 declare attributes TenSpcElt : Bimap, Cat, Centroids, Codomain, Coerce, CoordImages, Densor, Derivations, Domain, Element, FullyNondeg, 
-Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Valence;
+Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, SymImage, Valence;
 
 /* 
-  Tensors will be thought of as multimaps but will be allowed flexibility for the user.
+  Tensors will be thought of as multimaps internally but will be allowed flexibility for the user.
 
   Description of attributes:
     Bimap. . . . . . . . . The record of bimap info. Only defined when the valence is 2.
@@ -70,6 +71,7 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Val
     Permutation. . . . . . Used for shuffling tensors. Allows for on-the-fly computations; defaults is Sym({1..v+1})!1.
     Radicals . . . . . . . A list of the radicals for each Cartesian factor in the domain and the coradical.
     Reflexive. . . . . . . A record which states if the tensor is reflexive.
+    SymImage . . . . . . . The indexed set of tuples <sigma, H> such that sigma is a generator of Symmetries and H in Hom(t, t^sigma). 
     Valence. . . . . . . . The number of modules in the frame.
 */
 
