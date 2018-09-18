@@ -11,6 +11,7 @@
 
 import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
 import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
+import "../Types.m" : __RF_DERIVED_FROM;
 
 
 __CheckFuse := function( a, RP, inds )
@@ -378,6 +379,18 @@ intrinsic Center( A::Alg ) -> Alg
   return S;
 end intrinsic;
 
+intrinsic DerivedFrom( ~X::., t::TenSpcElt, I::[RngIntElt] : Fused := true )
+{This procedure should be used to store the tensor information: the tensor t and
+the corresponding indices I, to the object X.}
+  require Type(X) in {AlgMat, AlgMatLie, GrpMat} : 
+    "No attribute to store tensor information.";
+  R := rec< __RF_DERIVED_FROM | 
+    Tensor := t, 
+    Indices := Sort([t`Valence - i : i in I]),
+    Fused := Fused
+    >;
+  X`DerivedFrom := R;
+end intrinsic;
 
 // ------------------------------------------------------------------------------
 //                                    Printing

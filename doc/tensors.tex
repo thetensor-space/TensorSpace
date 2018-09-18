@@ -2554,7 +2554,19 @@ Now we can see that have the action of $D$ on $U_1$.
 \end{code}
 \end{example}
 
+We include a partner intrinsic to \texttt{Include} and that is the following procedure.
 
+\index{DerivedFrom}
+\begin{intrinsics}
+DerivedFrom(X, t, I) : Any, TenSpcElt, [RngIntElt]
+\end{intrinsics}
+
+Includes the tensor data in the matrix object $X$, where the relevant coordinates are in the sequence $I\subseteq \{0,\dots,\vav\}$.
+Currently, this only works for objects of type \texttt{AlgMat}, \texttt{AlgMatLie}, and \texttt{GrpMat}.
+If the tensor category has a nontrivial partition of its coordinates fused, it does not matter if every coordinate in a particular part are contained in $I$. 
+It is assumed that $X$ is block diagonal, whose blocks starting from the top left go in decreasing order in the coordinates---in the same way the coordinates of the frame decrease from left to right for a tensor. 
+
+% Maybe include an example at some point.
 
 \subsection{Standard invariants}
 

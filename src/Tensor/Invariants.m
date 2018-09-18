@@ -132,7 +132,11 @@ __Derivations := function( t )
     cat " by " cat IntegerToString(Nrows(M));
 
   N := NullspaceOfTranspose(M);
-  basis := [__VectorToBlocks(b, dims cat [d]) : b in Basis(N)];
+  B := Basis(N);
+  if Dimension(N) eq 0 then
+    B := [N!0];
+  end if;
+  basis := [__VectorToBlocks(b, dims cat [d]) : b in B];
   return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
     Reverse([0..#Domain(t)]));
 end function;
@@ -522,6 +526,9 @@ __DerivationsOfBimap := function(t)
   basis := [<Matrix(a, a, Eltseq(N[i])[b^2+1..a^2+b^2]), Matrix(b, b, \
     Eltseq(N[i])[1..b^2]), Transpose(Matrix(c, c, \
     Eltseq(N[i])[a^2+b^2+1..a^2+b^2+c^2]))> : i in [1..Nrows(N)]];
+  if #basis eq 0 then
+    basis := [<ZeroMatrix(K, a, a), ZeroMatrix(K, b, b), ZeroMatrix(K, c, c)>];
+  end if;
   return __ReduceByFuse(basis, RepeatPartition(TensorCategory(t)), \
     Reverse([0..2]));
 end function;
