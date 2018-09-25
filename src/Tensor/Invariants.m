@@ -972,7 +972,7 @@ intrinsic AdjointAlgebra( t::TenSpcElt ) -> AlgMat
   S := SystemOfForms(t);
   A := AdjointAlgebra(S);
   A`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [1, 2], Fused := false >;
+    Tensor := t, Indices := [1], Fused := false >;
   t`Bimap`Adjoint := A;
   return A;
 end intrinsic;

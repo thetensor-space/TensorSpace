@@ -11,24 +11,35 @@
 
 import "TensorSpc.m" : __GetTensorSpace;
 import "../GlobalVars.m" : __SANITY_CHECK;
+import "../Util/Util.m" : __GetInduction;
 
-// Given operators O and dims a,b,c compute the tensors t (flat arrays) such that O is a subset of Der(t).
-__GetDensorTensors := function( O, a, b, c )
-  /* Assumption: 
+// Given a Lie subalgebra of operators Delta_Lie and dims [a,b,c], compute the tensors t (flat arrays) such that Delta_Lie is a subset of Der(t).
+__GetDensorTensors := function( Delta_Lie, dims )
+  /* Assumption:
+   *   dims = [a, b, c]
    *   T : K^a x K^b >-> K^c
-   *   #O = d
+   *   #Ngens(Delta_Lie) = d
    * Solves abc linear equations with abcd variables. 
    */
 
-  K := BaseRing(O[1]);
-  d := #O;
-  dims := [a,b,c];
+  Delta := [D : D in Generators(Delta_Lie)];
+  K := BaseRing(Delta_Lie);
+  d := #Delta;
+  a := dims[1];
+  b := dims[2];
+  c := dims[3];
+
+  // Temporary fix. I think the better fix is to simplify the computation below if there is a nontrivial repeat partition.
+  // For now, we just increase the size of Delta.
+  if #Delta_Lie`DerivedFrom`Tensor`Cat`Repeats lt 3 then
+    Delta_projs := [Induce(Delta_Lie, a) : a in Reverse([0..2])];
+    Delta := [DiagonalJoin(<X @ Delta_projs[i] : i in [1..3]>) : X in Delta];
+  end if;
 
   vprint eMAGma, 1 : "Setting linear system: " cat IntegerToString(a*b*c) cat " by " cat IntegerToString(a*b*c*d);
 
   offset := [1,a+1,a+b+1];
-  blocks := [* [ ExtractBlock(X,offset[i],offset[i],dims[i],dims[i]) : X in O ] : i in [1..3] *];
-  //blocks[2] := [ Transpose(X) : X in blocks[2] ];
+  blocks := [* [ ExtractBlock(X,offset[i],offset[i],dims[i],dims[i]) : X in Delta ] : i in [1..3] *];
   Z := ZeroMatrix(K, a*b*c, a*b*c*d);
   Y := ZeroMatrix(K, a*b*c*d, a*b*c);
   X := ZeroMatrix(K, a*b*c*d, a*b*c);
@@ -93,16 +104,37 @@ end function;
 intrinsic DerivationClosure( T::TenSpc, Delta::[Mtrx] ) -> TenSpc
 {Returns the derivation closure of the tensor space with the given operators Delta.}
   require T`Valence eq 3 : "Tensor space must have valence 3.";
-  dims := [ Dimension(X) : X in T`Frame ];
-  require Nrows(Delta[1]) eq &+dims and Ncols(Delta[1]) eq &+dims : "Incompatible operators.";
   require BaseRing(T) eq BaseRing(Delta[1]) : "Base rings are incompatible.";
-  N := __GetDensorTensors(Delta, dims[1], dims[2], dims[3]);
-  S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
+
+  // remove redundant dims if coords are fused.
+  ess_dims := [ Dimension(X) : X in T`Frame ];
+  for P in [P : P in T`Cat`Repeats | #P gt 1] do
+    m := Maximum(P);
+    for p in P diff {m} do
+      ess_dims[T`Valence - p] := 0;
+    end for;
+  end for;
+  ess_dims := [d : d in ess_dims | d ne 0];
+  dims := [ Dimension(X) : X in T`Frame ];
+
+  matched_fused := Nrows(Delta[1]) eq &+ess_dims and Ncols(Delta[1]) eq &+ess_dims;
+  matched_not_fused := Nrows(Delta[1]) eq &+dims and Ncols(Delta[1]) eq &+dims;
+
+  require matched_fused or matched_not_fused : "Incompatible operators.";
+
+  // Package the Delta into a Lie algebra 
+  Delta_Lie := sub< MatrixLieAlgebra(BaseRing(T), Nrows(Delta[1])) | Delta >;
+  DerivedFrom(~Delta_Lie, T!0, [0..2] : Fused := matched_fused); // Really just need the tensor category info
+
+  N := __GetDensorTensors(Delta_Lie, dims);
+  S := __GetTensorSpace(T`Ring, T`Frame, T`Cat);
   S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
+
   if __SANITY_CHECK and Dimension(S) gt 0 then
     printf "Running sanity check (DerivationClosure)\n";
     assert forall{ i : i in [1..10] | Delta subset DerivationAlgebra(Random(S)) };
   end if;
+
   return S;
 end intrinsic;
 
@@ -145,17 +177,26 @@ intrinsic NucleusClosure( T::TenSpc, Delta::[Mtrx], a::RngIntElt, b::RngIntElt )
   require T`Valence eq 3 : "Tensor space must have valence 3.";
   K := BaseRing(T);
   require K eq BaseRing(Delta[1]) : "Base rings are incompatible.";
+
   dims := [ Dimension(X) : X in T`Frame ];
   a := 3-a;
   b := 3-b;
   c := Random({1,2,3} diff {a,b}); // only one elt...
   require (&+(dims[[a,b]]) eq Nrows(Delta[1])) and (Nrows(Delta[1]) eq Ncols(Delta[1])) : "Incompatible operators.";
+
   blocks := [* [ ExtractBlock( X, 1, 1, dims[a], dims[a] ) : X in Delta ], [ ExtractBlock( -Transpose(X), dims[a]+1, dims[a]+1, dims[b], dims[b] ) : X in Delta ], [ ZeroMatrix(K,dims[c],dims[c]) : i in [1..#Delta] ] *];
   perm := [1,2,3];
   temp := [a,b,c];
   ParallelSort(~temp,~perm);
-  M := [ DiagonalJoin( < blocks[perm[i]][j] : i in [1..3] > ) : j in [1..#Delta] ];
-  N := __GetDensorTensors(M,dims[1],dims[2],dims[3]);
+  M := [DiagonalJoin( < blocks[perm[i]][j] : i in [1..3] > ) : j in [1..#Delta]];
+  Delta_Lie := sub<MatrixLieAlgebra(K, &+dims) | M>;
+  DerivedFrom(~Delta_Lie, T!0, [0..2] : Fused := false); // important not to fuse! 
+  pi2 := Induce(Delta_Lie, 2);
+  pi1 := Induce(Delta_Lie, 1);
+  V := Domain(T!0)[1];
+  t := Random(T);
+
+  N := __GetDensorTensors(Delta_Lie, dims);
   S := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
   S`Mod := sub< T`Mod | [ T`Mod!N[i] : i in [1..Nrows(N)] ] >;
   if __SANITY_CHECK and Dimension(S) gt 0 then

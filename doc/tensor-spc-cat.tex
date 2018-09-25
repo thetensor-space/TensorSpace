@@ -398,6 +398,8 @@ DerivationClosure(T, Delta) : TenSpc, [AlgMatLie] -> TenSpc
 \end{intrinsics}
 
 Returns the derivation closure of the given tensor space $T$, with frame $U_2\times U_1\rightarrowtail U_0$, with operators $\Delta\subseteq \text{End}(U_2)\times \text{End}(U_1)\times \text{End}(U_0)$.
+If a nontrivial subset of coordinates are fused, then \texttt{DerivationClosure} accepts $\Delta$ input from the smaller ambient space. 
+For example, if coordinates $2$ and $1$ are fused, then the input for $\Delta$ can be in either $\text{End}(U_2)\times\text{End}(U_1)\times\text{End}(U_0)$ or $\text{End}(U_2)\times\text{End}(U_0)$.
 Currently, this only works for tensor spaces of valence 3.
 This is the subspace whose tensors' derivation algebra contains $\Delta$.
 
