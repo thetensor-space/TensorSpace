@@ -14,97 +14,108 @@ import "TensorData.m" : __GetForms;
   programmed at a low level.
 */
 
-
 /*
-  Input are three matrices where the input denotes 
-    [ A  B ]
-    [ I  C ].
-  We will add the rows of C to B via the rows of A. The output is a matrix D
-    [ 0  D ]
-    [ I  C ].
-  We assume the dimensions are correct. 
-*/
-__BackSolverOLD := function(A, B, C)
-  A_rows := [A[i] : i in [1..Nrows(A)]];
-  B_rows := [B[i] : i in [1..Nrows(B)]];
-  C_rows := [C[i] : i in [1..Nrows(C)]];
-  for i in [1..Nrows(A)] do
-    r := A_rows[i]; 
-    B_rows[i] +:= &+[r[j]*C_rows[j] : j in [1..Degree(r)]];
-  end for;
-  return Matrix(B_rows);
-end function;
+  Given: seq - the structure constants of a tensor. Type: [FldElt]
+         dims - the dimensions of the frame, starting at U_vav and ending at 
+            U_0. Type: [RngIntElt]
 
+  Return: basis - a basis for the {1, 0}-nucleus of a tensor. Type: [Tup];
+            here Tup is a pair of matrices in End(U_1) x End(U_0).
 
-/*
-  Input are two matrices where the input denotes 
-    [ A ]
-    [ B ],
-  where B is in RREF.  Return the matrix C such that 
-    [ C ] 
-    [ B ]
-  is in RREF modulo row permutations.
+  Complexity: O(PI^2 * d0^2 / d1), where di = dim(U_i) and 
+      PI = d0 * d1 * ... * dvav.
 */
-__BackSolver := function(A, B)
-  A_rows := [A[i] : i in [1..Nrows(A)]];
-  B_rows := [B[i] : i in [1..Nrows(B)]];
-  for r in B_rows do
-    if exists(j){j : j in [1..Degree(r)] | r[j] ne 0} then
-      for i in [1..#A_rows] do
-        A_rows[i] +:= -(A_rows[i][j]) * r;
+Nuc10 := function(seq, dims) 
+  // Initial setup.
+  d := &*(dims);
+  d1 := dims[#dims-1];
+  d0 := dims[#dims];
+  c := d div (d1 * d0);
+  K := BaseRing(t);
+  Id0 := IdentityMatrix(K, d0);
+  ZC := ZeroMatrix(K, c * d0, 1);
+
+  // Constructing the matrices M^(I).
+  Mats := __GetForms(seq, dims, 1, 0);
+  assert #Mats eq c;
+  assert Nrows(Mats[1]) eq d1;
+  assert Ncols(Mats[1]) eq d0;
+  // The matrix in the first pillar in each stripe, before a Kronecker product.
+  FPillars_part := [Matrix(K, [Mats[k][i] : k in [1..c]]) : i in [1..d1]];
+  // Second pillar
+  Mats := [Transpose(X) : X in Mats];
+  SPillar := -Matrix(K, &cat[[Mats[k][i] : k in [1..c]] : i in [1..d0]]);
+  delete Mats;
+
+  // Step 1: Get second pillar in RREF.
+  E_SPillar, T_SPillar := EchelonForm(SPillar);
+  r := Rank(E_SPillar);
+  z := Nrows(E_SPillar) - r;
+  delete SPillar;
+
+  // Columns in the first pillar containing pivots.
+  pivots := [0 : i in [1..d0^2]];
+  // First pillar
+  FPillars := [];
+  // Now we run through each of the stripes of the first pillar.
+  for i in [1..d1] do
+    // Step 2a: Propagate T_SPillar to each stripe.
+    FPillar_i := KroneckerProduct(Id0, FPillars_part[1]);
+    FPillar_i := T_SPillar*FPillar_i;
+    FPillars_part := FPillars_part[2..#FPillars_part];
+
+    // Step 2b: Forward solve.
+    for j in [k : k in [1..d0^2] | pivots[k] ne 0] do
+      // Replace the columns below a pivot with the 0 column.
+      InsertBlock(~FPillar_i, ZC, 1, j);
+    end for;
+
+    // Step 3: Get the lower part of the ith first pillar in RREF.
+    FPillar_i_lower := ExtractBlock(FPillar_i, r+1, 1, z, Ncols(FPillar_i));
+    E_FP_i_l := EchelonForm(FPillar_i_lower); // Main bottleneck
+    // Store the first pillar for the ith stripe after RREF.
+    Append(~FPillars, InsertBlock(FPillar_i, E_FP_i_l, r+1, 1));
+
+    // Step 4a: Find the columns in the first pillar containing pivots. 
+    new := []; // New pivots found for this i.
+    for j in [1..Nrows(E_FP_i_l)] do
+      if exists(k){k : k in [1..Degree(E_FP_i_l[j])] | 
+        Eltseq(E_FP_i_l[j])[k] ne K!0} then
+        pivots[k] := 1; // Turn on 
+        Append(~new, k);
+      end if;
+    end for;
+
+    // Step 4b: Back solve.
+    for j in [1..i-1] do
+      M := FPillars[j];
+      for k in new do 
+        // Replace the columns above a pivot with the 0 column.
+        InsertBlock(~M, ZC, 1, k);
       end for;
-    end if;
-  end for;
-  return A;
-end function;
-
-
-// Solve XA - AY^t = 0.
-AdjointSolver := function(t)
-  s := Eltseq(t);
-  spaces := Frame(t);
-  dims := [Dimension(X) : X in spaces];
-  rightBlocks := __GetForms(s, dims, 1, 0 : op := true);
-  assert #rightBlocks eq dims[1];
-  leftBlocks := __GetForms(s, dims, 2, 0 : op := true);
-  assert #leftBlocks eq dims[2];
-
-  /*
-    Outline of the algorithm:
-      Step 1. Get the right blocks into RREF
-      Step 2. Propagate the transformations to the left blocks. 
-      Step 3. Get the bottom blocks in the left blocks into RREF.
-      Step 4. Back solve.
-      Step 5. Extract data.
-  */
-
-  // Step 1.
-  rrefRight := [];
-  transforms := [];
-  for i in [1..dims[1]] do
-    E, T := EchelonForm(rightBlocks[i]);
-    Append(~rrefRight, E);
-    Append(~transforms, -T);
+      FPillars[j] := M;
+    end for;
   end for;
 
-  // Step 2.
-  transformBlocks := [[transforms[i] * leftBlocks[j] : j in [1..dims[2]]] : 
-    i in [1..dims[1]]];
-
-  // Step 3.
-  ranksRight := [Rank(E) : E in rrefRight];
-  bottomLeft := [*[*ExtractBlock(X, ranksRight[i]+1, 1, dims[3]-ranksRight[i], 
-    dims[1]) : X in transformBlocks[i]*] : i in [1..dims[1]]*];
-  topLeft := [*[*ExtractBlock(X, 1, 1, ranksRight[i], dims[1]) : 
-    X in transformBlocks[i]*] : i in [1..dims[1]]*];
-  rrefBottomLeft := [*[*EchelonForm(bottomLeft[i][j]) : j in [1..dims[2]]*] : 
-    i in [1..dims[1]]*];
-
-  // Step 4. 
-  rrefTopLeft := [*[*__BackSolver(topLeft[i][j], rrefBottomLeft[i][j]) : 
-    j in [1..dims[2]]*] : i in [1..dims[1]]*];
-
-  // Step 5. 
-
+  // Step 5: Construct a basis.
   return 0;
 end function;
+
+
+
+
+
+
+
+
+
+
+
+
+
+intrinsic NEW( t::TenSpcElt ) -> RngIntElt
+{A better solver?}
+  seq := Eltseq(t);
+  dims := [Dimension(X) : X in Frame(t)];
+  return Nuc10(seq, dims);
+end intrinsic;

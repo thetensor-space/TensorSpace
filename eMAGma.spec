@@ -13,6 +13,7 @@
   	{
     	BimapDef.m
     	Invariants.m
+      LinearSolver.m
     	Tensor.m
     	TensorBasic.m
       TensorCategorical.m
