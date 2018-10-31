@@ -31,20 +31,19 @@ Nuc10 := function(seq, dims)
   d1 := dims[#dims-1];
   d0 := dims[#dims];
   c := d div (d1 * d0);
-  K := BaseRing(t);
+  K := Parent(seq[1]);
   Id0 := IdentityMatrix(K, d0);
   ZC := ZeroMatrix(K, c * d0, 1);
 
   // Constructing the matrices M^(I).
   Mats := __GetForms(seq, dims, 1, 0);
-  assert #Mats eq c;
-  assert Nrows(Mats[1]) eq d1;
-  assert Ncols(Mats[1]) eq d0;
   // The matrix in the first pillar in each stripe, before a Kronecker product.
-  FPillars_part := [Matrix(K, [Mats[k][i] : k in [1..c]]) : i in [1..d1]];
+  FPillars_part := [Matrix(K, [Eltseq(Mats[k][i]) : 
+    k in [1..c]]) : i in [1..d1]];
   // Second pillar
   Mats := [Transpose(X) : X in Mats];
-  SPillar := -Matrix(K, &cat[[Mats[k][i] : k in [1..c]] : i in [1..d0]]);
+  SPillar := -Matrix(K, &cat[[Eltseq(Mats[k][i]) : 
+    k in [1..c]] : i in [1..d0]]);
   delete Mats;
 
   // Step 1: Get second pillar in RREF.
@@ -54,7 +53,7 @@ Nuc10 := function(seq, dims)
   delete SPillar;
 
   // Columns in the first pillar containing pivots.
-  pivots := [0 : i in [1..d0^2]];
+  pivots := [];
   // First pillar
   FPillars := [];
   // Now we run through each of the stripes of the first pillar.
@@ -65,7 +64,7 @@ Nuc10 := function(seq, dims)
     FPillars_part := FPillars_part[2..#FPillars_part];
 
     // Step 2b: Forward solve.
-    for j in [k : k in [1..d0^2] | pivots[k] ne 0] do
+    for j in pivots do
       // Replace the columns below a pivot with the 0 column.
       InsertBlock(~FPillar_i, ZC, 1, j);
     end for;
@@ -78,13 +77,16 @@ Nuc10 := function(seq, dims)
 
     // Step 4a: Find the columns in the first pillar containing pivots. 
     new := []; // New pivots found for this i.
-    for j in [1..Nrows(E_FP_i_l)] do
-      if exists(k){k : k in [1..Degree(E_FP_i_l[j])] | 
-        Eltseq(E_FP_i_l[j])[k] ne K!0} then
-        pivots[k] := 1; // Turn on 
-        Append(~new, k);
+    r_i := Rank(E_FP_i_l);
+    j := 1;
+    // Search for pivots 
+    while #new lt r_i do
+      if E_FP_i_l[#new + 1][j] ne 0 then
+        Append(~new, j);
       end if;
-    end for;
+      pivots cat:= new;
+      j +:= 1;
+    end while;
 
     // Step 4b: Back solve.
     for j in [1..i-1] do
@@ -113,7 +115,7 @@ end function;
 
 
 
-intrinsic NEW( t::TenSpcElt ) -> RngIntElt
+intrinsic NEWNUKE( t::TenSpcElt ) -> RngIntElt
 {A better solver?}
   seq := Eltseq(t);
   dims := [Dimension(X) : X in Frame(t)];

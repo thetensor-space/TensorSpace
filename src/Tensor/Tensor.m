@@ -44,7 +44,7 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   t`Codomain := C;
   t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
   t`Nuclei := [* [* S : S in Subsets( {0..t`Valence-1},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence-1},2 )] *] *];
-  t`Centroids := [* [* S : S in Subsets( {1..t`Valence-1},i ), i in Reverse([2..t`Valence-1]) *] *];
+  t`Centroids := [* [* S : S in Subsets({0..t`Valence-1}, i), i in Reverse([3..t`Valence]) *] *];
   Append(~t`Centroids, [* 0 : i in [1..#t`Centroids[1]] *]);
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
   t`Reflexive := rec< rf | >;

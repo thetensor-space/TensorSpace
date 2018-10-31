@@ -20,9 +20,9 @@ declare attributes TenCat : Arrows, Contra, Repeats, Symmetries, Valence;
   Description of attributes:
     Arrows . . . . . . . . The function from Repeats to {-1,0,1} detailing which spaces are dualized.
     Contra . . . . . . . . True/false whether the category is contravariant.
-    Repeats. . . . . . . . A partition of {0..v}.
-    Symmetries . . . . . . The subgroup of Sym({0..v}) which act on the coordinates as symmetries.
-    Valence. . . . . . . . The valence v.
+    Repeats. . . . . . . . A partition of {0..vav}.
+    Symmetries . . . . . . The subgroup of Sym({0..vav}) which act on the coordinates as symmetries.
+    Valence. . . . . . . . The valence vav + 1.
 */
 
 // ------------------------------------------------------------------------------
@@ -52,8 +52,8 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Sym
   Tensors will be thought of as multimaps internally but will be allowed flexibility for the user.
 
   Description of attributes:
-    Bimap. . . . . . . . . The record of bimap info. Only defined when the valence is 2.
-    Centroids. . . . . . . The list of centroids sorted by subsets of {1..v} of order at least 2.
+    Bimap. . . . . . . . . The record of bimap info. Only defined when the valence is 3.
+    Centroids. . . . . . . The list of centroids sorted by subsets of {0..vav} of order at least 3.
     Cat . . . . . . . . .  The tensor category.
     Codomain . . . . . . . The codomain of the tensor.
     Coerce . . . . . . . . If the multimap is created from some algebraic object, this will contain maps to the modules.
@@ -66,9 +66,9 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Sym
     Image. . . . . . . . . The image of the tensor.
     Map. . . . . . . . . . The map from the domain into the codomain.
     Nondegenerate. . . . . A tuple containing the nondegenerate multimap and a homotopism to get there.
-    Nuclei . . . . . . . . A list of spaces sorted by the subsets of {0..v} of order 2.
+    Nuclei . . . . . . . . A list of spaces sorted by the subsets of {0..vav} of order 2.
     Parent . . . . . . . . A tensor space which contains the tensor.
-    Permutation. . . . . . Used for shuffling tensors. Allows for on-the-fly computations; defaults is Sym({1..v+1})!1.
+    Permutation. . . . . . Used for shuffling tensors. Allows for on-the-fly computations; defaults is Sym({1..vav})!1.
     Radicals . . . . . . . A list of the radicals for each Cartesian factor in the domain and the coradical.
     Reflexive. . . . . . . A record which states if the tensor is reflexive.
     SymImage . . . . . . . The indexed set of tuples <sigma, H> such that sigma is a generator of Symmetries and H in Hom(t, t^sigma). 
