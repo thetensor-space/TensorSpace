@@ -12,7 +12,7 @@
 
 
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
-import "TensorData.m" : __GetForms;
+import "TensorData.m" : __GetForms, __GetSlice;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../GlobalVars.m" : __SANITY_CHECK, __FRAME;
 import "../Types.m" : __RF_DERIVED_FROM;
@@ -51,9 +51,57 @@ __ReduceByFuse := function(basis, partition, coords)
 end function;
 
 
+/*
+  Given: K (Fld), dims ([RngIntElt]), repeats ({SetEnum}), A ({RngIntElt}).
+  Returns: A matrix with I and -I strategically placed so that the corresponding
+    linear system will equate the operators supported on repeats, relative to A.
+
+    This matrix should be vertically joined to ensure that coordinates that are
+  fused are equal. 
+*/  
+__FusionBlock := function(K, dims, repeats, A)
+  // Setup.
+  v := #dims;
+  S := &+[dims[v-a]^2 : a in A];
+  R := {X meet A : X in repeats | #(X meet A) gt 1};
+  n := &+([(#r-1)*dims[v - Minimum(r)]^2 : r in R] cat [0]);
+  
+  M := ZeroMatrix(K, n, S);
+  // If no repeats relative to A, we are done. 
+  // Returns a (0 x S)-matrix to prevent issues with VerticalJoin.
+  if n eq 0 then return M; end if;
+  
+  // Run through the repeats.
+  row := 1;
+  for r in R do
+    // We fix a for this particular r, and compare everything to this.
+    a := Minimum(r);
+    B := r diff {a};
+    I := IdentityMatrix(K, dims[v-a]^2);
+    rcol := S - &+[dims[v-a+i]^2 : i in [0..a] | a-i in A] + 1;
+    // Run though the set r - a.
+    while #B gt 0 do
+      b := Minimum(B);
+      B diff:= {b};
+      lcol := S - &+[dims[v-b+i]^2 : i in [0..b] | b-i in A] + 1;
+
+      // Place the blocks.      
+      InsertBlock(~M, I, row, lcol);
+      InsertBlock(~M, -I, row, rcol);
+
+      row +:= dims[v-a]^2;
+    end while;
+  end for;
+
+  return M;
+end function;
+
 /* 
   Given: t (TenSpcElt), A ({RngIntElt} a subset of [vav])
   Return: [Tup] (Tup are contained in Prod_a End(U_a))
+
+  These are the operators that satisfy 
+      \bigcap_{b \in A - \{a\}} (x_a - x_b).
 
   + Note that if |A| = 2, then this is actually a nucleus computation. 
 
@@ -64,7 +112,7 @@ end function;
     squares of the dimensions supported by A, then this algorithm constructs a 
     basis for the kernel of a K-matrix with (|A|-1)*D rows and S columns.
 */
-__A_Centroid := function(seq, dims, A)
+__A_Centroid := function(seq, dims, A : repeats := {})
   // Initial setup.
   a := Minimum(A);
   B := A diff {a};
@@ -109,11 +157,17 @@ __A_Centroid := function(seq, dims, A)
     col +:= d_b^2;
   end while;
 
-  // Solve the linear equations
+  // Check repeats.
+  if #repeats ne 0 then
+    R := __FusionBlock(K, dims, repeats, A);
+    M := VerticalJoin(R, M);
+  end if;
+
+  // Solve the linear equations.
   N := NullspaceOfTranspose(M);
   delete M;
 
-  // Interpret the nullspace as matrices
+  // Interpret the nullspace as matrices.
   basis := [];
   for b in Basis(N) do
     T := <>;
@@ -131,6 +185,108 @@ __A_Centroid := function(seq, dims, A)
   if 0 in A then
     for i in [1..#basis] do
       basis[i][#basis[i]] := Transpose(basis[i][#basis[i]]);
+    end for;
+  end if;
+
+  return basis;
+end function;
+
+/*
+  This is essentially Transpose(Foliation(t, a)), but it splits up the matrix 
+  into k equal pieces.
+*/
+__Coordinate_Spread := function(seq, dims, a, k)
+  v := #dims;
+  d_a := dims[v-a];
+  dims_a := dims;
+  dims_a[v-a] := 1;
+  CP := CartesianProduct(< [1..d] : d in dims_a >);
+  rows := [];
+  for c in CP do
+    grid := [{x} : x in c];
+    grid[v-a] := {1..d_a};
+    Append(~rows, __GetSlice(seq, dims, grid));
+  end for;
+  d := &*(dims_a) div k;
+  Mats := [Matrix(rows[(i-1)*d+1..i*d]) : i in [1..k]];
+  return Mats;
+end function;
+
+
+/* 
+  Given: t (TenSpcElt), A ({RngIntElt} a subset of [vav])
+  Return: [Tup] (Tup are contained in Prod_a End(U_a))
+
+  These are the operators that satisfy
+      (\sum_{a \in A} x_a)            if 0 not in A,
+      (\sum_{a \in A-0} x_a - x_0)    if 0 in A.
+
+  + We leave it to the function calling this to organize and find appropriate 
+    representations.
+
+  Complexity: If D is the product of dimensions in dims, and S is the sum of 
+    squares of the dimensions supported by A, then this algorithm constructs a 
+    basis for the kernel of a K-matrix with D rows and S columns.
+*/
+
+__A_Derivations := function(seq, dims, A, repeats)
+  // Initial setup.
+  d := &*(dims);
+  K := Parent(seq[1]);
+  v := #dims;
+  s := &+[dims[v-x]^2 : x in A];
+  M := ZeroMatrix(K, d, s);
+
+  // Construct the appropriate matrix.
+  // We work from right to left.
+  B := A;
+  col := s+1;
+  depth := d;
+  while #B gt 0 do
+    row := 1;
+    a := Minimum(B);
+    B diff:= {a};
+    d_a := dims[v-a];
+    col -:= d_a^2;
+    depth div:= d_a;
+
+    // A chopped up foliation.
+    Mats := __Coordinate_Spread(seq, dims, a, depth);
+
+    // Add the matrices to our big matrix.
+    I := IdentityMatrix(K, d_a);
+    r := d_a * Nrows(Mats[1]);
+    for X in Mats do
+      InsertBlock(~M, KroneckerProduct(I, X), row, col);
+      row +:= r;
+    end for;
+
+  end while;
+
+  // Get the repeats block.
+  M := VerticalJoin(__FusionBlock(K, dims, repeats, A), M);
+  
+  // Solve the linear system.
+  N := NullspaceOfTranspose(M);
+
+  // Interpret the nullspace as matrices
+  basis := [];
+  for b in Basis(N) do
+    T := <>;
+    vec := Eltseq(b);
+    for a in Reverse(Sort([a : a in A])) do
+      MA := MatrixAlgebra(K, dims[v-a]);
+      Append(~T, MA!vec[1..dims[v-a]^2]);
+      vec := vec[dims[v-a]^2+1..#vec];
+    end for;
+    Append(~basis, T);
+  end for;
+
+  // We want to return everything to End(U_i) (in particular, no op).
+  // If 0 is in A, then we need to negate and transpose the matrices.
+  if 0 in A then
+    for i in [1..#basis] do
+      basis[i][#basis[i]] := -Transpose(basis[i][#basis[i]]);
     end for;
   end if;
 
@@ -397,7 +553,8 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
     error "Cannot compute structure constants.";
   end try;
 
-  basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], A);
+  basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], A : 
+    repeats := t`Cat`Repeats);
   
   // Take the block-basis and construct the corresponding matrix algebra.
   basis := [DiagonalJoin(T) : T in basis];
@@ -435,9 +592,70 @@ end intrinsic;
 
 intrinsic DerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
 {Returns the derivation algebra of the tensor t.}
+  return DerivationAlgebra(t, {0..Valence(t)-1});
+end intrinsic;
+
+intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
+{Returns the A-derivation algebra of the tensor t.}
+  // Make sure A makes sense.
+  require A subset {0..Valence(t)-1} : "Unknown coordinates.";
+  require #A gt 1 : "Set must contain at least two coordinates.";
+
+  // Make sure we can obtain the structure constants. 
+  try
+    _ := Eltseq(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+
+  // Deal with the #A = 2 case.
+  if #A eq 2 then
+    // See if the corresponding nucleus has been computed.
+    ind := Index(t`Nuclei[1], A);
+    if Type(t`Nuclei[2][ind]) ne RngIntElt then
+      N := t`Nuclei[2][ind];
+    else
+      N := Nucleus(t, Maximum(A), Minimum(A));
+    end if;
+    // If 0 is in A, then op and negate it. Effectively turning x_a - x_b to the
+    // correct derivation polynomial.
+    if 0 notin A then
+      pi_a := Induce(N, Maximum(A));
+      pi_b := Induce(N, Maximum(A));
+      N := sub< Generic(N) | [DiagonalJoin(X @ pi_a, -Transpose(X @ pi_b)) : 
+        X in Basis(N)] >;
+    end if;
+    return sub< MatrixLieAlgebra(BaseRing(N), Degree(N)) | Basis(N) >;
+  end if;
+
   // Check if the derivations have been computed before.
-  if assigned t`Derivations then
-    return t`Derivations;
+  ind := Index(t`Derivations[1], A);
+  if Type(t`Derivations[2][ind]) ne RngIntElt then
+    return t`Derivations[2][ind];
+  end if; 
+
+  // Get the derivations
+  basis := __A_Derivations(Eltseq(t), [Dimension(X) : X in Frame(t)], A,
+    t`Cat`Repeats);
+
+  // Take the block-basis and construct the corresponding matrix Lie algebra.
+  basis := [DiagonalJoin(T) : T in basis];
+  MLA := MatrixLieAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
+  D := sub< MLA | basis >;
+  D := __GetSmallerRandomGenerators(D);
+  D`DerivedFrom := rec< __RF_DERIVED_FROM | 
+    Tensor := t, Indices := [Valence(t)-a : a in A], Fused := true >;
+
+  // Save and return.
+  t`Derivations[2][ind] := D;
+  return D;
+end intrinsic;
+
+intrinsic OLDDerivationAlgebra( t::TenSpcElt ) -> AlgMatLie
+{Returns the derivation algebra of the tensor t.}
+  // Check if the derivations have been computed before.
+  if Type(t`Derivations[2][1]) ne RngIntElt then
+    return t`Derivations[2][1];
   end if;
 
   // Make sure we can obtain the structure constants. 
@@ -531,6 +749,49 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
   min := Minimum([a, b]);
   Nuke`DerivedFrom := rec< __RF_DERIVED_FROM | 
     Tensor := t, Indices := [v - max, v - min], Fused := false >;
+
+  // Save and return.
+  t`Nuclei[2][ind] := Nuke;
+  return Nuke;
+end intrinsic;
+
+intrinsic SelfAdjointAlgebra( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) 
+  -> ModMatFld
+{Returns the vector space of ab-self-adjoint operators for the tensor t.}
+  // Make sure {a,b} make sense.
+  require a ne b : "Integers must be distinct.";
+  v := Valence(t);
+  require {a,b} subset {0..v-1} : \
+    "Integers must correspond to Cartesian factors.";
+  if t`Cat`Contra then
+    require 0 notin {a,b} : "Integers must be positive for cotensors.";
+  end if;
+
+  // Make sure we can obtain the structure constants. 
+  try 
+    _ := Eltseq(t);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+
+  T := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], {a, b} : 
+    repeats := {{a, b}});
+
+  // Get the right representation.
+  if 0 notin {a, b} then
+    for i in [1..#T] do
+      T[i][2] := Transpose(T[i][2]);
+    end for;
+  end if;
+
+  // Put everything together.
+  basis := [DiagonalJoin(t[1], t[2]) : t in T];
+  MS := RMatrixSpace(BaseRing(basis[1]), Nrows(basis[1]), Nrows(basis[1]));
+  Nuke := sub< MS | basis >;
+  max := Maximum([a, b]);
+  min := Minimum([a, b]);
+  Nuke`DerivedFrom := rec< __RF_DERIVED_FROM | 
+    Tensor := t, Indices := [v - max, v - min], Fused := true >;
 
   return Nuke;
 end intrinsic;

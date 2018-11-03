@@ -43,6 +43,8 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   end if;
   t`Codomain := C;
   t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
+  t`Derivations := [* [* S : S in Subsets({0..t`Valence-1}, i), i in Reverse([3..t`Valence]) *] *];
+  Append(~t`Derivations, [* 0 : i in [1..#t`Derivations[1]] *]);
   t`Nuclei := [* [* S : S in Subsets( {0..t`Valence-1},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence-1},2 )] *] *];
   t`Centroids := [* [* S : S in Subsets({0..t`Valence-1}, i), i in Reverse([3..t`Valence]) *] *];
   Append(~t`Centroids, [* 0 : i in [1..#t`Centroids[1]] *]);

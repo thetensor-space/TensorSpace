@@ -59,7 +59,7 @@ Image, Map, Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, Sym
     Coerce . . . . . . . . If the multimap is created from some algebraic object, this will contain maps to the modules.
     CoordImages. . . . . . The sequence of images of the coordinates.
     Densor . . . . . . . . The universal densor subspace of the tensor. 
-    Derivations. . . . . . The associated Lie algebra of derivations.
+    Derivations. . . . . . The list of derivations sorted by subsets of {0..vav} of order at least 3.
     Domain . . . . . . . . A list of the modules in the domain.
     Element. . . . . . . . The corresponding element in the tensor space.
     FullyNondeg. . . . . . The fully nondegenerate tensor.
@@ -136,6 +136,7 @@ __RF_BIMAP := recformat< Adjoint : AlgMat, Aut : GrpMat, Isom : GrpMat, PIsom : 
 declare attributes GrpMat : DerivedFrom;
 declare attributes AlgMat : DerivedFrom;
 declare attributes AlgMatLie : DerivedFrom;
+declare attributes ModMatFld : DerivedFrom;
 declare attributes AlgGen : Star; 
 
 /*
