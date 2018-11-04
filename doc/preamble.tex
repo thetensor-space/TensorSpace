@@ -34,6 +34,24 @@
 
 %\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
+% Create chapter autors
+\newcommand\chapterauthor[2]{\authortoc{#1}{#2}\printchapterauthor{#1}{#2}}
+\makeatletter
+\newcommand{\printchapterauthor}[2]{%
+  {\parindent0pt\vspace*{-25pt}%
+  \linespread{1.1}\large\scshape#1 \\ \footnotesize#2%
+  \par\nobreak\vspace*{35pt}}
+  \@afterheading%
+}
+\newcommand{\authortoc}[2]{%
+  \addtocontents{toc}{\vskip-10pt}%
+  \addtocontents{toc}{%
+    \protect\contentsline{chapter}%
+    {\hskip1em\mdseries\scshape\protect\scriptsize#1\quad \tiny#2}{}{}}
+  \addtocontents{toc}{\vskip5pt}%
+}
+\makeatother
+
 
 %-----------------------------------------------------
 %       Standard theoremlike environments.

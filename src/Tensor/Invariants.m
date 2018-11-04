@@ -562,7 +562,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   C := sub< MA | basis >;
   C := __GetSmallerRandomGenerators(C);
   C`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [Valence(t) - a : a in A], Fused := false >; // COME BACK AND INCLUDE FUSE
+    Tensor := t, Indices := [Valence(t) - a : a in A], Fused := true >; 
 
   // Sanity check
   if __SANITY_CHECK then

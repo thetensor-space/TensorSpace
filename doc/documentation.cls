@@ -70,7 +70,6 @@
   }
   {}
 
-
 % NOTICE: the code that follows comes from amsbook.cls
 %
 % Latest versions of the amsbook class can be found at the AMS website:

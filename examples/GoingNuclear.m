@@ -7,7 +7,7 @@ t := Tensor([A, B, C], F);
 t;
 
 
-L := LeftNucleus(t);
+L := LeftNucleus(t : op := true);
 M := MidNucleus(t);
 R := RightNucleus(t);
 Dimension(L), Dimension(M), Dimension(R);

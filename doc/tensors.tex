@@ -1853,7 +1853,7 @@ Therefore, the possible outputs are a tensor space \texttt{TenSpc}, a tensor \te
 
 Related to this intrinsic is the following: using tensor spaces with the infix notation.
 
-\index{$*$!bilinear space (infix)}
+\index{$*$!bilinear tensor (infix)}
 \begin{intrinsics}
 x * T : Any, TenSpc -> Any
 T * y : Any, TenSpc -> Any
@@ -2562,7 +2562,7 @@ DerivedFrom(X, t, I) : Any, TenSpcElt, [RngIntElt]
 \end{intrinsics}
 
 Includes the tensor data in the matrix object $X$, where the relevant coordinates are in the sequence $I\subseteq \{0,\dots,\vav\}$.
-Currently, this only works for objects of type \texttt{AlgMat}, \texttt{AlgMatLie}, and \texttt{GrpMat}.
+Currently, this only works for objects of type \texttt{AlgMat}, \texttt{AlgMatLie}, \texttt{GrpMat}, and \texttt{ModMatFld}.
 If the tensor category has a nontrivial partition of its coordinates fused, it does not matter if every coordinate in a particular part are contained in $I$. 
 It is assumed that $X$ is block diagonal, whose blocks starting from the top left go in decreasing order in the coordinates---in the same way the coordinates of the frame decrease from left to right for a tensor. 
 
@@ -2711,9 +2711,12 @@ Mapping from: AlgMat: A to AlgMat: A given by a rule [no inverse]
 \index{LeftNucleus!bilinear} 
 \begin{intrinsics}
 LeftNucleus(t) : TenSpcElt -> AlgMat
+    op : BoolElt : false
 \end{intrinsics}
 
-Returns the left nucleus of the bilinear map $t$ as a subalgebra of $\End(U_2)^\op\times \End(U_0)^\op$.
+Returns the left nucleus of the bilinear map $t$ as a subalgebra of $\End(U_2)\times \End(U_0)$.
+In previous versions of eMAGma, the left nucleus was returned as a subalgebra of $\End(U_2)^\op\times \End(U_0)^\op$.
+To enable this, set the optional arugment \texttt{op} to \texttt{true}.
 
 \index{MidNucleus!bilinear} 
 \begin{intrinsics}
@@ -2750,7 +2753,7 @@ U0 : Full Vector space of degree 15 over Rational Field
 Because matrix multiplication is associative, the left, middle, and right nuclei contain $\mathbb{M}_3(\mathbb{Q})$, $\mathbb{M}_4(\mathbb{Q})$, and $\mathbb{M}_5(\mathbb{Q})$ respectively.
 In fact, the following computation shows that this is equality.
 \begin{code}
-> L := LeftNucleus(t);
+> L := LeftNucleus(t : op := true);
 > M := MidNucleus(t);
 > R := RightNucleus(t);
 > Dimension(L), Dimension(M), Dimension(R);
@@ -2917,9 +2920,12 @@ The following functions can be used for general tensors.
 \index{Centroid!tensor}
 \begin{intrinsics}
 Centroid(t) : TenSpcElt -> AlgMat
+Centroid(t, A) : TenSpcElt, {RngIntElt} -> AlgMat
 \end{intrinsics}
 
-Returns the centroid of the tensor as a subalgebra of $\prod_{a\in[\vav]}\End(U_a)$.
+Returns the $A$-centroid of the tensor as a subalgebra of $\prod_{a\in A}\End(U_a)$, where $A\subseteq [\vav]$.
+If no $A$ is given, it is assumed that $A=[\vav]$. 
+If $t$ is contained in a category where coordinates $a$ and $b$ (also contained in $A$) are fused together, then the corresponding operators on those coordinates will be equal. 
 
 \begin{example}[Centroid]
 
@@ -2965,9 +2971,12 @@ x^4 + 2*x^2 - 8
 \index{DerivationAlgebra!tensor}
 \begin{intrinsics}
 DerivationAlgebra(t) : TenSpcElt -> AlgMatLie
+DerivationAlgebra(t, A) : TenSpcElt, {RngIntElt} -> AlgMatLie
 \end{intrinsics}
 
-Returns the derivation Lie algebra of the tensor as a Lie subalgebra of $\prod_{a\in[\vav]}\End(U_a)$.
+Returns the $A$-derivation Lie algebra of the tensor as a Lie subalgebra of $\prod_{a\in A}\End(U_a)$, where $A\subseteq [\vav]$.
+If no $A$ is given, it is assumed that $A=[\vav]$. 
+If $t$ is contained in a category where coordinates $a$ and $b$ (also contained in $A$) are fused together, then the corresponding operators on those coordinates will be equal.
 
 \index{Nucleus}
 \begin{intrinsics}
@@ -2977,6 +2986,7 @@ Nucleus(t, a, b) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
 Returns the $\{a,b\}$-nucleus ($a\ne b$) of the tensor as a subalgebra of $\End(U_i)\times \End(U_j)$, 
 where $i=\max(a,b)$ and $j=\min(a,b)$.
 If $j>0$, then replace $\End(U_j)$ with $\End(U_j)^\op$. 
+If $t$ is contained in a category where coordinates $a$ and $b$ are fused together, then the corresponding operators on those coordinates will not be forced to be equal.
 
 \begin{example}[RestrictDerivation]
 
@@ -3003,13 +3013,13 @@ U1 : Full Vector space of degree 4 over GF(2)
 U0 : Full Vector space of degree 6 over GF(2)
 \end{code}
 
-Now we will compute the derivation algebra of \texttt{T}. 
+Now we will compute the derivation algebra of \texttt{t}. 
 We choose $a=3$ and $b=2$, so the $\{3,2\}$-nucleus is $\mathbb{M}_{4\times 4}(\mathbb{F}_2)$.
 \begin{code}
 > D := DerivationAlgebra(t);
 > Dimension(D);
 32
-> N32 := Nucleus(T, 3, 2);
+> N32 := Nucleus(t, 3, 2);
 > N32;
 Matrix Algebra of degree 20 with 16 generators over GF(2)
 \end{code}
@@ -3028,6 +3038,14 @@ Mapping from: ModMatFld: D_vs to ModMatFld: Omega_10
 KMatrixSpace of 30 by 30 matrices and dimension 16 over GF(2)
 \end{code}
 \end{example}
+
+\index{SelfAdjointAlgebra}
+\begin{intrinsics}
+SelfAdjointAlgebra(t, a, b) : TenSpcElt, RngIntElt, RngIntElt -> ModMatFld
+\end{intrinsics}
+
+Returns the self-adjoint elements of the $ab$-nucleus of $t$ as a subspace of $\End(U_a)$, with $a,b\in[\vav]$ and $a\ne b$. 
+It is not required that $t$ be in a tensor category with coordinates $a$ and $b$ fused. 
 
 \index{TensorOverCentroid}
 \begin{intrinsics}
