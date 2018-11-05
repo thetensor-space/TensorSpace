@@ -6,7 +6,7 @@
 
 /*  Global variables  */
 __VERSION := "2.0";
-__SANITY_CHECK := false;
+__SANITY_CHECK := true;
 __LIST := {ModTupFld, ModFld, ModMatFld}; // suitable types we can do most computations with.
 __FRAME := function( T ) // returns the 'domain' and the 'codomain'.
   if Type(T) eq TenSpcElt then

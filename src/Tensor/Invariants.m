@@ -413,7 +413,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   end if;
 
   // Check if the centroid has been computed before.
-  ind := Index(t`Centroids[1], A);
+  ind := Index(t`Centroids[1], A);ind;
   if Type(t`Centroids[2][ind]) ne RngIntElt then
     return t`Centroids[2][ind];
   end if;
@@ -440,21 +440,31 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   if __SANITY_CHECK then
     // Preliminaries  
     printf "Running sanity check (Centroid)\n";
-    proj := [*Induce(C, a) : a in Reverse([0..t`Valence-1])*];
+    inds := [*a : a in A*];
+    proj := [*Induce(C, a) : a in A*];
     basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+    m := Minimum(A);
 
     // A function to only change one coordinate.
-    MultByMat := function(x, B, i)
+    MultByMat := function(x, B, a)
       y := x;
-      y[i] := y[i]*B;
+      y[Valence(t) - a] := y[Valence(t) - a]*B;
       return y;
     end function;
 
-    // Checking satisfaction of (x_vav - x_0) meet ... meet (x_1 - x_0).
-    assert forall{c : c in Generators(C) | forall{x : x in basis | forall{i : \
-      i in [1..t`Valence-1] | \
-      MultByMat(x, c @ proj[i], i) @ t eq (x @ t)*(c @ proj[#proj]) \
-      }}};
+    // Checking satisfaction of (x_a - x_m), for all a in A - {m}.
+    if m eq 0 then 
+      assert forall{c : c in Generators(C) | forall{x : x in basis | forall{a : \
+        a in A diff {m} | \
+        MultByMat(x, c @ proj[Index(inds, a)], a) @ t eq (x @ t)*(c @ proj[Index(inds, m)]) \
+        }}};
+    else
+      assert forall{c : c in Generators(C) | forall{x : x in basis | forall{a : \
+        a in A diff {m} | \
+        MultByMat(x, c @ proj[Index(inds, a)], a) @ t eq \
+        MultByMat(x, c @ proj[Index(inds, m)], m) @ t
+        }}};
+    end if;
   end if;
 
   // Save and return.
@@ -518,6 +528,36 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
   D`DerivedFrom := rec< __RF_DERIVED_FROM | 
     Tensor := t, Indices := [Valence(t)-a : a in A], Fused := true >;
 
+  // Sanity check
+  if __SANITY_CHECK then
+    // Preliminaries  
+    printf "Running sanity check (DerivationAlgebra)\n";
+    inds := [*a : a in A*];
+    proj := [*Induce(D, a) : a in A*];
+    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+    m := Minimum(A);
+
+    // A function to only change one coordinate.
+    MultByMat := function(x, B, a)
+      y := x;
+      y[Valence(t) - a] := y[Valence(t) - a]*B;
+      return y;
+    end function;
+
+    // Checking satisfaction of the derivation polynomial.
+    if m eq 0 then
+      assert forall{del : del in Generators(D) | forall{x : x in basis | 
+        &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] eq
+          (x @ t)*(del @ proj[Index(inds, m)]) \
+        }};
+    else
+      assert forall{del : del in Generators(D) | forall{x : x in basis | 
+        &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] +
+          MultByMat(x, del @ proj[Index(inds, m)], m) @ t eq (t`Codomain)!0 \
+        }};
+    end if;
+  end if;
+
   // Save and return.
   t`Derivations[2][ind] := D;
   return D;
@@ -565,6 +605,32 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
   min := Minimum([a, b]);
   Nuke`DerivedFrom := rec< __RF_DERIVED_FROM | 
     Tensor := t, Indices := [v - max, v - min], Fused := false >;
+
+  // Sanity check
+  if __SANITY_CHECK then
+    // Preliminaries  
+    printf "Running sanity check (Centroid)\n";
+    proj := [*Induce(Nuke, min), Induce(Nuke, max)*];
+    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+
+    // A function to only change one coordinate.
+    MultByMat := function(x, B, a)
+      y := x;
+      y[Valence(t) - a] := y[Valence(t) - a]*B;
+      return y;
+    end function;
+
+    // Checking satisfaction of (x_a - x_m), for all a in A - {m}.
+    if min eq 0 then
+      assert forall{nu : nu in Generators(Nuke) | forall{x : x in basis | 
+        MultByMat(x, nu @ proj[2], max) @ t eq (x @ t)*(nu @ proj[1]) \
+        }};
+    else
+      assert forall{nu : nu in Generators(Nuke) | forall{x : x in basis | 
+        MultByMat(x, nu @ proj[2], max) @ t eq MultByMat(x, Transpose(nu @ proj[1]), min) @ t 
+        }};
+    end if;
+  end if;
 
   // Save and return.
   t`Nuclei[2][ind] := Nuke;
