@@ -361,7 +361,7 @@ __MakeAlgebra := function(t, A, F, ALG, B, obj);
   basis := [DiagonalJoin(T) : T in B];
   MA := ALG(BaseRing(t), Nrows(basis[1]));
   Operators := sub< MA | basis >;
-  Operators := __GetSmallerRandomGenerators(O);
+  Operators := __GetSmallerRandomGenerators(Operators);
   Operators`DerivedFrom := rec< __RF_DERIVED_FROM | Tensor := t, Coords := A, 
     Fused := F, Object := obj >; 
   return Operators, B;
@@ -478,13 +478,17 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], A : 
     repeats := t`Cat`Repeats);
 
+  // Save the algebra
+  C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis, "Centroid");
+  __SmartSave(~t, basis, C`DerivedFrom`Coords, "Centroid"); 
+
   // Sanity check
   if __SANITY_CHECK then
     // Preliminaries  
     printf "Running sanity check (Centroid)\n";
     inds := [*a : a in A*];
     proj := [*Induce(C, a) : a in A*];
-    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+    dom_basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
     m := Minimum(A);
 
     // A function to only change one coordinate.
@@ -496,12 +500,12 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
 
     // Checking satisfaction of (x_a - x_m), for all a in A - {m}.
     if m eq 0 then 
-      assert forall{c : c in Generators(C) | forall{x : x in basis | forall{a : \
+      assert forall{c : c in Generators(C) | forall{x : x in dom_basis | forall{a : \
         a in A diff {m} | \
         MultByMat(x, c @ proj[Index(inds, a)], a) @ t eq (x @ t)*(c @ proj[Index(inds, m)]) \
         }}};
     else
-      assert forall{c : c in Generators(C) | forall{x : x in basis | forall{a : \
+      assert forall{c : c in Generators(C) | forall{x : x in dom_basis | forall{a : \
         a in A diff {m} | \
         MultByMat(x, c @ proj[Index(inds, a)], a) @ t eq \
         MultByMat(x, c @ proj[Index(inds, m)], m) @ t
@@ -509,10 +513,6 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
     end if;
   end if;
 
-  // Checkpoint!
-  // Save and quit.
-  C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis, "Centroid");
-  __SmartSave(~t, basis, C`DerivedFrom`Coords, "Centroid"); 
   return C;
 end intrinsic;
 
@@ -562,13 +562,17 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
   basis := __A_Derivations(Eltseq(t), [Dimension(X) : X in Frame(t)], A,
     t`Cat`Repeats);
 
+  // Save the algebra
+  D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
+  __SmartSave(~t, basis, D`DerivedFrom`Coords, "Derivation"); 
+
   // Sanity check
   if __SANITY_CHECK then
     // Preliminaries  
     printf "Running sanity check (DerivationAlgebra)\n";
     inds := [*a : a in A*];
     proj := [*Induce(D, a) : a in A*];
-    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+    dom_basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
     m := Minimum(A);
 
     // A function to only change one coordinate.
@@ -580,22 +584,18 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
 
     // Checking satisfaction of the derivation polynomial.
     if m eq 0 then
-      assert forall{del : del in Generators(D) | forall{x : x in basis | 
+      assert forall{del : del in Generators(D) | forall{x : x in dom_basis | 
         &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] eq
           (x @ t)*Matrix(del @ proj[Index(inds, m)]) \
         }};
     else
-      assert forall{del : del in Generators(D) | forall{x : x in basis | 
+      assert forall{del : del in Generators(D) | forall{x : x in dom_basis | 
         &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] +
           MultByMat(x, del @ proj[Index(inds, m)], m) @ t eq (t`Codomain)!0 \
         }};
     end if;
   end if;
 
-  // Checkpoint!
-  // Save and return.
-  D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
-  __SmartSave(~t, basis, D`DerivedFrom`Coords, "Derivation"); 
   return D;
 end intrinsic;
 
@@ -639,12 +639,17 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
     end for;
   end if;
 
+  Nuke, basis := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, basis, "Nucleus");
+  t`Nuclei[2][ind] := basis;
+
   // Sanity check
   if __SANITY_CHECK then
     // Preliminaries  
     printf "Running sanity check (Nucleus)\n";
+    min := Min({a,b});
+    max := Max({a,b});
     proj := [*Induce(Nuke, min), Induce(Nuke, max)*]; 
-    basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
+    dom_basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
 
     // A function to only change one coordinate.
     MultByMat := function(x, B, a)
@@ -655,21 +660,17 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
 
     // Checking satisfaction of (x_a - x_m), for all a in A - {m}.
     if min eq 0 then
-      assert forall{nu : nu in Generators(Nuke) | forall{x : x in basis | 
+      assert forall{nu : nu in Generators(Nuke) | forall{x : x in dom_basis | 
         MultByMat(x, nu @ proj[2], max) @ t eq (x @ t)*(nu @ proj[1]) \
         }};
     else
-      assert forall{nu : nu in Generators(Nuke) | forall{x : x in basis | 
+      assert forall{nu : nu in Generators(Nuke) | forall{x : x in dom_basis | 
         MultByMat(x, nu @ proj[2], max) @ t eq MultByMat(x, Transpose(nu @ proj[1]), min) @ t 
         }};
     end if;
   end if;
 
-  // Checkpoint!
-  // Save and return.
-  N, basis := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, basis, "Nucleus");
-  t`Nuclei[2][ind] := basis;
-  return N;
+  return Nuke;
 end intrinsic;
 
 intrinsic SelfAdjointAlgebra( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) 

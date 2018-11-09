@@ -167,7 +167,7 @@ declare attributes AlgGen : Star;
     Star . . . . . . . . . An involution on the algebra.
 */
 
-__RF_DERIVED_FROM := recformat< Tensor : TenSpcElt, Coords : SeqEnum, 
+__RF_DERIVED_FROM := recformat< Tensor : TenSpcElt, Coords : SetEnum, 
     Fused : BoolElt, Object : MonStgElt >;
 
 /*

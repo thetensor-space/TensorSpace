@@ -43,7 +43,7 @@ __GetInduction := function(X, a)
   else
     error "Induction failed because of unknown object.";
   end if;
-  
+
   blocks := {B[i] : B in basis};
 
   if grp then
@@ -62,60 +62,6 @@ __GetInduction := function(X, a)
   
   // Currently I don't see know to program a surjection without an ExtractBlock.
   s := &+([Nrows(b[j]) : j in [1..i-1], b in basis[1]] cat [1]);
-  proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
-
-  return proj, Y;
-end function;
-
-// Given the object and the index (not coordinate), return the induced object on the i-th index (or (v-i)-th coordinate). 
-__GetInduction := function( X, i )
-  t := X`DerivedFrom`Tensor;
-  grp := Type(X) eq GrpMat;
-  K := BaseRing(t);
-  spaces := Frame(t);
-  v := t`Valence;
-  d := Dimension(spaces[i]); 
-
-  // Trivial objects pose problems, so deal with them individually.
-  if (not grp) and (Dimension(X) eq 0) then 
-    gens := [X!0];
-  else
-    gens := [g : g in Generators(X)];
-    if grp and #gens eq 0 then
-      gens := [X!1];
-    end if;
-  end if;
-
-  // Determine which blocks to grab from the large matrix. 
-  if X`DerivedFrom`Fused then
-    // Changes to the minimal i relative to the tensor repeats. 
-    assert exists(i){v-Max(S) : S in t`Cat`Repeats | v-i in S}; 
-    s := 1;
-    S := {1..i-1} meet Set(X`DerivedFrom`Indices);
-    while #S gt 0 do
-      x := Min(S);
-      assert exists(R){R : R in t`Cat`Repeats | v-x in R};
-      S diff:= {v-r : r in R};
-      s +:= Dimension(spaces[x]);
-    end while;
-  else
-    s := &+([Dimension(spaces[k]) : k in [ x : x in X`DerivedFrom`Indices | x lt i ]] cat [1]); 
-  end if;
-
-  blocks := { ExtractBlock(g, s, s, d, d) : g in gens };
-
-  if grp then
-    if GL(d,K)!1 in blocks then
-      Exclude(~blocks,GL(d,K)!1);
-    end if;
-    Y := sub< Generic(GL(d,K)) | blocks >;
-  else
-    if Parent(Random(blocks))!0 in blocks then
-      Exclude(~blocks, Parent(Random(blocks))!0);
-    end if;
-    Y := sub< Parent(Random(blocks)) | blocks >;
-  end if;
-
   proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
 
   return proj, Y;
@@ -190,11 +136,11 @@ __InduceTemplate := function(X, a)
   end if;
   if X`DerivedFrom`Fused then
     assert exists(S){S : S in X`DerivedFrom`Tensor`Cat`Repeats | a in S};
-    Coord := S meet X`DerivedFrom`Indices;
+    Coord := S meet X`DerivedFrom`Coords;
     isit := #Coord eq 1;
     a := Random(Coord);
   else
-    isit := a in X`DerivedFrom`Indices;
+    isit := a in X`DerivedFrom`Coords;
   end if;
   if not isit then 
     return false, _, "No restriction found.";
