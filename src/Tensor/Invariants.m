@@ -18,36 +18,29 @@ import "../GlobalVars.m" : __SANITY_CHECK, __FRAME;
 import "../Types.m" : __RF_DERIVED_FROM;
 import "../Util/ConjugateCyclic.m" : __IsCyclic;
 
-// Given vectors return blocks
-__VectorToBlocks := function( v, d )
-  F := BaseRing( v );
-  v := Eltseq( v );
-  return <MatrixAlgebra( F, d[i] )![ v[ &+([0] cat [ d[j]^2 : j in [1..i-1] ]) \
-    + k] : k in [1..d[i]^2] ] : i in [1..#d]>;
-end function;
-
-
 // A function to remove superfluous blocks for fused coordinates. 
+/*
+  Given a basis as a tuple of blocks, partition as a set of subsets of {0..v}, 
+  and coords as a sequence aligned with basis.
+*/
 __ReduceByFuse := function(basis, partition, coords)
   K := BaseRing(basis[1][1]);
-  toFuse := [S : S in partition | #S gt 1];
+  toFuse := [S meet Set(coords) : S in partition | #(S meet Set(coords)) gt 1];
   newBasis := [[*x : x in b*] : b in basis];
+  newCoords := {s : s in S meet Set(coords), S in partition | #S eq 1};
+
   for S in toFuse do
     T := S diff {Max(S)};
+    Include(~newCoords, Max(S));
     for t in T do
-      if t in coords then
-        i := Index(coords, t);
-        temp := [];
-        for B in newBasis do
-          blocks := B;
-          blocks[i] := IdentityMatrix(K, 0);
-          Append(~temp, blocks);
-        end for;
-        newBasis := temp;
-      end if;
+      i := Index(coords, t);
+      for j in [1..#newBasis] do
+        newBasis[j][i] := IdentityMatrix(K, 0);
+      end for;
     end for;
   end for;
-  return [<x : x in b> : b in newBasis];
+
+  return [<x : x in b> : b in newBasis], newCoords;
 end function;
 
 
@@ -77,7 +70,13 @@ __FusionBlock := function(K, dims, repeats, A)
     // We fix a for this particular r, and compare everything to this.
     a := Minimum(r);
     B := r diff {a};
-    I := IdentityMatrix(K, dims[v-a]^2);
+    if a ne 0 then
+      I := IdentityMatrix(K, dims[v-a]^2);
+    else
+      temp := Matrix(Integers(), dims[v], dims[v], [1..dims[v]^2]);
+      temp := Eltseq(Transpose(temp));
+      I := PermutationMatrix(K, temp);
+    end if;
     rcol := S - &+[dims[v-a+i]^2 : i in [0..a] | a-i in A] + 1;
     // Run though the set r - a.
     while #B gt 0 do
@@ -86,7 +85,7 @@ __FusionBlock := function(K, dims, repeats, A)
       lcol := S - &+[dims[v-b+i]^2 : i in [0..b] | b-i in A] + 1;
 
       // Place the blocks.      
-      InsertBlock(~M, I, row, lcol);
+      InsertBlock(~M, IdentityMatrix(K, dims[v-a]^2), row, lcol);
       InsertBlock(~M, -I, row, rcol);
 
       row +:= dims[v-a]^2;
@@ -124,7 +123,7 @@ __A_Centroid := function(seq, dims, A : repeats := {})
   I := IdentityMatrix(K, d_a);
   r_anchor := Ncols(M) - d_a^2 + 1;
   
-  vprintf eMAGma, 1 : "Constructing a %o by %o matrix over %o.", Ncols(M), 
+  vprintf eMAGma, 1 : "Constructing a %o by %o matrix over %o.\n", Ncols(M), 
     Nrows(M), K;
   
   // Construct the appropriate matrix. 
@@ -168,7 +167,7 @@ __A_Centroid := function(seq, dims, A : repeats := {})
   end if;
 
   // Solve the linear equations.
-  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.", Ncols(M),
+  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.\n", Ncols(M),
     Nrows(M);
   N := NullspaceOfTranspose(M);
   delete M;
@@ -214,7 +213,12 @@ __Coordinate_Spread := function(seq, dims, a, k)
     Append(~rows, __GetSlice(seq, dims, grid));
   end for;
   d := &*(dims_a) div k;
-  Mats := [Matrix(rows[(i-1)*d+1..i*d]) : i in [1..k]];
+  if a eq 0 then 
+    ep := -1; 
+  else 
+    ep := 1;
+  end if;
+  Mats := [ep*Matrix(rows[(i-1)*d+1..i*d]) : i in [1..k]];
   return Mats;
 end function;
 
@@ -242,7 +246,7 @@ __A_Derivations := function(seq, dims, A, repeats)
   v := #dims;
   s := &+[dims[v-x]^2 : x in A];
   M := ZeroMatrix(K, d, s);
-  vprintf eMAGma, 1 : "Construting a %o by %o matrix over %o.", Ncols(M), 
+  vprintf eMAGma, 1 : "Construting a %o by %o matrix over %o.\n", Ncols(M), 
     Nrows(M), K;
 
   // Construct the appropriate matrix.
@@ -276,8 +280,8 @@ __A_Derivations := function(seq, dims, A, repeats)
   M := VerticalJoin(__FusionBlock(K, dims, repeats, A), M);
   
   // Solve the linear system.
-  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.", Ncols(M),
-    Nrows(M);
+  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.\n", 
+    Ncols(M), Nrows(M);
   N := NullspaceOfTranspose(M);
 
   // Interpret the nullspace as matrices
@@ -297,7 +301,7 @@ __A_Derivations := function(seq, dims, A, repeats)
   // If 0 is in A, then we need to negate and transpose the matrices.
   if 0 in A then
     for i in [1..#basis] do
-      basis[i][#basis[i]] := -Transpose(basis[i][#basis[i]]);
+      basis[i][#basis[i]] := Transpose(basis[i][#basis[i]]);
     end for;
   end if;
 
@@ -307,7 +311,7 @@ end function;
 
 /* 
   Kantor's Lemma as described in Brooksbank, Wilson, "The module isomorphism 
-    problem reconsidered, 2015.
+    problem reconsidered," 2015.
   Given isomorphic field extensions E and F of a common field k, return the 
     isomorphisms from E to F and F to E.
 */
@@ -346,6 +350,44 @@ __GetSmallerRandomGenerators := function( X )
   until Dimension(X) eq Dimension(S);
   return S;
 end function;
+
+// Given a tensor t, a set of coords A, a boolean F, a function ALG, a seq of 
+// tuples B, and a string obj return algebra derived from the tensor. 
+__MakeAlgebra := function(t, A, F, ALG, B, obj);
+  coords := Reverse(Sort([a : a in A]));
+  if F then
+    B, A := __ReduceByFuse(B, t`Cat`Repeats, coords);
+  end if;
+  basis := [DiagonalJoin(T) : T in B];
+  MA := ALG(BaseRing(t), Nrows(basis[1]));
+  Operators := sub< MA | basis >;
+  Operators := __GetSmallerRandomGenerators(O);
+  Operators`DerivedFrom := rec< __RF_DERIVED_FROM | Tensor := t, Coords := A, 
+    Fused := F, Object := obj >; 
+  return Operators, B;
+end function;
+
+// Given a tensor t, a seq of tuples basis, a set of coords A, and a string
+// locat, save the basis in all the relevant spots. Certainly, there are two
+// acceptable strings: "Derivation" and "Centroid". 
+__SmartSave := procedure(~t, basis, A, locat)
+  B := A;
+  for a in A do
+    assert exists(S){S : S in t`Cat`Repeats | a in S};
+    B join:= S;
+  end for;
+  for k in [#A..#B] do
+    for S in Subsets(B, k) do
+      if A subset S then
+        if locat eq "Derivation" then
+          t`Derivations[2][Index(t`Derivations[1], S)] := basis;
+        else
+          t`Centroids[2][Index(t`Centroids[1], S)] := basis;
+        end if;
+      end if;
+    end for;
+  end for;
+end procedure;
 
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -405,19 +447,27 @@ end intrinsic;
 
 intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
 {Returns the A-centroid of the tensor t.}
-  // Check A makes sense.
+  // Check that A makes sense.
   require A subset {0..Valence(t)-1} : "Unknown tensor coordinates.";
   require #A ge 2 : "Must be at least two coordinates.";
+  if t`Cat`Contra then
+    require 0 notin A : "Integers must be positive for cotensors.";
+  end if;
+  
+  // |A| = 2 case.
   if #A eq 2 then
     return Nucleus(t, Maximum(A), Minimum(A));
   end if;
 
   // Check if the centroid has been computed before.
-  ind := Index(t`Centroids[1], A);ind;
+  ind := Index(t`Centroids[1], A);
   if Type(t`Centroids[2][ind]) ne RngIntElt then
-    return t`Centroids[2][ind];
+    // If it has been, return it as an algebra. 
+    return __MakeAlgebra(t, A, true, MatrixAlgebra, t`Centroids[2][ind], 
+      "Centroid");
   end if;
    
+  // Now it hasn't been computed before, and we need to compute something.
   // Make sure we can obtain the structure constants. 
   try
     _ := Eltseq(t);
@@ -427,14 +477,6 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
 
   basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], A : 
     repeats := t`Cat`Repeats);
-  
-  // Take the block-basis and construct the corresponding matrix algebra.
-  basis := [DiagonalJoin(T) : T in basis];
-  MA := MatrixAlgebra(BaseRing(t), Nrows(basis[1]));
-  C := sub< MA | basis >;
-  C := __GetSmallerRandomGenerators(C);
-  C`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [Valence(t) - a : a in A], Fused := true >; 
 
   // Sanity check
   if __SANITY_CHECK then
@@ -467,8 +509,10 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
     end if;
   end if;
 
-  // Save and return.
-  t`Centroids[2][ind] := C;
+  // Checkpoint!
+  // Save and quit.
+  C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis, "Centroid");
+  __SmartSave(~t, basis, C`DerivedFrom`Coords, "Centroid"); 
   return C;
 end intrinsic;
 
@@ -482,6 +526,9 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
   // Make sure A makes sense.
   require A subset {0..Valence(t)-1} : "Unknown coordinates.";
   require #A gt 1 : "Set must contain at least two coordinates.";
+  if t`Cat`Contra then
+    require 0 notin A : "Integers must be positive for cotensors.";
+  end if;
 
   // Make sure we can obtain the structure constants. 
   try
@@ -492,41 +539,28 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
 
   // Deal with the #A = 2 case.
   if #A eq 2 then
-    // See if the corresponding nucleus has been computed.
+    // Compute the nucleus. 
+    _ := Nucleus(t, Maximum(A), Minimum(A));
     ind := Index(t`Nuclei[1], A);
-    if Type(t`Nuclei[2][ind]) ne RngIntElt then
-      N := t`Nuclei[2][ind];
-    else
-      N := Nucleus(t, Maximum(A), Minimum(A));
-    end if;
-    // If 0 is in A, then op and negate it. Effectively turning x_a - x_b to the
-    // correct derivation polynomial.
+    basis := t`Nuclei[2][ind];
+    // If 0 is not in A, then op and negate it. Effectively turning x_a - x_b to
+    // the correct derivation polynomial.
     if 0 notin A then
-      pi_a := Induce(N, Maximum(A));
-      pi_b := Induce(N, Maximum(A));
-      N := sub< Generic(N) | [DiagonalJoin(X @ pi_a, -Transpose(X @ pi_b)) : 
-        X in Basis(N)] >;
+      basis := [<N[1], -Transpose(N[2])> : N in basis];
     end if;
-    return sub< MatrixLieAlgebra(BaseRing(N), Degree(N)) | Basis(N) >;
+    return __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
   end if;
 
   // Check if the derivations have been computed before.
   ind := Index(t`Derivations[1], A);
   if Type(t`Derivations[2][ind]) ne RngIntElt then
-    return t`Derivations[2][ind];
+    return __MakeAlgebra(t, A, true, MatrixLieAlgebra, t`Derivations[2][ind], 
+      "Derivation");
   end if; 
 
   // Get the derivations
   basis := __A_Derivations(Eltseq(t), [Dimension(X) : X in Frame(t)], A,
     t`Cat`Repeats);
-
-  // Take the block-basis and construct the corresponding matrix Lie algebra.
-  basis := [DiagonalJoin(T) : T in basis];
-  MLA := MatrixLieAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
-  D := sub< MLA | basis >;
-  D := __GetSmallerRandomGenerators(D);
-  D`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [Valence(t)-a : a in A], Fused := true >;
 
   // Sanity check
   if __SANITY_CHECK then
@@ -540,7 +574,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     // A function to only change one coordinate.
     MultByMat := function(x, B, a)
       y := x;
-      y[Valence(t) - a] := y[Valence(t) - a]*B;
+      y[Valence(t) - a] := y[Valence(t) - a]*Matrix(B);
       return y;
     end function;
 
@@ -548,7 +582,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     if m eq 0 then
       assert forall{del : del in Generators(D) | forall{x : x in basis | 
         &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] eq
-          (x @ t)*(del @ proj[Index(inds, m)]) \
+          (x @ t)*Matrix(del @ proj[Index(inds, m)]) \
         }};
     else
       assert forall{del : del in Generators(D) | forall{x : x in basis | 
@@ -558,9 +592,17 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     end if;
   end if;
 
+  // Checkpoint!
   // Save and return.
-  t`Derivations[2][ind] := D;
+  D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
+  __SmartSave(~t, basis, D`DerivedFrom`Coords, "Derivation"); 
   return D;
+end intrinsic;
+
+intrinsic Nucleus( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
+{Returns the A-nucleus of the tensor t, for |A| = 2.}
+  require #A eq 2 : "Set must contain exactly two coordinates.";
+  return Nucleus(t, Maximum(A), Minimum(A));
 end intrinsic;
 
 intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
@@ -575,9 +617,10 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
   end if;
 
   // Check if it has been computed before.
-  ind := Index(t`Nuclei[1], {a,b});
+  ind := Index(t`Nuclei[1], {a, b});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
-    return t`Nuclei[2][ind];
+    return __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, t`Nuclei[2][ind], 
+      "Nucleus");
   end if;
 
   // Make sure we can obtain the structure constants. 
@@ -587,30 +630,20 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
     error "Cannot compute structure constants.";
   end try;
 
-  T := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], {a, b});
+  basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], {a, b});
 
-  // Get the right representation.
+  // Get the correct representation.
   if 0 notin {a, b} then
-    for i in [1..#T] do
-      T[i][2] := Transpose(T[i][2]);
+    for i in [1..#basis] do
+      basis[i][2] := Transpose(basis[i][2]);
     end for;
   end if;
-
-  // Put everything together.
-  basis := [DiagonalJoin(t[1], t[2]) : t in T];
-  MA := MatrixAlgebra(BaseRing(basis[1]), Nrows(basis[1]));
-  Nuke := sub< MA | basis >;
-  Nuke := __GetSmallerRandomGenerators(Nuke);
-  max := Maximum([a, b]);
-  min := Minimum([a, b]);
-  Nuke`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [v - max, v - min], Fused := false >;
 
   // Sanity check
   if __SANITY_CHECK then
     // Preliminaries  
-    printf "Running sanity check (Centroid)\n";
-    proj := [*Induce(Nuke, min), Induce(Nuke, max)*];
+    printf "Running sanity check (Nucleus)\n";
+    proj := [*Induce(Nuke, min), Induce(Nuke, max)*]; 
     basis := CartesianProduct(<Basis(X) : X in Domain(t)>);
 
     // A function to only change one coordinate.
@@ -632,9 +665,11 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
     end if;
   end if;
 
+  // Checkpoint!
   // Save and return.
-  t`Nuclei[2][ind] := Nuke;
-  return Nuke;
+  N, basis := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, basis, "Nucleus");
+  t`Nuclei[2][ind] := basis;
+  return N;
 end intrinsic;
 
 intrinsic SelfAdjointAlgebra( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) 
@@ -648,6 +683,8 @@ intrinsic SelfAdjointAlgebra( t::TenSpcElt, a::RngIntElt, b::RngIntElt )
   if t`Cat`Contra then
     require 0 notin {a,b} : "Integers must be positive for cotensors.";
   end if;
+  require Dimension(Frame(t)[v-a]) eq Dimension(Frame(t)[v-b]) : 
+    "Given coordinates correspond to non-isomorphic spaces.";
 
   // Make sure we can obtain the structure constants. 
   try 
@@ -656,26 +693,12 @@ intrinsic SelfAdjointAlgebra( t::TenSpcElt, a::RngIntElt, b::RngIntElt )
     error "Cannot compute structure constants.";
   end try;
 
-  T := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], {a, b} : 
+  basis := __A_Centroid(Eltseq(t), [Dimension(X) : X in Frame(t)], {a, b} : 
     repeats := {{a, b}});
 
-  // Get the right representation.
-  if 0 notin {a, b} then
-    for i in [1..#T] do
-      T[i][2] := Transpose(T[i][2]);
-    end for;
-  end if;
-
-  // Put everything together.
-  basis := [DiagonalJoin(t[1], t[2]) : t in T];
-  MS := RMatrixSpace(BaseRing(basis[1]), Nrows(basis[1]), Nrows(basis[1]));
-  Nuke := sub< MS | basis >;
-  max := Maximum([a, b]);
-  min := Minimum([a, b]);
-  Nuke`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [v - max, v - min], Fused := true >;
-
-  return Nuke;
+  // Quick fix.
+  KSqMatSp := func< K, n | KMatrixSpace(K, n, n) >;
+  return __MakeAlgebra(t, {a, b}, true, KSqMatSp, basis);
 end intrinsic;
 
 intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
@@ -800,7 +823,7 @@ intrinsic TensorOverCentroid( t::TenSpcElt ) -> TenSpcElt, Hmtp
 end intrinsic;
 
 // ==============================================================================
-//                              Optimized for bimaps
+//                            Special names for bimaps
 // ==============================================================================
 intrinsic AdjointAlgebra( t::TenSpcElt ) -> AlgMat
 {Returns the adjoint *-algebra of the 3-tensor t.}

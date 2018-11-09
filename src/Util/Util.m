@@ -14,61 +14,110 @@ import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
 import "../Types.m" : __RF_DERIVED_FROM;
 
 
-__CheckFuse := function( a, RP, inds )
-  if not exists(S){S : S in RP | a in S} then
-    return false, _;
-  end if;
-  v := Maximum(&join(RP)) + 1;
-  T := {v - s : s in S};
-  inter := T meet Set(inds);
-  if #inter gt 0 then
-    return true, Minimum(inter);
+__GetInduction := function(X, a)
+  t := X`DerivedFrom`Tensor;
+  grp := Type(X) eq GrpMat;
+  K := BaseRing(t);
+  spaces := Frame(t);
+  v := t`Valence;
+  d := Dimension(spaces[v-a]); 
+  coords := Reverse(Sort([a : a in X`DerivedFrom`Coords]));
+  i := Index(coords, a);
+
+  // Determine what kind of object we have.
+  if X`DerivedFrom`Object eq "Autotopism" then
+    // Autotopism 
+    error "Induction on autotopisms is not yet implemented.";
+  elif X`DerivedFrom`Object eq "Derivation" then
+    ind := Index(t`Derivations[1], X`DerivedFrom`Coords);
+    basis := t`Derivations[2][ind];
+    ALG := MatrixLieAlgebra;
+  elif X`DerivedFrom`Object eq "Centroid" then
+    ind := Index(t`Centroids[1], X`DerivedFrom`Coords);
+    basis := t`Centroids[2][ind];
+    ALG := MatrixAlgebra;
+  elif X`DerivedFrom`Object eq "Nucleus" then
+    ind := Index(t`Nuclei[1], X`DerivedFrom`Coords);
+    basis := t`Nuclei[2][ind];
+    ALG := MatrixAlgebra;
   else
-    return false, _;
+    error "Induction failed because of unknown object.";
   end if;
+  
+  blocks := {B[i] : B in basis};
+
+  if grp then
+    if GL(d,K)!1 in blocks then
+      Exclude(~blocks,GL(d,K)!1);
+    end if;
+    Y := sub< GL(d,K) | blocks >;
+  else
+    b := Random(blocks);
+    A := ALG(BaseRing(b), Nrows(b));
+    if A!0 in blocks then
+      Exclude(~blocks, A!0);
+    end if;
+    Y := sub< A | blocks >;
+  end if;
+  
+  // Currently I don't see know to program a surjection without an ExtractBlock.
+  s := &+([Nrows(b[j]) : j in [1..i-1], b in basis[1]] cat [1]);
+  proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
+
+  return proj, Y;
 end function;
 
 // Given the object and the index (not coordinate), return the induced object on the i-th index (or (v-i)-th coordinate). 
 __GetInduction := function( X, i )
   t := X`DerivedFrom`Tensor;
-  gens := [g : g in Generators(X)];
   grp := Type(X) eq GrpMat;
-  lie := Type(X) eq AlgMatLie;
   K := BaseRing(t);
   spaces := Frame(t);
   v := t`Valence;
-  d := Dimension(spaces[i]);
+  d := Dimension(spaces[i]); 
+
+  // Trivial objects pose problems, so deal with them individually.
+  if (not grp) and (Dimension(X) eq 0) then 
+    gens := [X!0];
+  else
+    gens := [g : g in Generators(X)];
+    if grp and #gens eq 0 then
+      gens := [X!1];
+    end if;
+  end if;
+
+  // Determine which blocks to grab from the large matrix. 
   if X`DerivedFrom`Fused then
+    // Changes to the minimal i relative to the tensor repeats. 
+    assert exists(i){v-Max(S) : S in t`Cat`Repeats | v-i in S}; 
     s := 1;
-    for x in [x : x in X`DerivedFrom`Indices | x lt i] do
-      assert exists(S){S : S in t`Cat`Repeats | v-x in S};
-      if Max(S) eq v-x then
-        s +:= Dimension(spaces[x]);
-      end if;
-    end for;
+    S := {1..i-1} meet Set(X`DerivedFrom`Indices);
+    while #S gt 0 do
+      x := Min(S);
+      assert exists(R){R : R in t`Cat`Repeats | v-x in R};
+      S diff:= {v-r : r in R};
+      s +:= Dimension(spaces[x]);
+    end while;
   else
     s := &+([Dimension(spaces[k]) : k in [ x : x in X`DerivedFrom`Indices | x lt i ]] cat [1]); 
   end if;
+
   blocks := { ExtractBlock(g, s, s, d, d) : g in gens };
+
   if grp then
     if GL(d,K)!1 in blocks then
       Exclude(~blocks,GL(d,K)!1);
     end if;
     Y := sub< Generic(GL(d,K)) | blocks >;
   else
-    if lie then
-      if MatrixLieAlgebra(K,d)!0 in blocks then
-        Exclude(~blocks,MatrixLieAlgebra(K,d)!0);
-      end if;
-      Y := sub< MatrixLieAlgebra(K,d) | blocks >;
-    else
-      if MatrixAlgebra(K,d)!0 in blocks then
-        Exclude(~blocks,MatrixAlgebra(K,d)!0);
-      end if;
-      Y := sub< MatrixAlgebra(K,d) | blocks >;
+    if Parent(Random(blocks))!0 in blocks then
+      Exclude(~blocks, Parent(Random(blocks))!0);
     end if;
+    Y := sub< Parent(Random(blocks)) | blocks >;
   end if;
-  proj := map< X -> Y | x :-> Y!ExtractBlock(x,s,s,d,d) >;
+
+  proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
+
   return proj, Y;
 end function;
 
@@ -140,15 +189,17 @@ __InduceTemplate := function(X, a)
     return false, _, "Cannot recognize associated tensor.";
   end if;
   if X`DerivedFrom`Fused then
-    isit, i := __CheckFuse(a, X`DerivedFrom`Tensor`Cat`Repeats, X`DerivedFrom`Indices);
+    assert exists(S){S : S in X`DerivedFrom`Tensor`Cat`Repeats | a in S};
+    Coord := S meet X`DerivedFrom`Indices;
+    isit := #Coord eq 1;
+    a := Random(Coord);
   else
-    i := X`DerivedFrom`Tensor`Valence - a;
-    isit := i in X`DerivedFrom`Indices;
+    isit := a in X`DerivedFrom`Indices;
   end if;
   if not isit then 
     return false, _, "No restriction found.";
   else 
-    return true, i, _;
+    return true, a, _;
   end if;
 end function;
 
@@ -268,23 +319,30 @@ end intrinsic;
 
 intrinsic Induce( X::GrpMat, a::RngIntElt ) -> Map, GrpMat
 {Given a group of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
-  pass, i, E := __InduceTemplate(X, a);
+  pass, b, E := __InduceTemplate(X, a);
   require pass : E;
-  return __GetInduction(X, i);
+  return __GetInduction(X, b);
 end intrinsic;
 
 intrinsic Induce( X::AlgMat, a::RngIntElt ) -> Map, AlgMat
 {Given an algebra of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
-  pass, i, E := __InduceTemplate(X, a);
+  pass, b, E := __InduceTemplate(X, a);
   require pass : E;
-  return __GetInduction(X, i);
+  return __GetInduction(X, b);
 end intrinsic;
 
 intrinsic Induce( X::AlgMatLie, a::RngIntElt ) -> Map, AlgMatLie
 {Given a Lie algebra of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
-  pass, i, E := __InduceTemplate(X, a);
+  pass, b, E := __InduceTemplate(X, a);
   require pass : E;
-  return __GetInduction(X, i);
+  return __GetInduction(X, b);
+end intrinsic;
+
+intrinsic Induce( X::ModMatFld, a::RngIntElt ) -> Map, ModMatFld
+{Given a vector space of matrices associated to a tensor, returns the projection and the restriction of the object onto the ath coordinate.}
+  pass, b, E := __InduceTemplate(X, a);
+  require pass : E;
+  return __GetInduction(X, b);
 end intrinsic;
 
 intrinsic DerivationAlgebra( A::Alg ) -> AlgMatLie
