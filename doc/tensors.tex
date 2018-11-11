@@ -2981,9 +2981,10 @@ If $t$ is contained in a category where coordinates $a$ and $b$ (also contained 
 \index{Nucleus}
 \begin{intrinsics}
 Nucleus(t, a, b) : TenSpcElt, RngIntElt, RngIntElt -> AlgMat
+Nucleus(t, A) : TenSpcElt, SetEnum -> AlgMat
 \end{intrinsics}
 
-Returns the $\{a,b\}$-nucleus ($a\ne b$) of the tensor as a subalgebra of $\End(U_i)\times \End(U_j)$, 
+Returns the $A$-nucleus, for $A=\{a,b\}$ ($a\ne b$), of the tensor as a subalgebra of $\End(U_i)\times \End(U_j)$, 
 where $i=\max(a,b)$ and $j=\min(a,b)$.
 If $j>0$, then replace $\End(U_j)$ with $\End(U_j)^\op$. 
 If $t$ is contained in a category where coordinates $a$ and $b$ are fused together, then the corresponding operators on those coordinates will not be forced to be equal.

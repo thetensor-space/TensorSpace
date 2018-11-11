@@ -356,38 +356,18 @@ end function;
 __MakeAlgebra := function(t, A, F, ALG, B, obj);
   coords := Reverse(Sort([a : a in A]));
   if F then
-    B, A := __ReduceByFuse(B, t`Cat`Repeats, coords);
+    B, A_rep := __ReduceByFuse(B, t`Cat`Repeats, coords);
+  else
+    A_rep := A;
   end if;
   basis := [DiagonalJoin(T) : T in B];
   MA := ALG(BaseRing(t), Nrows(basis[1]));
   Operators := sub< MA | basis >;
   Operators := __GetSmallerRandomGenerators(Operators);
   Operators`DerivedFrom := rec< __RF_DERIVED_FROM | Tensor := t, Coords := A, 
-    Fused := F, Object := obj >; 
+    Fused := F, Object := obj, RepCoords := A_rep >; 
   return Operators, B;
 end function;
-
-// Given a tensor t, a seq of tuples basis, a set of coords A, and a string
-// locat, save the basis in all the relevant spots. Certainly, there are two
-// acceptable strings: "Derivation" and "Centroid". 
-__SmartSave := procedure(~t, basis, A, locat)
-  B := A;
-  for a in A do
-    assert exists(S){S : S in t`Cat`Repeats | a in S};
-    B join:= S;
-  end for;
-  for k in [#A..#B] do
-    for S in Subsets(B, k) do
-      if A subset S then
-        if locat eq "Derivation" then
-          t`Derivations[2][Index(t`Derivations[1], S)] := basis;
-        else
-          t`Centroids[2][Index(t`Centroids[1], S)] := basis;
-        end if;
-      end if;
-    end for;
-  end for;
-end procedure;
 
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -463,8 +443,9 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   ind := Index(t`Centroids[1], A);
   if Type(t`Centroids[2][ind]) ne RngIntElt then
     // If it has been, return it as an algebra. 
-    return __MakeAlgebra(t, A, true, MatrixAlgebra, t`Centroids[2][ind], 
+    C := __MakeAlgebra(t, A, true, MatrixAlgebra, t`Centroids[2][ind], 
       "Centroid");
+    return C;
   end if;
    
   // Now it hasn't been computed before, and we need to compute something.
@@ -480,7 +461,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
 
   // Save the algebra
   C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis, "Centroid");
-  __SmartSave(~t, basis, C`DerivedFrom`Coords, "Centroid"); 
+  t`Centroids[2][ind] := basis;
 
   // Sanity check
   if __SANITY_CHECK then
@@ -548,14 +529,16 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     if 0 notin A then
       basis := [<N[1], -Transpose(N[2])> : N in basis];
     end if;
-    return __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
+    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
+    return D;
   end if;
 
   // Check if the derivations have been computed before.
   ind := Index(t`Derivations[1], A);
   if Type(t`Derivations[2][ind]) ne RngIntElt then
-    return __MakeAlgebra(t, A, true, MatrixLieAlgebra, t`Derivations[2][ind], 
+    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, t`Derivations[2][ind], 
       "Derivation");
+    return D;
   end if; 
 
   // Get the derivations
@@ -564,7 +547,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
 
   // Save the algebra
   D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
-  __SmartSave(~t, basis, D`DerivedFrom`Coords, "Derivation"); 
+  t`Derivations[2][ind] := basis;
 
   // Sanity check
   if __SANITY_CHECK then
@@ -619,8 +602,9 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
   // Check if it has been computed before.
   ind := Index(t`Nuclei[1], {a, b});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
-    return __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, t`Nuclei[2][ind], 
+    Nuke := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, t`Nuclei[2][ind], 
       "Nucleus");
+    return Nuke;
   end if;
 
   // Make sure we can obtain the structure constants. 

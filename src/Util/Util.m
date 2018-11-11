@@ -21,8 +21,8 @@ __GetInduction := function(X, a)
   spaces := Frame(t);
   v := t`Valence;
   d := Dimension(spaces[v-a]); 
-  coords := Reverse(Sort([a : a in X`DerivedFrom`Coords]));
-  i := Index(coords, a);
+  coords := Reverse(Sort([a : a in X`DerivedFrom`Coords])); 
+  i := Index(coords, a); 
 
   // Determine what kind of object we have.
   if X`DerivedFrom`Object eq "Autotopism" then
@@ -41,7 +41,7 @@ __GetInduction := function(X, a)
     basis := t`Nuclei[2][ind];
     ALG := MatrixAlgebra;
   else
-    error "Induction failed because of unknown object.";
+    error "Induction failed because the object is unknown.";
   end if;
 
   blocks := {B[i] : B in basis};
@@ -61,7 +61,7 @@ __GetInduction := function(X, a)
   end if;
   
   // Currently I don't see know to program a surjection without an ExtractBlock.
-  s := &+([Nrows(b[j]) : j in [1..i-1], b in basis[1]] cat [1]);
+  s := &+([Nrows(basis[1][j]) : j in [1..i-1]] cat [1]);
   proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
 
   return proj, Y;
@@ -136,11 +136,11 @@ __InduceTemplate := function(X, a)
   end if;
   if X`DerivedFrom`Fused then
     assert exists(S){S : S in X`DerivedFrom`Tensor`Cat`Repeats | a in S};
-    Coord := S meet X`DerivedFrom`Coords;
+    Coord := S meet X`DerivedFrom`RepCoords;
     isit := #Coord eq 1;
     a := Random(Coord);
   else
-    isit := a in X`DerivedFrom`Coords;
+    isit := a in X`DerivedFrom`RepCoords;
   end if;
   if not isit then 
     return false, _, "No restriction found.";
