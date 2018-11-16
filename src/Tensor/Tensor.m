@@ -14,7 +14,7 @@ import "TensorDef.m" : __HasBasis;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 import "../Types.m" : __RF_BIMAP;
-import "TensorData.m" : __GetShuffle, __GetForms;
+import "TensorData.m" : __GetShuffle, __GetForms, __GetSlice;
 
 __GetBimapRecord := function( B )
   D := B`Domain;
@@ -839,6 +839,65 @@ intrinsic SymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   end if;
   return s;
 end intrinsic;
+
+intrinsic TensorProduct( t::TenSpcElt, s::TenSpcElt ) -> TenSpcElt
+{Returns the tensor product of t and s over their common base field.}
+  require Valence(t) eq Valence(s) : "Valences do not match.";
+  require ISA(Type(BaseRing(t)), Fld) and ISA(Type(BaseRing(t)), Fld) : 
+    "Base rings must be fields.";
+  try 
+    require BaseRing(t) eq BaseRing(s) : "Base fields incompatible.";
+  catch err 
+    error "Cannot compare base fields. Might be incompatible.";
+  end try;
+  K := BaseRing(t);
+  v := Valence(t);
+  require v gt 1 : "Valence 1 not implemented.";
+  if t`Cat eq s`Cat then
+    C := t`Cat;
+  else
+    C := HomotopismCategory(v);
+  end if;
+
+  t_dims := [Dimension(X) : X in Frame(t)];
+  s_dims := [Dimension(X) : X in Frame(s)];
+  D := [t_dims[i]*s_dims[i] : i in [1..v]];
+
+/*  // Handle small cases with built in commands.
+  if v le 3 then
+    M_t := AsMatrices(t, 1, 0);
+    M_s := AsMatrices(s, 1, 0);
+    M := [KroneckerProduct(M_t[i], M_s[j]) : j in [1..#M_s], i in [1..#M_t]];
+    ts := Tensor(M, 1, 0);
+
+    u := Tensor(K, D, Eltseq(ts), C);
+    return u;
+  end if;*/
+
+  try 
+    _ := Eltseq(t);
+    _ := Eltseq(s);
+  catch err
+    error "Cannot compute structure constants.";
+  end try;
+
+  V := VectorSpace(K, s_dims[v]);
+  S := [];
+  CP := CartesianProduct(<[[i,j] : j in [1..s_dims[k]], i in [1..t_dims[k]]] : k in [1..v-1]>);
+  Last_t := [{1..t_dims[v]}];
+  Last_s := [{1..s_dims[v]}];
+  for I in CP do
+    u := __GetSlice(Eltseq(t), t_dims, [{I[k][1]} : k in [1..#I]] cat Last_t);
+    v := V!__GetSlice(Eltseq(s), s_dims, [{I[k][2]} : k in [1..#I]] cat Last_s);
+    for k in [1..#u] do
+      S cat:= Eltseq(u[k] * v);
+    end for;
+  end for;
+  u := Tensor(K, D, S, C);
+
+  return u;
+end intrinsic;
+
 
 // ==============================================================================
 //                                      Forms
