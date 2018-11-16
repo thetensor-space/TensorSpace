@@ -584,8 +584,8 @@ intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt, Map
   return __GetTensor( [* V, V *], V, F : Cat := TensorCategory([1,1,1],{{0,1,2}}), Co := [* f, f, f *] ), f; // add a coerce?
 end intrinsic;
 
-intrinsic MatrixTensor( K::Fld, S::[RngIntElt] ) -> TenSpcElt, Map
-{Returns the K-tensor given by rectangular matrix multication.}
+intrinsic MatrixTensor( K::Fld, S::[RngIntElt] ) -> TenSpcElt, List
+{Returns the K-tensor given by rectangular matrix multication and a list of maps from the matrix spaces to the vector spaces.}
   require #S gt 1 : "Sequence must have more than one entry.";
   require forall{s : s in S | s gt 0} : "Sequences must contain positive integers.";
   
@@ -605,7 +605,7 @@ intrinsic MatrixTensor( K::Fld, S::[RngIntElt] ) -> TenSpcElt, Map
   require isit : err;
   t`Coerce := maps;
 
-  return t;
+  return t, maps;
 end intrinsic;
 
 // ==============================================================================
@@ -800,16 +800,6 @@ intrinsic SymmetricTensor( t::TenSpcElt ) -> TenSpcElt
   if IsSymmetric(t) then
     return t;
   end if;
-//  G := Sym( {0..t`Valence-1} );
-//  Stab := Stabilizer( G, GSet(G), GSet(G)!0 );
-//  temp := [ K!0 : i in [1..#sc] ];
-//  for g in Stab do
-//    s := Shuffle(t,g);
-//    seq := Eltseq(s);
-//    temp := [ temp[i] + seq[i] : i in [1..#seq] ];
-//  end for;
-//  spaces := Frame(t);
-//  s := Tensor( K, [Dimension(X) : X in spaces], temp, t`Cat );
 
   dims := [Dimension(X) : X in __FRAME(t)];
   if t`Valence eq 3 then
@@ -862,17 +852,6 @@ intrinsic TensorProduct( t::TenSpcElt, s::TenSpcElt ) -> TenSpcElt
   t_dims := [Dimension(X) : X in Frame(t)];
   s_dims := [Dimension(X) : X in Frame(s)];
   D := [t_dims[i]*s_dims[i] : i in [1..v]];
-
-/*  // Handle small cases with built in commands.
-  if v le 3 then
-    M_t := AsMatrices(t, 1, 0);
-    M_s := AsMatrices(s, 1, 0);
-    M := [KroneckerProduct(M_t[i], M_s[j]) : j in [1..#M_s], i in [1..#M_t]];
-    ts := Tensor(M, 1, 0);
-
-    u := Tensor(K, D, Eltseq(ts), C);
-    return u;
-  end if;*/
 
   try 
     _ := Eltseq(t);

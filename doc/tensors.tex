@@ -898,6 +898,18 @@ U0 : Full Vector space of degree 1 over GF(5^3)
 \end{code}
 \end{example}
 
+
+\index{MatrixTensor}
+\begin{intrinsics}
+MatrixTensor(K, S) : Fld, [RngIntElt] -> TenSpcElt, List
+\end{intrinsics}
+
+Given a field $K$ and a sequence of positive integers $S=[s_1,\dots, s_{\vav}]$, return the tensor 
+\[ \mathbb{M}_{s_1\times s_2}(K) \times \cdots \times \mathbb{M}_{s_{\vav-1}\times s_{\vav}}(K)\rightarrowtail \mathbb{M}_{s_1\times s_{\vav}}(K), \]
+given by matrix multiplcation. 
+A list of maps from the matrix spaces to the vector spaces is given as well even though the given tensor will evaluate matrices as well. 
+
+
 \index{Polarisation}\index{Polarization}
 \begin{intrinsics}
 Polarisation(f) : MPolElt -> TenSpcElt, MPolElt
@@ -929,7 +941,7 @@ U0 : Full Vector space of degree 1 over Rational Field
 (0)
 > <[1,0],[1,0],[0,1]> @ t;
 (2)
-\end{code} %$% editer does not recognize the custom environment
+\end{code}
 \end{example}
 
 
@@ -1101,6 +1113,13 @@ U0 : Full Vector space of degree 3 over GF(2)
 \end{example}
 
 
+\index{TensorProduct}
+\begin{intrinsics}
+TensorProduct(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
+\end{intrinsics}
+
+Given $K$-tensors $t:U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$ and $s:V_{\vav}\times \cdots \times V_1\rightarrowtail V_0$, returns the tensor $t\otimes s : U_{\vav}\otimes V_{\vav}\times \cdots \times U_1\otimes V_1\rightarrowtail U_0\otimes V_0$. 
+This is like a generalized Kronecker product. 
 
 
 \section{Operations with Tensors}
