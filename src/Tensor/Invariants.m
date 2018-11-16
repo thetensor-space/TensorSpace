@@ -252,6 +252,7 @@ __A_Derivations := function(seq, dims, A, repeats)
   // Construct the appropriate matrix.
   // We work from right to left.
   B := A;
+  C := {0..v-1} diff A;
   col := s+1;
   depth := d;
   while #B gt 0 do
@@ -260,7 +261,9 @@ __A_Derivations := function(seq, dims, A, repeats)
     B diff:= {a};
     d_a := dims[v-a];
     col -:= d_a^2;
-    depth div:= d_a;
+    D := {c : c in C | c lt a};
+    C diff:= D;
+    depth div:= d_a * &*([dims[v-c] : c in D] cat [1]);
 
     // A chopped up foliation.
     Mats := __Coordinate_Spread(seq, dims, a, depth);
@@ -298,7 +301,7 @@ __A_Derivations := function(seq, dims, A, repeats)
   end for;
 
   // We want to return everything to End(U_i) (in particular, no op).
-  // If 0 is in A, then we need to negate and transpose the matrices.
+  // If 0 is in A, then we need to transpose the matrices.
   if 0 in A then
     for i in [1..#basis] do
       basis[i][#basis[i]] := Transpose(basis[i][#basis[i]]);
@@ -572,8 +575,8 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
         }};
     else
       assert forall{del : del in Generators(D) | forall{x : x in dom_basis | 
-        &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A diff {m}] +
-          MultByMat(x, del @ proj[Index(inds, m)], m) @ t eq (t`Codomain)!0 \
+        &+[MultByMat(x, del @ proj[Index(inds, a)], a) @ t : a in A] eq 
+        (t`Codomain)!0 \
         }};
     end if;
   end if;
