@@ -29,6 +29,7 @@ end function;
 
 // Given a list of domain D, codomain C, and a user defined function F,
 // write the necessary information into t to make it a functional TenSpcElt.
+// Par = Parent,  Co = Cotensor,  Cat = Category
 __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismCategory(#D+1) )
   t := New(TenSpcElt);
   dom := CartesianProduct( < X : X in D > );
@@ -581,6 +582,30 @@ intrinsic Tensor( Q::RngUPolRes ) -> TenSpcElt, Map
   end function;
   f := map< Q -> V | x :-> coerce(x), y :-> (&+[ y[i]*R.1^(i-1) : i in [1..d] ]) @ pi >;
   return __GetTensor( [* V, V *], V, F : Cat := TensorCategory([1,1,1],{{0,1,2}}), Co := [* f, f, f *] ), f; // add a coerce?
+end intrinsic;
+
+intrinsic MatrixTensor( K::Fld, S::[RngIntElt] ) -> TenSpcElt, Map
+{Returns the K-tensor given by rectangular matrix multication.}
+  require #S gt 1 : "Sequence must have more than one entry.";
+  require forall{s : s in S | s gt 0} : "Sequences must contain positive integers.";
+  
+  Dom := [*KMatrixSpace(K, S[i], S[i+1]) : i in [1..#S-1]*];
+  Cod := KMatrixSpace(K, S[1], S[#S]);
+  
+  mult := function(x)
+    y := x[1];
+    for i in [2..#x] do
+      y *:= x[i];
+    end for;
+    return Cod!y;
+  end function;
+
+  t := __GetTensor(Dom, Cod, mult);
+  isit, t, maps, err := __TensorOnVectorSpaces(t);
+  require isit : err;
+  t`Coerce := maps;
+
+  return t;
 end intrinsic;
 
 // ==============================================================================

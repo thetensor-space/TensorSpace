@@ -182,8 +182,7 @@ end intrinsic;
 
 intrinsic IsNondegenerate( t::TenSpcElt ) -> BoolElt
 {Decides if t is nondegenerate.}
-  Rad := Radical(t);
-  return forall{ R : R in Rad | R eq sub< R | R!0 > };
+  return forall{a : a in [1..Valence(t)-1] | Dimension(Radical(t, a)) eq 0};
 end intrinsic;
 
 intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp

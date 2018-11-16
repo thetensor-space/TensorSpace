@@ -161,7 +161,7 @@ __A_Centroid := function(seq, dims, A : repeats := {})
 
   // Check repeats.
   if #repeats ne 0 then
-    vprint eMAGma, 1 : "Adding in fusion data.";
+    vprint eMAGma, 1 : "Adding in possible fusion data.";
     R := __FusionBlock(K, dims, repeats, A);
     M := VerticalJoin(R, M);
   end if;
@@ -276,7 +276,7 @@ __A_Derivations := function(seq, dims, A, repeats)
   end while;
 
   // Get the repeats block.
-  vprint eMAGma, 1 : "Adding in fusion data.";
+  vprint eMAGma, 1 : "Adding in possible fusion data.";
   M := VerticalJoin(__FusionBlock(K, dims, repeats, A), M);
   
   // Solve the linear system.
@@ -377,10 +377,9 @@ end function;
 //                             Linear algebra methods
 // ==============================================================================
 intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
-{Returns the ith radical of t contained in Vi.}
+{Returns the radical of t in the ath coordinate.}
   v := t`Valence;
-  require a ge 1 : "Argument must be a positive integer.";
-  require a lt v : "Argument exceeds coordinates in the domain.";
+  require a in {1..v-1} : "Unknown coordinate.";
   require ISA(Type(BaseRing(t)), Fld) : "Radicals only implemented for tensors over fields.";
   if Type(t`Radicals[v - a]) ne RngIntElt then
     return t`Radicals[v - a];
