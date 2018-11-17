@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
     Distributed under GNU GPLv3.
 */
 
@@ -47,12 +47,13 @@ end function;
 
 // s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], g: permutation in Sym({0..vav}). 
 __GetShuffle := function( s, dims, g )
-  perm := Reverse([ #dims-i : i in Eltseq(g) ]);
+  perm := Reverse([#dims-i : i in Eltseq(g)]);
+  perm_inv := Reverse([#dims-i : i in Eltseq(g^-1)]);
   dims_old := dims;
   dims := dims[perm];
-  CP := CartesianProduct(< [1..dims[i]] : i in [1..#dims] >);
-  offsets_old := [ &*dims_old[i+1..#dims] : i in [1..#dims-1] ] cat [1]; 
-  indices := [ 1 + (&+[offsets_old[i]*(cp[perm[i]]-1): i in [1..#dims]]) : cp in CP ];
+  CP := CartesianProduct(< [1..d] : d in dims >);
+  offsets_old := [&*dims_old[i+1..#dims] : i in [1..#dims-1]] cat [1]; 
+  indices := [1 + &+[offsets_old[i]*(cp[perm_inv[i]]-1): i in [1..#dims]] : cp in CP];
   return s[indices];
 end function;
 
