@@ -16,42 +16,31 @@ import "../Types.m" : __RF_DERIVED_FROM;
 
 __GetInduction := function(X, a)
   t := X`DerivedFrom`Tensor;
-  grp := Type(X) eq GrpMat;
   K := BaseRing(t);
-  spaces := Frame(t);
   v := t`Valence;
-  d := Dimension(spaces[v-a]); 
-  coords := Reverse(Sort([a : a in X`DerivedFrom`Coords])); 
-  i := Index(coords, a); 
+  dims := [Dimension(X) : X in Frame(t)]; 
+  start := &+([dims[v-b] : b in X`DerivedFrom`RepCoords | b gt a] cat [1]);
+  d := dims[v-a];
 
-  // Determine what kind of object we have.
-  if X`DerivedFrom`Object eq "Autotopism" then
-    // Autotopism 
-    error "Induction on autotopisms is not yet implemented.";
-  elif X`DerivedFrom`Object eq "Derivation" then
-    ind := Index(t`Derivations[1], X`DerivedFrom`Coords);
-    basis := t`Derivations[2][ind];
-    ALG := MatrixLieAlgebra;
-  elif X`DerivedFrom`Object eq "Centroid" then
-    ind := Index(t`Centroids[1], X`DerivedFrom`Coords);
-    basis := t`Centroids[2][ind];
-    ALG := MatrixAlgebra;
-  elif X`DerivedFrom`Object eq "Nucleus" then
-    ind := Index(t`Nuclei[1], X`DerivedFrom`Coords);
-    basis := t`Nuclei[2][ind];
-    ALG := MatrixAlgebra;
-  else
-    error "Induction failed because the object is unknown.";
-  end if;
+  blocks := [ExtractBlock(x, start, start, d, d) : x in Generators(X)];
 
-  blocks := {B[i] : B in basis};
-
-  if grp then
+  if Type(X) eq GrpMat then
     if GL(d,K)!1 in blocks then
       Exclude(~blocks,GL(d,K)!1);
     end if;
     Y := sub< GL(d,K) | blocks >;
   else
+    // Determine the correct category.
+    if Type(X) eq AlgMatLie then
+      ALG := MatrixLieAlgebra;
+    elif Type(X) eq AlgMat then
+      ALG := MatrixAlgebra;
+    elif Type(X) eq ModMatFld then
+      ALG := func< K, n | KMatrixSpace(K, n, n) >;
+    else
+      error "Do not recognize the category to induce.";
+    end if;
+
     b := Random(blocks);
     A := ALG(BaseRing(b), Nrows(b));
     if A!0 in blocks then
@@ -60,9 +49,7 @@ __GetInduction := function(X, a)
     Y := sub< A | blocks >;
   end if;
   
-  // Currently I don't see know to program a surjection without an ExtractBlock.
-  s := &+([Nrows(basis[1][j]) : j in [1..i-1]] cat [1]);
-  proj := map< X -> Y | x :-> Y!ExtractBlock(x, s, s, d, d) >;
+  proj := map< X -> Y | x :-> Y!ExtractBlock(x, start, start, d, d) >;
 
   return proj, Y;
 end function;
@@ -383,15 +370,18 @@ intrinsic Center( A::Alg ) -> Alg
   return S;
 end intrinsic;
 
-intrinsic DerivedFrom( ~X::., t::TenSpcElt, I::[RngIntElt] : Fused := true )
-{This procedure should be used to store the tensor information: the tensor t and
-the corresponding indices I, to the object X.}
-  require Type(X) in {AlgMat, AlgMatLie, GrpMat} : 
+intrinsic DerivedFrom( ~X::., t::TenSpcElt, C::{RngIntElt}, RC::{RngIntElt}
+  : Fused := true )
+{This procedure stores the following tensor information to the object X. The 
+tensor t, the corresponding coordinates C, the coordinates RC for which the 
+object is represented on, and the string Type for the type of object X is.}
+  require Type(X) in {AlgMat, AlgMatLie, GrpMat, ModMatFld} : 
     "No attribute to store tensor information.";
   R := rec< __RF_DERIVED_FROM | 
     Tensor := t, 
-    Indices := Sort([t`Valence - i : i in I]),
-    Fused := Fused
+    Coords := C,
+    Fused := Fused,
+    RepCoords := RC
     >;
   X`DerivedFrom := R;
 end intrinsic;

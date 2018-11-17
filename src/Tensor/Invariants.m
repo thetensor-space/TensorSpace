@@ -356,7 +356,7 @@ end function;
 
 // Given a tensor t, a set of coords A, a boolean F, a function ALG, a seq of 
 // tuples B, and a string obj return algebra derived from the tensor. 
-__MakeAlgebra := function(t, A, F, ALG, B, obj);
+__MakeAlgebra := function(t, A, F, ALG, B);
   coords := Reverse(Sort([a : a in A]));
   if F then
     B, A_rep := __ReduceByFuse(B, t`Cat`Repeats, coords);
@@ -368,7 +368,7 @@ __MakeAlgebra := function(t, A, F, ALG, B, obj);
   Operators := sub< MA | basis >;
   Operators := __GetSmallerRandomGenerators(Operators);
   Operators`DerivedFrom := rec< __RF_DERIVED_FROM | Tensor := t, Coords := A, 
-    Fused := F, Object := obj, RepCoords := A_rep >; 
+    Fused := F, RepCoords := A_rep >; 
   return Operators, B;
 end function;
 
@@ -445,8 +445,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
   ind := Index(t`Centroids[1], A);
   if Type(t`Centroids[2][ind]) ne RngIntElt then
     // If it has been, return it as an algebra. 
-    C := __MakeAlgebra(t, A, true, MatrixAlgebra, t`Centroids[2][ind], 
-      "Centroid");
+    C := __MakeAlgebra(t, A, true, MatrixAlgebra, t`Centroids[2][ind]);
     return C;
   end if;
    
@@ -462,8 +461,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
     repeats := t`Cat`Repeats);
 
   // Save the algebra
-  C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis, "Centroid");
-  t`Centroids[2][ind] := basis;
+  C, basis := __MakeAlgebra(t, A, true, MatrixAlgebra, basis);
 
   // Sanity check
   if __SANITY_CHECK then
@@ -496,6 +494,7 @@ intrinsic Centroid( t::TenSpcElt, A::{RngIntElt} ) -> AlgMat
     end if;
   end if;
 
+  t`Centroids[2][ind] := basis;
   return C;
 end intrinsic;
 
@@ -531,15 +530,14 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     if 0 notin A then
       basis := [<N[1], -Transpose(N[2])> : N in basis];
     end if;
-    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
+    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis);
     return D;
   end if;
 
   // Check if the derivations have been computed before.
   ind := Index(t`Derivations[1], A);
   if Type(t`Derivations[2][ind]) ne RngIntElt then
-    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, t`Derivations[2][ind], 
-      "Derivation");
+    D := __MakeAlgebra(t, A, true, MatrixLieAlgebra, t`Derivations[2][ind]);
     return D;
   end if; 
 
@@ -548,8 +546,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     t`Cat`Repeats);
 
   // Save the algebra
-  D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis, "Derivation");
-  t`Derivations[2][ind] := basis;
+  D, basis := __MakeAlgebra(t, A, true, MatrixLieAlgebra, basis);
 
   // Sanity check
   if __SANITY_CHECK then
@@ -581,6 +578,7 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt} ) -> AlgMatLie
     end if;
   end if;
 
+  t`Derivations[2][ind] := basis;
   return D;
 end intrinsic;
 
@@ -604,8 +602,7 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
   // Check if it has been computed before.
   ind := Index(t`Nuclei[1], {a, b});
   if Type(t`Nuclei[2][ind]) ne RngIntElt then
-    Nuke := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, t`Nuclei[2][ind], 
-      "Nucleus");
+    Nuke := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, t`Nuclei[2][ind]);
     return Nuke;
   end if;
 
@@ -625,8 +622,7 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
     end for;
   end if;
 
-  Nuke, basis := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, basis, "Nucleus");
-  t`Nuclei[2][ind] := basis;
+  Nuke, basis := __MakeAlgebra(t, {a, b}, false, MatrixAlgebra, basis);
 
   // Sanity check
   if __SANITY_CHECK then
@@ -656,6 +652,7 @@ intrinsic Nucleus( t::TenSpcElt, a::RngIntElt, b::RngIntElt ) -> AlgMat
     end if;
   end if;
 
+  t`Nuclei[2][ind] := basis;
   return Nuke;
 end intrinsic;
 
@@ -827,7 +824,8 @@ intrinsic AdjointAlgebra( t::TenSpcElt ) -> AlgMat
   S := SystemOfForms(t);
   A := AdjointAlgebra(S);
   A`DerivedFrom := rec< __RF_DERIVED_FROM | 
-    Tensor := t, Indices := [1], Fused := false >;
+    Tensor := t, Coords := {2}, Fused := false, 
+    RepCoords := {2} >;
   t`Bimap`Adjoint := A;
   return A;
 end intrinsic;

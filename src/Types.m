@@ -168,14 +168,13 @@ declare attributes AlgGen : Star;
 */
 
 __RF_DERIVED_FROM := recformat< Tensor : TenSpcElt, Coords : SetEnum, 
-    Fused : BoolElt, Object : MonStgElt, RepCoords : SetEnum >;
+    Fused : BoolElt, RepCoords : SetEnum >;
 
 /*
   DerivedFrom record:
     Tensor . . . . . . . . The tensor from where the object wsa derived from.
     Coords . . . . . . . . The corresponding coordinates for the blocks. 
     Fused. . . . . . . . . Whether or not the tensor category was incorporated.
-    Object . . . . . . . . The name of the object. 
     RepCoords. . . . . . . The set on which the object is representated on.
 */
 

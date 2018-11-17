@@ -2577,12 +2577,13 @@ We include a partner intrinsic to \texttt{Include} and that is the following pro
 
 \index{DerivedFrom}
 \begin{intrinsics}
-DerivedFrom(X, t, I) : Any, TenSpcElt, [RngIntElt]
+DerivedFrom(~X, t, C, RC) : Any, TenSpcElt, {RngIntElt}, {RngIntElt}
+    Fused : BoolElt : true
 \end{intrinsics}
 
-Includes the tensor data in the matrix object $X$, where the relevant coordinates are in the sequence $I\subseteq \{0,\dots,\vav\}$.
+Includes the following tensor data in the matrix object $X$: the tensor $t$, the relevant coordinates which are in the set $C\subseteq \{0,\dots,\vav\}$, and the coordinates $RC\subseteq C$ for which the object is represented on.
+The reason for the subset $C$ is so that we know the coordinates which can be induced on, see \texttt{Induce}.
 Currently, this only works for objects of type \texttt{AlgMat}, \texttt{AlgMatLie}, \texttt{GrpMat}, and \texttt{ModMatFld}.
-If the tensor category has a nontrivial partition of its coordinates fused, it does not matter if every coordinate in a particular part are contained in $I$. 
 It is assumed that $X$ is block diagonal, whose blocks starting from the top left go in decreasing order in the coordinates---in the same way the coordinates of the frame decrease from left to right for a tensor. 
 
 % Maybe include an example at some point.

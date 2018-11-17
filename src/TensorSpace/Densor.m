@@ -103,28 +103,34 @@ end function;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic DerivationClosure( T::TenSpc, Delta::[Mtrx] ) -> TenSpc
 {Returns the derivation closure of the tensor space with the given operators Delta.}
-  require T`Valence eq 3 : "Tensor space must have valence 3.";
+  require Valence(T) eq 3 : "Tensor space must have valence 3.";
   require BaseRing(T) eq BaseRing(Delta[1]) : "Base rings are incompatible.";
 
   // remove redundant dims if coords are fused.
   ess_dims := [ Dimension(X) : X in T`Frame ];
-  for P in [P : P in T`Cat`Repeats | #P gt 1] do
+  RC := {};
+  for P in T`Cat`Repeats do
     m := Maximum(P);
+    Include(~RC, m);
     for p in P diff {m} do
-      ess_dims[T`Valence - p] := 0;
+      ess_dims[Valence(T) - p] := 0;
     end for;
   end for;
-  ess_dims := [d : d in ess_dims | d ne 0];
-  dims := [ Dimension(X) : X in T`Frame ];
+  ess_dims := [d : d in ess_dims | d ne 0] cat [0];
+  dims := [ Dimension(X) : X in T`Frame ] cat [0];
 
   matched_fused := Nrows(Delta[1]) eq &+ess_dims and Ncols(Delta[1]) eq &+ess_dims;
   matched_not_fused := Nrows(Delta[1]) eq &+dims and Ncols(Delta[1]) eq &+dims;
 
   require matched_fused or matched_not_fused : "Incompatible operators.";
 
+  if matched_not_fused then
+    RC := {0..2};
+  end if;
+
   // Package the Delta into a Lie algebra 
   Delta_Lie := sub< MatrixLieAlgebra(BaseRing(T), Nrows(Delta[1])) | Delta >;
-  DerivedFrom(~Delta_Lie, T!0, [0..2] : Fused := matched_fused); // Really just need the tensor category info
+  DerivedFrom(~Delta_Lie, T!0, {0..2}, RC : Fused := matched_fused); // Really just need the tensor category info
 
   N := __GetDensorTensors(Delta_Lie, dims);
   S := __GetTensorSpace(T`Ring, T`Frame, T`Cat);
@@ -190,7 +196,7 @@ intrinsic NucleusClosure( T::TenSpc, Delta::[Mtrx], a::RngIntElt, b::RngIntElt )
   ParallelSort(~temp,~perm);
   M := [DiagonalJoin( < blocks[perm[i]][j] : i in [1..3] > ) : j in [1..#Delta]];
   Delta_Lie := sub<MatrixLieAlgebra(K, &+dims) | M>;
-  DerivedFrom(~Delta_Lie, T!0, [0..2] : Fused := false); // important not to fuse! 
+  DerivedFrom(~Delta_Lie, T!0, {0..2}, {0..2} : Fused := false); // important not to fuse! 
   pi2 := Induce(Delta_Lie, 2);
   pi1 := Induce(Delta_Lie, 1);
   V := Domain(T!0)[1];
