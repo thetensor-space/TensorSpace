@@ -668,7 +668,7 @@ intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   s`Permutation := t`Permutation*g; 
   s`Cat := New(TenCat);
   s`Cat`Valence := v;
-  s`Cat`Arrows := map< {0..v} -> {-1,0,1} | x:->(x^g) @ t`Cat`Arrows >;
+  s`Cat`Arrows := map< {0..v-1} -> {-1,0,1} | x:->(x^g) @ t`Cat`Arrows >;
   s`Cat`Repeats := { { x^(g^-1) : x in f } : f in t`Cat`Repeats };
   s`Cat`Contra := t`Cat`Contra;
   return s;
