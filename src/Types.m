@@ -48,10 +48,9 @@ declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 // -----------------------------------------------------------------------------
 //                                     Tensor
 // -----------------------------------------------------------------------------
-declare attributes TenSpcElt : Auto, Bimap, Cat, Centroids, Codomain, Coerce, 
-  CoordImages, Densor, Derivations, Domain, Element, FullyNondeg, Image, Map, 
-  Nondegenerate, Nuclei, Parent, Permutation, Radicals, Reflexive, SymImage, 
-  Valence;
+declare attributes TenSpcElt : Auto, Bimap, Cat, Codomain, Coerce, CoordImages, 
+  Densor, Derivations, Domain, Element, FullyNondeg, Image, Map, Nondegenerate, 
+  Parent, Permutation, Radicals, Reflexive, SymImage, Valence;
 
 /* 
   Tensors will be thought of as multimaps internally but will be allowed 
@@ -61,9 +60,6 @@ declare attributes TenSpcElt : Auto, Bimap, Cat, Centroids, Codomain, Coerce,
     Auto . . . . . . . . . The autotopism group of the tensor. 
     Bimap. . . . . . . . . The record of bimap info. Only defined when the 
                            valence is 3.
-    Centroids. . . . . . . The list of sequences of tuples corresponding to a 
-                           basis for centroids sorted by subsets of {0..vav} of
-                           order at least 3.
     Cat . . . . . . . . .  The tensor category.
     Codomain . . . . . . . The codomain of the tensor.
     Coerce . . . . . . . . If the tensor is created from some algebraic object,
@@ -71,8 +67,9 @@ declare attributes TenSpcElt : Auto, Bimap, Cat, Centroids, Codomain, Coerce,
     CoordImages. . . . . . The sequence of images of the coordinates.
     Densor . . . . . . . . The universal densor subspace of the tensor. 
     Derivations. . . . . . The list of sequences of tuples corresponding to a 
-                           basis for derivations sorted by subsets of {0..vav} 
-                           of order at least 3.
+                           basis for derivations sorted by tuples of the form 
+                           <A, k>, where A is a subset of {0..vav} of order at 
+                           least 2 and k an integer in {2..#A}.
     Domain . . . . . . . . A list of the modules in the domain.
     Element. . . . . . . . The corresponding element in the tensor space.
     FullyNondeg. . . . . . The fully nondegenerate tensor.
@@ -80,9 +77,6 @@ declare attributes TenSpcElt : Auto, Bimap, Cat, Centroids, Codomain, Coerce,
     Map. . . . . . . . . . The map from the domain into the codomain.
     Nondegenerate. . . . . A tuple containing the nondegenerate multimap and a 
                            homotopism to get there.
-    Nuclei . . . . . . . . A list of sequences of tuples corresponding to a 
-                           basis nuclei sorted by the subsets of {0..vav} of
-                           order 2.
     Parent . . . . . . . . A tensor space which contains the tensor.
     Permutation. . . . . . Used for shuffling tensors. Allows for on-the-fly 
                            computations; defaults is Sym({1..vav})!1.

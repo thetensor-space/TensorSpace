@@ -34,6 +34,8 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   t := New(TenSpcElt);
   dom := CartesianProduct( < X : X in D > );
   m := map< dom -> C | x :-> F(x) >;
+
+  // assign parameters to the tensor.
   t`Map := m;
   t`Valence := #D+1;  
   if Type(D) eq SeqEnum then
@@ -44,11 +46,9 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   end if;
   t`Codomain := C;
   t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
-  t`Derivations := [* [* S : S in Subsets({0..t`Valence-1}, i), i in Reverse([3..t`Valence]) *] *];
-  Append(~t`Derivations, [* 0 : i in [1..#t`Derivations[1]] *]);
-  t`Nuclei := [* [* S : S in Subsets( {0..t`Valence-1},2 ) *], [* 0 : i in [1..#Subsets( {0..t`Valence-1},2 )] *] *];
-  t`Centroids := [* [* S : S in Subsets({0..t`Valence-1}, i), i in Reverse([3..t`Valence]) *] *];
-  Append(~t`Centroids, [* 0 : i in [1..#t`Centroids[1]] *]);
+  t`Derivations := [* [*<A, k> : k in [2..#A], A in Subsets({0..#D}, j), 
+    j in [2..#D+1]*]*];
+  Append(~(t`Derivations), [*0 : i in [1..#t`Derivations[1]]*]);
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
   t`Reflexive := rec< rf | >;
   t`Cat := Cat;
@@ -62,6 +62,7 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   if t`Valence eq 3 and not t`Cat`Contra then
     t := __GetBimapRecord(t);
   end if;
+
   return t;
 end function;
 
@@ -163,8 +164,6 @@ __TensorOnVectorSpaces := function(M)
   if assigned M`CoordImages then
     N`CoordImages := M`CoordImages;
   end if;
-  N`Nuclei := M`Nuclei;
-  N`Centroids := M`Centroids;
   if assigned M`Coerce then
     N`Coerce := [* M`Coerce[i] * maps[i] : i in [1..#maps] *];
   else
@@ -644,33 +643,20 @@ intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   end function; 
 
   // Construct new tensor from the old one.
-  s := New(TenSpcElt);
-  dom := CartesianProduct( < X : X in D > );
-  m := map< dom -> C | x :-> F(x) >;
-  s`Map := m;
-  s`Valence := #D+1;
-  s`Domain := D;
-  s`Codomain := C;
-  s`Radicals := [* 0 : i in [1..s`Valence] *]; // radical and coradical
-  s`Nuclei := [* [* S : S in Subsets( {0..s`Valence},2 ) *], [* 0 : i in [1..#Subsets( {0..s`Valence},2 )] *] *];
-  s`Centroids := [* [* S : S in Subsets( {1..s`Valence},i ), i in Reverse([2..s`Valence]) *], [* 0 : i in [1..2^(s`Valence)-s`Valence-1] *] *];
-  rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
-  s`Reflexive := rec< rf | >;
+  Cate := New(TenCat);
+  Cate`Valence := v;
+  Cate`Arrows := map< {0..v-1} -> {-1,0,1} | x:->(x^g) @ t`Cat`Arrows >;
+  Cate`Repeats := { { x^(g^-1) : x in f } : f in t`Cat`Repeats };
+  Cate`Contra := t`Cat`Contra;
+  s := __GetTensor(D, C, F : Cat := Cate);
   if assigned t`Coerce then
     s`Coerce := t`Coerce[g_elt];
-  end if;
-  if s`Valence eq 3 then
-    s := __GetBimapRecord(s);
   end if;
   if assigned t`CoordImages then
     s`CoordImages := t`CoordImages;
   end if;
   s`Permutation := t`Permutation*g; 
-  s`Cat := New(TenCat);
-  s`Cat`Valence := v;
-  s`Cat`Arrows := map< {0..v-1} -> {-1,0,1} | x:->(x^g) @ t`Cat`Arrows >;
-  s`Cat`Repeats := { { x^(g^-1) : x in f } : f in t`Cat`Repeats };
-  s`Cat`Contra := t`Cat`Contra;
+
   return s;
 end intrinsic;
 
