@@ -412,8 +412,6 @@ __BSanity := function(Z, B : nuke := false)
   // Initial setup.
   t := Z`DerivedFrom`Tensor;
   v := Valence(t);
-  B_seq := [b : b in B];
-  projs := [*Induce(Z, b) : b in B_seq*];
   CP := CartesianProduct(<Basis(X) : X in Domain(t)>);
 
   MultByMat := function(x, M, a)
@@ -448,7 +446,8 @@ __BSanity := function(Z, B : nuke := false)
     // we need to verify Sum_{b in B} x_b. 
     if 0 in B then
       return forall{z : z in Generators(Z) | forall{x : x in CP | 
-        &+[MultByMat(x, z @ Induce(Z, a), a) @ t : a in B diff {0}] eq 
+        &+([MultByMat(x, z @ Induce(Z, a), a) @ t : a in B diff {0}] cat 
+          [Codomain(t)!0]) eq 
         (x @ t)*(z @ Induce(Z, 0))
         }};
     else
@@ -582,11 +581,11 @@ intrinsic DerivationAlgebra( t::TenSpcElt, A::{RngIntElt}, k::RngIntElt ) ->
 {Returns the (A, k)-derivation algebra of the tensor t.}
   // Make sure A makes sense.
   require A subset {0..Valence(t)-1} : "Unknown coordinates.";
-  require #A gt 1 : "Set must contain at least two coordinates.";
+  require #A gt 0 : "Set must contain at least two coordinates.";
   if t`Cat`Contra then
     require 0 notin A : "Integers must be positive for cotensors.";
   end if;
-  require k ge 2 : "Integer must be at least 2.";
+  require k ge 1 : "Integer must be at least 2.";
   require k le #A : "Integer cannot be larger than set size.";
 
   // Out-source the k=2 case
@@ -857,7 +856,6 @@ intrinsic LeftNucleus( t::TenSpcElt : op := false ) -> AlgMat
   if op then
     N := sub< Generic(Nuke) | [Transpose(X) : X in Generators(Nuke)] >;
     N`DerivedFrom := Nuke`DerivedFrom;
-    t`Nuclei[2][2] := N;
     return N;
   else
     return Nuke;

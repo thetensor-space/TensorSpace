@@ -46,8 +46,8 @@ __GetTensor := function( D, C, F : Par := false, Co := false, Cat := HomotopismC
   end if;
   t`Codomain := C;
   t`Radicals := [* 0 : i in [1..t`Valence] *]; // radical and coradical
-  t`Derivations := [* [*<A, k> : k in [2..#A], A in Subsets({0..#D}, j), 
-    j in [2..#D+1]*]*];
+  t`Derivations := [* [*<A, k> : k in [1..#A], A in Subsets({0..#D}, j), 
+    j in [1..#D+1]*]*];
   Append(~(t`Derivations), [*0 : i in [1..#t`Derivations[1]]*]);
   rf := recformat< Alternating : BoolElt, Antisymmetric : BoolElt, Symmetric : BoolElt >;
   t`Reflexive := rec< rf | >;
