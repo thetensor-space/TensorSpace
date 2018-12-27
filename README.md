@@ -28,13 +28,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 ## Package Contents 
 
-  1. Spec file is "./eMAGma.spec"
-  2. Source Code is contained in the folder "src"
-  3. Examples are included in the folder "examples"
-  4. Documentation is included as "eMAGma.pdf" in "doc"
-  5. Example files are demonstrated in "eMAGma.pdf" and their file names 
+  1. Spec file is `./eMAGma.spec`
+  2. Source Code is contained in the folder `src`
+  3. Examples are included in the folder `examples`
+  4. Documentation is included as `eMAGma.pdf` in `doc`
+  5. Example files are demonstrated in `eMAGma.pdf` and their file names 
      coincide with their example title in the text.
-  6. Performance and debugging tests are contained in the folder "tests"
+  6. Performance and debugging tests are contained in the folder `tests`
 
 
 ## Installation
@@ -51,8 +51,7 @@ directory containing the eMAGma directory,
 ## Latest Version
 
   Current version: 2.0.
-  Latest versions can be downloaded on GitHub at:
-    `https://github.com/algeboy/eMAGma`
+  Latest versions can be downloaded on GitHub at: <https://github.com/algeboy/eMAGma>
 
 
 ## Feedback, Bugs, and Contributions
