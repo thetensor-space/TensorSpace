@@ -137,32 +137,40 @@ intrinsic Image( t::TenSpcElt ) -> ModTupRng
     S := sub< t`Codomain | S, t`Codomain!sc[(i-1)*d+1..i*d] >;
     i +:= 1;
   end while;
-  S := sub< S | Basis(S) >;// Magma work-around : remove superfluous generators
+  S := sub< S | Basis(S) >; // Magma work-around : remove superfluous generators
   t`Image := S;
   return S;
 end intrinsic;
 
-intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
+intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp, List
 {Returns the associated nondegenerate tensor of t along with a homotopism.}
   if assigned t`Nondegenerate then
     return t`Nondegenerate[1], t`Nondegenerate[2];
   end if;
+
   if exists{ X : X in t`Domain cat [* t`Codomain *] | Type(X) ne ModTupFld } then
     passed, t, H2, err := __TensorOnVectorSpaces(t);
     require passed : err;
   end if;
+
+  // Initial solve
   R := BaseRing(t);
   D := t`Domain;
   Rad := Radical(t);
-  dom := [* *];
-  proj := [* *];
+
+  // Construct projections
+  dom := [**];
+  proj := [**];
   for i in [1..#D] do
     Q,pi := D[i]/Rad[i];
-    Append(~dom,Q);
-    Append(~proj,pi);
+    Q_basis := [b @@ pi : b in Basis(Q)];
+    Append(~dom, Q);
+    Append(~proj, pi);
   end for;
-  Append(~proj,hom< t`Codomain -> t`Codomain | [ <b,b> : b in Basis(t`Codomain) ] >);
-  
+  // Include the codomain stuff
+  Append(~proj, hom< t`Codomain -> t`Codomain | [ <b,b> : b in Basis(t`Codomain) ] >);
+  Append(~auto, IdentityMatrix(R, Dimension(t`Codomain)));
+
   F := function(x)
     return < x[i] @@ proj[i] : i in [1..#x] > @ t;
   end function;
@@ -176,6 +184,7 @@ intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
   if assigned H2 then
     H := H2*H;
   end if;
+
   t`Nondegenerate := < s, H >;
   return s, H;
 end intrinsic;
@@ -186,10 +195,11 @@ intrinsic IsNondegenerate( t::TenSpcElt ) -> BoolElt
 end intrinsic;
 
 intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
-{Returns the fully nondegenerate tensor of t.}
+{Returns the fully nondegenerate tensor of t and a homotopism.}
   if assigned t`FullyNondeg then
     return t`FullyNondeg[1], t`FullyNondeg[2];
   end if;
+
   s, H := NondegenerateTensor(t);
   if t`Cat`Contra then
     return s, H;

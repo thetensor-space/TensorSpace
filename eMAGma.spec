@@ -13,6 +13,7 @@
     {
       BimapDef.m
       Invariants.m
+      Singularity.m
       Tensor.m
       TensorBasic.m
       TensorCategorical.m

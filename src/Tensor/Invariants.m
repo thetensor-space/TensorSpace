@@ -471,13 +471,13 @@ end function;
 // ==============================================================================
 //                             Linear algebra methods
 // ==============================================================================
-intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
-{Returns the radical of t in the ath coordinate.}
+intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng, Mtrx
+{Returns the radical of t in the ath coordinate and a matrix that splits the radical in Va.}
   v := t`Valence;
   require a in {1..v-1} : "Unknown coordinate.";
   require ISA(Type(BaseRing(t)), Fld) : "Radicals only implemented for tensors over fields.";
   if Type(t`Radicals[v - a]) ne RngIntElt then
-    return t`Radicals[v - a];
+    return t`Radicals[v - a][1], t`Radicals[v - a][2];
   end if;
 
   try 
@@ -486,6 +486,7 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
     error "Cannot compute structure constants.";
   end try;
 
+  // Construct the radical
   D := t`Domain[v - a];
   B := Basis(D);
   V := VectorSpace(BaseRing(t), #B);
@@ -493,8 +494,10 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng
     cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
-  t`Radicals[v - a] := R;
-  return R;
+  // Construct the matrix
+  M := Matrix(Reverse(ExtendBasis(R)));
+  t`Radicals[v - a] := <R, M>;
+  return R, M;
 end intrinsic;
 
 intrinsic Coradical( t::TenSpcElt ) -> ModTupRng, Map
@@ -502,6 +505,7 @@ intrinsic Coradical( t::TenSpcElt ) -> ModTupRng, Map
   if Type(t`Radicals[t`Valence]) ne RngIntElt then
     return t`Radicals[t`Valence][1],t`Radicals[t`Valence][2];
   end if;
+
   I := Image(t);
   C, pi := t`Codomain/I;
   t`Radicals[t`Valence] := <C, pi>;
