@@ -36,9 +36,9 @@ declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 // -----------------------------------------------------------------------------
 //                                  Frame
 // -----------------------------------------------------------------------------
-declare type TenFrm[FrameElt]; 
+declare type TenFrm; 
 declare attributes TenFrm : BaseRing, Modules, Valence; 
-
+declare type MyMod : ModMatFld, ModTupFld;
 
 /* 
   Description of attributes:

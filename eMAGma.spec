@@ -40,6 +40,7 @@
     Util
     {
       ConjugateCyclic.m
+      Frame.m
       Util.m
     }
   }

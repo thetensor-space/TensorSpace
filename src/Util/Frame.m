@@ -1,29 +1,31 @@
 
-intrinsic AsFrame(mods::SeqEnum) -> TenFrm
+intrinsic AsFrame(modules::SeqEnum[MyMod]) -> TenFrm
 { The modules to form the frame. }
   F := New(TenFrm);
-  F`Valence := #mods;
-  try
-    require forall{ M : M in S | BaseRing(M) cmpeq BaseRing(S[1]) } :
+  F`Valence := #modules;
+  //try // no error can happen as I typed the input more strongly.
+    require forall{ M : M in modules | BaseRing(M) cmpeq BaseRing(modules[1]) } :
       "All modules must have a common base ring.";
-  catch err
-    error "Entries in frame must have a module structure.";
-  end try;
+  //catch err
+  //  error "Entries in frame must have a module structure.";
+  //end try;
 
-  F`BaseRing := BaseRing(S[1]);
-  F`Modules := mods;
+  F`BaseRing := BaseRing(modules[1]);
+  F`Modules := modules;
   return F;
 end intrinsic;
 
-intrinsic Eltseq(F::TenFrm) -> SeqEnum
+intrinsic Eltseq(F::TenFrm) -> SeqEnum[MyMod]
+{ The modules of the frame. }
     return F`Modules;
 end intrinsic;
 
-intrinsic '#'(F:TenFrm) -> RngIntElt
+intrinsic '#'(F::TenFrm) -> RngIntElt
+{ The valence of the frame. }
     return F`Valence;
 end intrinsic;
 
-intrinsic '.'(F::TenFrm, a::RngIntElt) -> ModRng 
+intrinsic '.'(F::TenFrm, a::RngIntElt) -> MyMod
 { Return the a-th term in the frame. }
-    return F`Modules[#F-a+1];
+    return [F`Modules[#F-a+1]];
 end intrinsic;
