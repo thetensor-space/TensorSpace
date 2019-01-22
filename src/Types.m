@@ -33,6 +33,13 @@ declare attributes TenCat : Arrows, Contra, Repeats, Symmetries, Valence;
 declare type TenSpc[TenSpcElt]; // eventually inherit ModRng structure
 declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
 
+// -----------------------------------------------------------------------------
+//                                  Frame
+// -----------------------------------------------------------------------------
+declare type TenFrm[FrameElt]; 
+declare attributes TenFrm : BaseRing, Modules, Valence; 
+
+
 /* 
   Description of attributes:
     Cat. . . . . . . . . . The category of the tensor space tensors.
