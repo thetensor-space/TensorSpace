@@ -1,6 +1,6 @@
 /* 
     Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
-    Distributed under MIT Liscence
+    Distributed under MIT Lisence
 */
 
 

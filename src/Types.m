@@ -44,6 +44,7 @@ declare attributes UnitTenSpc : Coerce, Mod, UniMap;
 declare type PolyTenSpc : TenSpc;
 declare attributes PolyTenSpc : Frame;
 
+
 /* 
   Description of attributes:
     Cat::TenCat . . . . . . The category of the tensor space tensors.
@@ -56,22 +57,6 @@ declare attributes PolyTenSpc : Frame;
     Valence::RngIntElt . . The valence of the space.
 */
 
-
-// -----------------------------------------------------------------------------
-//                                  Frame
-// -----------------------------------------------------------------------------
-declare type TenFrm;  // Container class of tensor spaces of valence 1. 
-declare attributes TenFrm : 
-  Ring; // Base ring common to all children.
-
-declare type UnitTenFrm : TenFrm;
-declare attributes PolyTenFrm : 
-  Mod, // the module
-  Pos; // the position in the list.
-
-declare type PolyTenFrm : TenFrm;
-declare attributes PolyTenFrm : 
-  Frames; // The subframes.
 
 
 // -----------------------------------------------------------------------------
