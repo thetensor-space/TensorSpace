@@ -1,6 +1,6 @@
 /* 
     Copyright 2016, Peter A. Brooksbank, James B. Wilson.
-    Distributed under GNU GPLv3.
+    Distributed under MIT License.
 */
 
 

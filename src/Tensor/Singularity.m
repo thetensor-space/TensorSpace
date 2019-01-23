@@ -1,3 +1,9 @@
+/* 
+    Copyright 2019 Joshua Maglione, James B. Wilson.
+    Distributed under MIT License.
+*/
+
+
 intrinsic Singularity( M::TenSpcElt, S::{RngIntElt} ) -> Sch
 {Returns the T-singularities of the tensor as the scheme of the zero-locus of a set of polynomials.}
   v := M`Valence-1;

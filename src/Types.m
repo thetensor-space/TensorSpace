@@ -1,6 +1,6 @@
 /* 
-    Copyright 2016--2018 Joshua Maglione, James B. Wilson.
-    Distributed under GNU GPLv3.
+    Copyright 2016--2019 Joshua Maglione, James B. Wilson.
+    Distributed under MIT License.
 */
 
 
