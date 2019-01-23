@@ -29,28 +29,50 @@ declare attributes TenCat : Arrows, Contra, Repeats, Symmetries, Valence;
 
 // -----------------------------------------------------------------------------
 //                                  Tensor Space
+// TenSpc
+// case UnitTenSpc < TenSpc
+//   
+// case PolyTenSpc < TenSpc
+//   Frame::SeqEnum[UnitTenSpc]
 // -----------------------------------------------------------------------------
 declare type TenSpc[TenSpcElt]; // eventually inherit ModRng structure
-declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
+declare attributes TenSpc : Cat,  Ring; //removed Valence
+
+declare type UnitTenSpc : TenSpc;
+declare attributes UnitTenSpc : Coerce, Mod, UniMap;
+
+declare type PolyTenSpc : TenSpc;
+declare attributes PolyTenSpc : Frame;
+
+/* 
+  Description of attributes:
+    Cat::TenCat . . . . . . The category of the tensor space tensors.
+    Coerce . . . . . . . . If the space is created from some algebraic object, 
+                           this will contain maps to the modules.
+    Frame::TenFrm. . . . . The sequence of the modules in the frame.
+    Mod::UnitTenSpc. . . . The R-module T.
+    Ring::Rng. . . . . . . The base ring.
+    UniMap . . . . . . . . The universal map: T -> hom(Va, ... hom(V1, V0) ...).
+    Valence::RngIntElt . . The valence of the space.
+*/
+
 
 // -----------------------------------------------------------------------------
 //                                  Frame
 // -----------------------------------------------------------------------------
-declare type TenFrm; 
-declare attributes TenFrm : BaseRing, Modules, Valence; 
-declare type MyMod : ModMatFld, ModTupFld;
+declare type TenFrm;  // Container class of tensor spaces of valence 1. 
+declare attributes TenFrm : 
+  Ring; // Base ring common to all children.
 
-/* 
-  Description of attributes:
-    Cat. . . . . . . . . . The category of the tensor space tensors.
-    Coerce . . . . . . . . If the space is created from some algebraic object, 
-                           this will contain maps to the modules.
-    Frame. . . . . . . . . The sequence of the modules in the frame.
-    Mod. . . . . . . . . . The R-module T.
-    Ring . . . . . . . . . The base ring.
-    UniMap . . . . . . . . The universal map: T -> hom(Va, ... hom(V1, V0) ...).
-    Valence. . . . . . . . The valence of the space.
-*/
+declare type UnitTenFrm : TenFrm;
+declare attributes PolyTenFrm : 
+  Mod, // the module
+  Pos; // the position in the list.
+
+declare type PolyTenFrm : TenFrm;
+declare attributes PolyTenFrm : 
+  Frames; // The subframes.
+
 
 // -----------------------------------------------------------------------------
 //                                     Tensor

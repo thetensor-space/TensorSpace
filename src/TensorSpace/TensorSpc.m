@@ -1,6 +1,6 @@
 /* 
     Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
-    Distributed under GNU GPLv3.
+    Distributed under MIT Liscence
 */
 
 
@@ -13,18 +13,19 @@ import "../GlobalVars.m" : __LIST, __SANITY_CHECK;
 import "../Tensor/TensorDef.m" : __HasBasis;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 
-__GetTensorSpace := function( R, L, C : Co := false )
+__GetTensorSpace := function( R, frame, cat : Co := false )
   T := New(TenSpc);
-  T`Cat := C;
-  T`Valence := C`Valence;
+  T`Cat := cat;
+  //T`Valence := cat`Valence;  -- just call valence from cat.
   T`Ring := R;
-  if Type(L) eq SeqEnum then
-    T`Frame := [* X : X in L *];
-  else // should be list
-    assert Type(L) eq List;
-    T`Frame := L;
-  end if;
-  T`Mod := RSpace(R,&*[Dimension(M) : M in L]); // builds a universal copy.
+  T`Frame := frame;
+//  if Type(L) eq SeqEnum then
+//    T`Frame := [* X : X in L *];
+//  else // should be list
+//    assert Type(L) eq List;
+//    T`Frame := L;
+//  end if;
+  T`Mod := RSpace(R,&*[Dimension(M) : M in frame]); // builds a universal copy.
   T`UniMap := hom< T`Mod -> T`Mod | x:->x, y:->y >;
   if Type(Co) ne BoolElt then
     T`Coerce := Co;
@@ -38,9 +39,7 @@ __GetTensorSpaceOverVectorSpaces := function( R, S )
   return S2, L;
 end function;
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//                                  Intrinsics
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 // ==============================================================================
 //                       General Universal (Co)Tensor Spaces
 // ==============================================================================
@@ -56,8 +55,8 @@ intrinsic TensorSpace( S::SeqEnum, C::TenCat ) -> TenSpc, List
   passed, err := __TensorCatSanity(S, C);
   require passed : err;
   R := BaseRing(S[1]);
-  S, L := __GetTensorSpaceOverVectorSpaces(R, S);
-  return __GetTensorSpace(R, S, C : Co := L), L;
+  spaces, maps := __GetTensorSpaceOverVectorSpaces(R, S);
+  return __GetTensorSpace(R, spaces, C : Co := maps), maps;
 end intrinsic;
 
 intrinsic TensorSpace( S::SeqEnum ) -> TenSpc, List
