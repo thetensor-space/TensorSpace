@@ -123,8 +123,8 @@ __A_Centroid := function(seq, dims, A : repeats := {})
   I := IdentityMatrix(K, d_a);
   r_anchor := Ncols(M) - d_a^2 + 1;
   
-  vprintf eMAGma, 1 : "Constructing a %o by %o matrix over %o.\n", Ncols(M), 
-    Nrows(M), K;
+  vprintf TensorSpace, 1 : "Constructing a %o by %o matrix over %o.\n", 
+    Ncols(M), Nrows(M), K;
   
   // Construct the appropriate matrix. 
   // We place the a block on the right-most side of M.
@@ -161,13 +161,13 @@ __A_Centroid := function(seq, dims, A : repeats := {})
 
   // Check repeats.
   if #repeats ne 0 then
-    vprint eMAGma, 1 : "Adding in possible fusion data.";
+    vprint TensorSpace, 1 : "Adding in possible fusion data.";
     R := __FusionBlock(K, dims, repeats, A);
     M := VerticalJoin(R, M);
   end if;
 
   // Solve the linear equations.
-  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.\n", Ncols(M),
+  vprintf TensorSpace, 1 : "Computing the nullspace of a %o by %o matrix.\n", Ncols(M),
     Nrows(M);
   N := NullspaceOfTranspose(M);
   delete M;
@@ -252,7 +252,7 @@ __A_Derivations := function(seq, dims, A, repeats, k)
   M := ZeroMatrix(K, #k_Subs*d, s);
 
   // Start the bad boy up.
-  vprintf eMAGma, 1 : "Construting a %o by %o matrix over %o.\n", Ncols(M), 
+  vprintf TensorSpace, 1 : "Construting a %o by %o matrix over %o.\n", Ncols(M), 
     Nrows(M), K;
 
   // Construct the appropriate matrix.
@@ -293,11 +293,11 @@ __A_Derivations := function(seq, dims, A, repeats, k)
   end for;
 
   // Get the repeats block.
-  vprint eMAGma, 1 : "Adding in possible fusion data.";
+  vprint TensorSpace, 1 : "Adding in possible fusion data.";
   M := VerticalJoin(__FusionBlock(K, dims, repeats, A), M);
   
   // Solve the linear system.
-  vprintf eMAGma, 1 : "Computing the nullspace of a %o by %o matrix.\n", 
+  vprintf TensorSpace, 1 : "Computing the nullspace of a %o by %o matrix.\n", 
     Ncols(M), Nrows(M);
   N := NullspaceOfTranspose(M);
   B := Basis(N);
@@ -490,7 +490,7 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng, Mtrx
   D := t`Domain[v - a];
   B := Basis(D);
   V := VectorSpace(BaseRing(t), #B);
-  vprint eMAGma, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) \
+  vprint TensorSpace, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) \
     cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   

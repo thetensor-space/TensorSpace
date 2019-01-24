@@ -3,12 +3,6 @@
   {
     GlobalVars.m
   	Types.m
-    Exceptional
-    {
-      General.m
-      Jordan.m
-      Octonion.m
-   	}
     Tensor
     {
       BimapDef.m
@@ -32,7 +26,6 @@
     }
     TensorSpace
     {
-      Densor.m
       TensorSpc.m
       TensorSpcBasic.m
       TensorSpcDef.m
