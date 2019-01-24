@@ -24,19 +24,41 @@ authors.
 
 ## Installation
 
-Attach the spec file during a Magma run and the intrinsics will be available
-to use.  To attach the spec file run the following, where <location> is the 
+#### Linux and Mac users
+
+To install the package, run the following shell command:
+```
+$ sh install.sh
+```
+This will 
+  1. download dependencies and
+  2. edit your Magma start file to load this on start up.
+
+
+#### Manually
+
+Currently, we do not have an install file compatible with Windows. Instead, 
+attach the spec file during a Magma run and the intrinsics will be available
+to use.  To attach the spec file run the following, where `<location>` is the 
 directory containing the eMAGma directory,
-
 ```
-    > AttachSpec("<location>/eMAGma/eMAGma.spec");
+> AttachSpec("<location>/eMAGma/eMAGma.spec");
 ```
 
 
-## Latest Version
+## Updates
 
-  Current version: 2.1.
-  Latest versions can be downloaded on GitHub at: <https://github.com/algeboy/eMAGma>
+##### Linux and Mac users
+
+To update the package and all its dependencies, run the following shell command:
+```
+$ sh update.sh
+```
+
+#### Manually
+
+Latest versions can be downloaded on GitHub at: 
+<https://github.com/algeboy/eMAGma>
 
 
 ## Feedback, Bugs, and Contributions
