@@ -406,7 +406,7 @@ true
 
 \begin{example}[SCStored]
 
-The structure constants are convenient data structure for nearly all the algorithms in eMAGma. 
+The structure constants are convenient data structure for nearly all the algorithms in TensorSpace. 
 In fact, most computations require structure constants, so we store the structure constants sequence with the tensor. 
 This means that after the initial structure constant sequence computation, every time \texttt{StructureConstants} or \texttt{Eltseq} is called, Magma retreives what was previously computed. 
 
@@ -2735,7 +2735,7 @@ LeftNucleus(t) : TenSpcElt -> AlgMat
 \end{intrinsics}
 
 Returns the left nucleus of the bilinear map $t$ as a subalgebra of $\End(U_2)\times \End(U_0)$.
-In previous versions of eMAGma, the left nucleus was returned as a subalgebra of $\End(U_2)^\op\times \End(U_0)^\op$.
+In previous versions of TensorSpace (and eMAGma), the left nucleus was returned as a subalgebra of $\End(U_2)^\op\times \End(U_0)^\op$.
 To enable this, set the optional arugment \texttt{op} to \texttt{true}.
 
 \index{MidNucleus!bilinear} 

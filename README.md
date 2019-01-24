@@ -13,11 +13,11 @@ authors.
 
 ## Package Contents 
 
-  1. Spec file is `./eMAGma.spec`
+  1. Spec file is `./TensorSpace.spec`
   2. Source Code is contained in the folder `src`
   3. Examples are included in the folder `examples`
-  4. Documentation is included as `eMAGma.pdf` in `doc`
-  5. Example files are demonstrated in `eMAGma.pdf` and their file names 
+  4. Documentation is included as `TensorSpace.pdf` in `doc`
+  5. Example files are demonstrated in `TensorSpace.pdf` and their file names 
      coincide with their example title in the text.
   6. Performance and debugging tests are contained in the folder `tests`
 
@@ -40,9 +40,9 @@ This will
 Currently, we do not have an install file compatible with Windows. Instead, 
 attach the spec file during a Magma run and the intrinsics will be available
 to use.  To attach the spec file run the following, where `<location>` is the 
-directory containing the eMAGma directory,
+directory containing the TensorSpace directory,
 ```
-> AttachSpec("<location>/eMAGma/eMAGma.spec");
+> AttachSpec("<location>/TensorSpace/TensorSpace.spec");
 ```
 
 
@@ -58,14 +58,14 @@ $ sh update.sh
 #### Manually
 
 Latest versions can be downloaded on GitHub at: 
-<https://github.com/algeboy/eMAGma>
+<https://github.com/algeboy/TensorSpace>
 
 
 ## Feedback, Bugs, and Contributions
 
 We welcome general feedback about the package and challenging examples. To 
 report bugs, please create an "Issue" on eMAGma repository site on GitHub. 
-Contributions are always welcome. To contribute, please fork a copy of eMAGma
-and create a pull request.
+Contributions are always welcome. To contribute, please fork a copy of 
+TensorSpace and create a pull request.
 
 

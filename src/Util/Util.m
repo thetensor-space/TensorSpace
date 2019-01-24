@@ -440,8 +440,8 @@ end intrinsic;
 //                                     Version
 // ------------------------------------------------------------------------------
 
-intrinsic eMAGmaVersion() -> MonStgElt
-{Returns the version number of eMAGma.}
+intrinsic TensorSpaceVersion() -> MonStgElt
+{Returns the version number of the TensorSpace package.}
   return __VERSION;
 end intrinsic;
 

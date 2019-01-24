@@ -28,4 +28,4 @@ end function;
 
 
 /*  Verbose names  */
-declare verbose eMAGma, 1; 
+declare verbose TensorSpace, 1; 
