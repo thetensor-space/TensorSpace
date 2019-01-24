@@ -64,7 +64,7 @@ Latest versions can be downloaded on GitHub at:
 ## Feedback, Bugs, and Contributions
 
 We welcome general feedback about the package and challenging examples. To 
-report bugs, please create an "Issue" on eMAGma repository site on GitHub. 
+report bugs, please create an "Issue" on TensorSpace repository site on GitHub. 
 Contributions are always welcome. To contribute, please fork a copy of 
 TensorSpace and create a pull request.
 
