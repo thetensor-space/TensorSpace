@@ -6,5 +6,5 @@ cd "$BASEDIR"
 
 # Update main git directory
 echo "Updating TensorSpace package..."
-git -q pull origin master 
+git pull -q origin master 
 echo "Successfully updated!"
