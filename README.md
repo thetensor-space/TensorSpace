@@ -26,13 +26,21 @@ authors.
 
 #### Linux and Mac users
 
-To install the package, run the following shell command:
+Download Latest Release zip file and unzip into a folder into 
+magma you would like your Magma packages installed, e.g.:
+```
+$ mkdir my_magma_packages
+$ cd my_magma_packages
+$ gzip TensorSpace-2.2.zip
+```
+Then install the package by running the following shell command:
 ```
 $ sh install.sh
 ```
-This will 
-  1. download dependencies and
-  2. edit your Magma start file to load this on start up.
+This will may install further packages necessary in the same directory.  
+It will also modify your Magma start up file so that these packages 
+are available at start up of Magma.  To avoid this, use manual installation
+instructions below.
 
 
 #### Manually
@@ -59,6 +67,14 @@ $ sh update.sh
 
 Latest versions can be downloaded on GitHub at: 
 <https://github.com/algeboy/TensorSpace>
+
+## Uninstalling
+
+This package can be removed entirely by deleting the folder into which it was downloaded and removing the 
+following lines from you `/.magmarc` file.
+```
+AttachSpec("<location>/TensorSpace/TensorSpace.spec");
+```
 
 
 ## Feedback, Bugs, and Contributions
