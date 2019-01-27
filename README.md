@@ -2,8 +2,14 @@ Tensors mean different things to different people.
 
 ![Tensors across the sciences](doc/TensorSpaces.png)
 
-So we decided why not abstract the differences into _Tensor Spaces_. Now all it means to be a tensor is...
+So why not abstract the differences into _Tensor Spaces_. Now all it means to be a tensor is...
 > A tensor is an element of a tensor space.
+
+ * [Package Contents](PackageContents)
+ * [Installing](Installation)
+ * [Updates](Updates)
+
+#### Linux and Mac users
 
 
 The Experimental Multilinear Algebra Group's distribution of software for 
