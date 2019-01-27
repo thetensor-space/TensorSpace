@@ -1,6 +1,6 @@
 Tensors mean different things to different people.
 
-![Tensors across the sciences](doc/tensor-mix.png)
+![Tensors across the sciences](doc/TensorSpaces.png)
 
 So we decided why not abstract the differences into _Tensor Spaces_. Now all it means to be a tensor is...
 > A tensor is an element of a tensor space.
