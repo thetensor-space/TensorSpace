@@ -9,8 +9,6 @@ So why not abstract the differences into _Tensor Spaces_. Now all it means to be
  * [Installing](Installation)
  * [Updates](Updates)
 
-#### Linux and Mac users
-
 
 The Experimental Multilinear Algebra Group's distribution of software for 
 integration in the computer algebra system MAGMA, V2.22 and beyond.
@@ -35,6 +33,18 @@ authors.
 
 ## Installation
 
+
+    <section class="outer">
+
+        <div class="downloads inner">
+
+          <a class="zip_download_link" href="#">Download .zip</a>
+
+          <a class="tar_download_link" href="#">Download .tar.gz</a>
+
+        </div>
+
+    </section>
 #### Linux and Mac users
 
 Download Latest Release zip file and unzip into a folder into 
