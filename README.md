@@ -1,5 +1,9 @@
+Tensors mean different things to different people.
+![Tensors across the sciences](tensor-mix.png)
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\langle~t~|" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\langle~t~|" title="\langle~t~|" /></a>
+So we decided why not abstract the differences into _Tensor Spaces_. Now all it means to be a tensor is...
+> A tensor is an element of a tensor space.
+
 
 The Experimental Multilinear Algebra Group's distribution of software for 
 integration in the computer algebra system MAGMA, V2.22 and beyond.
