@@ -6,7 +6,7 @@
     Tensor
     {
       BimapDef.m
-      Invariants.m
+      Radicals.m
       Singularity.m
       Tensor.m
       TensorBasic.m
