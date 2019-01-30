@@ -329,7 +329,12 @@ end intrinsic;
 
 intrinsic Tensor( D::[RngIntElt], S::[RngElt], Cat::TenCat ) -> TenSpcElt
 {Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the tensor category Cat.}
-  return Tensor(Universe(S), D, S, Cat);
+  if #S eq 0 then 
+    U := Integers(); // arbitrary
+  else
+    U := Universe(S);
+  end if;
+  return Tensor(U, D, S, Cat);
 end intrinsic;
 
 intrinsic Tensor( R::Rng, D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
@@ -339,7 +344,12 @@ end intrinsic;
 
 intrinsic Tensor( D::[RngIntElt], S::[RngElt] ) -> TenSpcElt
 {Returns the tensor from the sequence S over the free R-modules with dimensions given by D in the homotopism category.}
-  return Tensor(Universe(S), D, S, HomotopismCategory(#D));
+  if #S eq 0 then 
+    U := Integers(); // arbitrary
+  else
+    U := Universe(S);
+  end if;
+  return Tensor(U, D, S, HomotopismCategory(#D));
 end intrinsic;
 
 // ==============================================================================
