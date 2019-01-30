@@ -16,7 +16,7 @@ import "Hom.m" : __GetHomotopism;
 intrinsic Print( H::Hmtp )
 {Print H}
   A := H`Cat`Arrows;
-  v := H`Domain`Valence;
+  v := H`Cat`Valence;
   s := Sprintf( "Maps from " );
   for i in [2..v-1] do
     s cat:= Sprintf( "U%o x ", v-i+1 );
@@ -26,7 +26,6 @@ intrinsic Print( H::Hmtp )
     s cat:= Sprintf( "V%o x ", v-i+1 );
   end for;
   s cat:= Sprintf( "V1 >-> V0." );
-  t := H`Domain;
   for i in Reverse([1..v-1]) do
     if ISA(Type(H`Maps[v-i]),Mtrx) then
       u := "\n";
