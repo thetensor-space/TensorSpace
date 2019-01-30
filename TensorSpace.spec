@@ -3,6 +3,13 @@
   {
     GlobalVars.m
   	Types.m
+    Homotopism
+    {
+      Eval.m
+      Hom.m
+      HomBasic.m
+      HomDef.m
+    }
     Tensor
     {
       BimapDef.m
@@ -17,9 +24,6 @@
     }
     TensorCategory
     {
-      Hom.m
-      HomBasic.m
-      HomDef.m
       TensorCat.m
       TensorCatBasic.m
       TensorCatDef.m

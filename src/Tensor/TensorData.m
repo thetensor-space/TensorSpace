@@ -19,6 +19,28 @@ __GetSlice := function( s, dims, grid )
 	return s[indices];
 end function;
 
+// s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], a: integer (in {0..vav})
+__GetFoliation := function( s, dims, a )
+  slice := [ {1..d} : d in dims ];
+  i := #dims - a;
+  F := [];
+  for k in [1..dims[i]] do
+    kSlice := slice;
+    kSlice[i] := {k};
+    Append(~F, __GetSlice(s, dims, kSlice));
+  end for;
+  return Matrix(F);
+end function;
+
+// The inverse of __GetFoliation. Namely, __ReverseFoliation(__GetFoliation(s, dims, a), dims, a) == s.
+__ReverseFoliation := function( M, dims, a )
+  v := #dims;
+  i := v - a;
+  d := &*(dims[i+1..#dims] cat [1]);
+  return &cat[Eltseq(ExtractBlock(M, 1, j, Nrows(M), d)) : j in [1..Ncols(M) by d]];
+end function;
+
+
 // s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], m: max, n: min (m,n in {0..vav})
 __GetForms := function( s, dims, m, n : op := false )
   v := #dims;
