@@ -85,6 +85,11 @@ intrinsic Homotopism( M::List, C::TenCat ) -> Hmtp
   H := __GetHomotopism(C, M : Check := false);
 end intrinsic;
 
+intrinsic Homotopism( M::SeqEnum, C::TenCat ) -> Hmtp
+{Constructs the homotopism, in the tensor category C, from the maps in M.}
+  return Homotopism([*X : X in M*], C);
+end intrinsic;
+
 // =============================================================================
 //                                     Tests
 // =============================================================================
