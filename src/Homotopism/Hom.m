@@ -28,9 +28,12 @@ end function;
 __GetHomotopism := function( Cat, M : Check := false, Cod := 0, Dom := 0 )
   H := New(Hmtp);
   // the @ operator does not work for AlgMatElt or GrpMatElt
-  //while exists(i){ i : i in [1..#M] | ISA(Type(M[i]), AlgMatElt) or ISA(Type(M[i]), GrpMatElt) } do
-  //  M[i] := Hom(F_B[i], F_C[i])!(M[i]);
-  //end while;
+  while exists(i){ i : i in [1..#M] | ISA(Type(M[i]), AlgMatElt) or ISA(Type(M[i]), GrpMatElt) } do
+    K := BaseRing(M[i]);
+    U := VectorSpace(K, Nrows(M[i]));
+    V := VectorSpace(K, Ncols(M[i]));
+    M[i] := Hom(U, V)!(M[i]);
+  end while;
   H`Maps := M;
   if Type(Dom) ne RngIntElt then
     H`Domain := Dom;
@@ -83,6 +86,7 @@ intrinsic Homotopism( M::List, C::TenCat ) -> Hmtp
 {Constructs the homotopism, in the tensor category C, from the maps in M.}
   require #M eq C`Valence : "Number of maps do not match the valence of the tensor category.";
   H := __GetHomotopism(C, M : Check := false);
+  return H;
 end intrinsic;
 
 intrinsic Homotopism( M::SeqEnum, C::TenCat ) -> Hmtp
@@ -93,27 +97,11 @@ end intrinsic;
 // =============================================================================
 //                                     Tests
 // =============================================================================
-intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> BoolElt
-{Decides if the given maps form a homotopism from t to s.}
-  require #M eq t`Valence : "Incorrect number of maps.";
-  require t`Cat eq s`Cat : "Tensor categories are incompatible.";
-  H, isit := __GetHomotopism(t, s, M);
-  if isit then
-    return isit, H;
-  end if;
-  return false, _;
-end intrinsic;
-
-intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum ) -> BoolElt
-{Decides if the given maps form a homotopism from t to s.}
-  return IsHomotopism(t, s, [*X : X in M*]);
-end intrinsic;
-
 intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat ) -> BoolElt
 {Decides if the given maps form a homotopism from t to s in the tensor category C.}
   require #M eq t`Valence : "Incorrect number of maps.";
   require t`Cat eq s`Cat : "Tensor categories are incompatible.";
-  H, isit := __GetHomotopism(t, s, M : Cat := C);
+  H, isit := __GetHomotopism(C, M : Check := true, Cod := s, Dom := t);
   if isit then
     return isit, H;
   end if;
@@ -124,3 +112,15 @@ intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum, C::TenCat ) -> B
 {Decides if the given maps form a homotopism from t to s in the tensor category C.}
   return IsHomotopism(t, s, [*X : X in M*], C);
 end intrinsic;
+
+intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::List ) -> BoolElt
+{Decides if the given maps form a homotopism from t to s.}
+  return IsHomotopism(t, s, M, HomotopismCategory(Valence(t)));
+end intrinsic;
+
+intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum ) -> BoolElt
+{Decides if the given maps form a homotopism from t to s.}
+  return IsHomotopism(t, s, [*X : X in M*], HomotopismCategory(Valence(t)));
+end intrinsic;
+
+

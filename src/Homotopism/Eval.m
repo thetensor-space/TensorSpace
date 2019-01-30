@@ -4,7 +4,7 @@
 */
 
 
-import "../Util/Util.m" : __GetFoliation, __ReverseFoliation;
+import "../Tensor/TensorData.m" : __GetFoliation, __ReverseFoliation;
 
 
 // s: sequence of field elts, dims: sequence of dimensions for [V_vav, ..., V_0], F: a matrix in End(V_a), a: an int (in {0..vav}).
@@ -34,6 +34,10 @@ intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
   catch err
     error "Cannot construct structure constants.";
   end try;
+
+    for a in [0..v-1] do
+      sc := __Apply(sc, dims, H.a, a);
+    end for;
 
   try
     for a in [0..v-1] do

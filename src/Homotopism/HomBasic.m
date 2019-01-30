@@ -16,12 +16,12 @@ import "Hom.m" : __GetHomotopism;
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic Domain( H::Hmtp ) -> TenSpcElt
 {Returns the domain of H.}
-  return H`Domain;
+  return H`Domain; // Come back to this. H`Domain isn't aways defined.
 end intrinsic;
 
 intrinsic Codomain( H::Hmtp ) -> TenSpcElt
 {Returns the codomain of H.}
-  return H`Codomain;
+  return H`Codomain; // Come back to this. H`Codomain isn't aways defined.
 end intrinsic;
 
 intrinsic Maps( H::Hmtp ) -> List
@@ -29,6 +29,7 @@ intrinsic Maps( H::Hmtp ) -> List
   return H`Maps;
 end intrinsic;
 
+// There is a more general function for this.... requires more thought.
 intrinsic Kernel( H::Hmtp ) -> TenSpcElt, List
 {Returns the kernel as a subtensor of the domain of H.}
   dom := Frame(H`Domain);
@@ -58,6 +59,7 @@ intrinsic Kernel( H::Hmtp ) -> TenSpcElt, List
   return Tensor(K_frame,F,H`Domain`Cat);
 end intrinsic;
 
+// There is a more general function for this.... requires more thought.
 intrinsic Image( H::Hmtp ) -> TenSpcElt, List
 {Returns the image of H as a subtensor of the codomain of H.}
   dom := Frame(H`Domain);
