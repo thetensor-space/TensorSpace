@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2019 Joshua Maglione, James B. Wilson.
     Distributed under MIT License.
 */
 
@@ -8,17 +8,46 @@
   This file contains all the homotopism constructors.
 */
 
-import "../GlobalVars.m" : __FRAME;
+// arrow is assumed to be in {-1, 1}. 
+__InterpretArrows := function(arrow)
+  if arrow eq -1 then
+    return 2;
+  end if;
+  return 1;
+end function;
 
-__VerifyHomotopism := function( B, C, H )
-  Dom := Domain(B);
-  v := #Dom+1;
-  Bas := CartesianProduct(< Basis(d) : d in Dom >);
+// Input: t: Tup, H: Hmtp, k: RngIntElt (either -1 or 1).
+// Returns: Tup.
+// If k == 1, then acts by maps in H "pointing down;" otherwise "pointing up."
+__ActOnTuple := function(t, H, k)
+  v := #t + 1;
+  s := t;
+  for i in [1..#t] do
+    if (v-i) @ H`Cat`Arrows eq k then 
+      s[i] := t[i] @ H.(v-i);
+    end if;
+  end for;
+  return s;
+end function;
 
-  // This needs to be fixed... -JM
-  try  
-    pass := forall{ x : x in Bas | (< x[i] @ H.(v-i) : i in [1..#x] > @ C) eq ((x @ B) @ H.0) };
-  catch err 
+__VerifyHomotopism := function( s, t, H )
+  v := Valence(s);
+
+  // Bring in only relevant spaces
+  Spaces := <>;
+  for i in [1..v-1] do
+    dom := [*Domain(s)[i], Domain(t)[i]*];
+    Append(~Spaces, dom[__InterpretArrows((v-i) @ H`Cat`Arrows)]);
+  end for;
+
+  // Get a structure basis for the tensor product of 'Spaces'
+  B := CartesianProduct(<Basis(X) : X in Spaces>);
+
+  // Run the test
+  try
+    pass := forall{x : x in B | __ActOnTuple(x, H, 1) @ t eq 
+        __ActOnTuple(x, H, -1) @ s};
+  catch err
     pass := false;
   end try;
 
