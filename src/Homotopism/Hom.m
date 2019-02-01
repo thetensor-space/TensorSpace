@@ -92,7 +92,7 @@ intrinsic Homotopism( t::TenSpcElt, s::TenSpcElt, M::List, C::TenCat : Check := 
   require #M eq t`Valence : "Number of maps and tensor valence do not match.";
   require #M eq C`Valence : "Number of maps and valence of given category do not match.";
   require t`Cat eq s`Cat : "Tensor categories are incompatible."; // Maybe we loosen this later?
-  H, isit := __GetHomotopism(t`Cat, M : Check := Check, Cod := s, Dom := t);
+  H, isit := __GetHomotopism(C, M : Check := Check, Cod := s, Dom := t);
   return H;
 end intrinsic;
 

@@ -11,7 +11,7 @@
 
 import "../GlobalVars.m" : __SANITY_CHECK, __FRAME;
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
-import "../TensorCategory/Hom.m" : __GetHomotopism;
+import "../Homotopism/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 
 // t: tensor, C: tensor category
@@ -142,7 +142,7 @@ intrinsic Image( t::TenSpcElt ) -> ModTupRng
   return S;
 end intrinsic;
 
-intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp, List
+intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp 
 {Returns the associated nondegenerate tensor of t along with a homotopism.}
   if assigned t`Nondegenerate then
     return t`Nondegenerate[1], t`Nondegenerate[2];
@@ -169,7 +169,6 @@ intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp, List
   end for;
   // Include the codomain stuff
   Append(~proj, hom< t`Codomain -> t`Codomain | [ <b,b> : b in Basis(t`Codomain) ] >);
-  Append(~auto, IdentityMatrix(R, Dimension(t`Codomain)));
 
   F := function(x)
     return < x[i] @@ proj[i] : i in [1..#x] > @ t;
@@ -180,7 +179,7 @@ intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp, List
   if assigned t`Coerce then
     s`Coerce := [* t`Coerce[i] * proj[i] : i in [1..#proj] *];
   end if;
-  H := __GetHomotopism( t, s, proj : Cat := HomotopismCategory(t`Valence : Contravariant := t`Cat`Contra) );
+  H := Homotopism( t, s, proj, HomotopismCategory(Valence(t)) );
   if assigned H2 then
     H := H2*H;
   end if;
@@ -210,7 +209,7 @@ intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
     return x @ s;
   end function;
   full_s := __GetTensor( s`Domain, I, F : Cat := t`Cat );
-  H := __GetHomotopism(t, full_s, H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *] : Cat := CohomotopismCategory(t`Valence));
+  H := Homotopism(t, full_s, H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *], CohomotopismCategory(Valence(t)));
   t`FullyNondeg := <full_s, H>;
   return full_s, H;
 end intrinsic;
