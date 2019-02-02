@@ -18,11 +18,32 @@ __Apply := function(s, dims, F, a)
 end function;
 
 
-
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //                                   Evaluation
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
+{Returns t @ H.}
+  v := Valence(t);
+  cohom := {[1 : k in [1..v-1]] cat [-1], [-1 : k in [1..v-1]] cat [1]};
+  require Arrows(H`Cat) in cohom : 
+    "Homotopism must be in a cohomotopism category, captible with the tensor.";
+  dims := [Dimension(X) : X in Frame(t)];
+
+  D := [*Domain(H.a) : a in [v-1..1 by -1]*];
+  C := Codomain(H.0);
+  F := function(x)
+    y := x;
+    for i in [1..#x] do
+      y[i] := x[i] @ H.(v-i);
+    end for;
+    return y @ t @ H.0;
+  end function;
+
+  s := Tensor(D, C, F, TensorCategory(t));
+  return s;
+end intrinsic;
+
+/*intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
 {Returns t @ H.}
   v := Valence(t);
   cohom := {[1 : k in [1..v-1]] cat [-1], [-1 : k in [1..v-1]] cat [1]};
@@ -35,10 +56,6 @@ intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
     error "Cannot construct structure constants.";
   end try;
 
-    for a in [0..v-1] do
-      sc := __Apply(sc, dims, H.a, a);
-    end for;
-
   try
     for a in [0..v-1] do
       sc := __Apply(sc, dims, H.a, a);
@@ -50,4 +67,4 @@ intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
   new_dims := [Dimension(Domain(H.a)) : a in [v-1..0 by -1]];
   
   return Tensor(new_dims, sc, t`Cat);
-end intrinsic;
+end intrinsic;*/

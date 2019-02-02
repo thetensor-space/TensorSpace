@@ -45,9 +45,15 @@ __VerifyHomotopism := function( s, t, H )
 
   // Run the test
   try
-    pass := forall{x : x in B | __ActOnTuple(x, H, 1) @ t eq 
-        __ActOnTuple(x, H, -1) @ s};
+    if 0 @ H`Cat`Arrows eq 1 then
+      pass := forall{x : x in B | __ActOnTuple(x, H, 1) @ t eq 
+          (__ActOnTuple(x, H, -1) @ s) @ H.0};
+    else
+      pass := forall{x : x in B | (__ActOnTuple(x, H, 1) @ t) @ H.0 eq 
+          __ActOnTuple(x, H, -1) @ s};
+    end if;
   catch err
+    "Something went wrong.";
     pass := false;
   end try;
 
@@ -56,13 +62,17 @@ end function;
 
 __GetHomotopism := function( Cat, M : Check := false, Cod := 0, Dom := 0 )
   H := New(Hmtp);
+
   // the @ operator does not work for AlgMatElt or GrpMatElt
-  while exists(i){ i : i in [1..#M] | ISA(Type(M[i]), AlgMatElt) or ISA(Type(M[i]), GrpMatElt) } do
+  while exists(i){ i : i in [1..#M] | ISA(Type(M[i]), AlgMatElt) or 
+      ISA(Type(M[i]), GrpMatElt) } do
     K := BaseRing(M[i]);
     U := VectorSpace(K, Nrows(M[i]));
     V := VectorSpace(K, Ncols(M[i]));
     M[i] := Hom(U, V)!(M[i]);
   end while;
+
+  H`Cat := Cat;
   H`Maps := M;
   if Type(Dom) ne RngIntElt then
     H`Domain := Dom;
@@ -70,7 +80,7 @@ __GetHomotopism := function( Cat, M : Check := false, Cod := 0, Dom := 0 )
   if Type(Cod) ne RngIntElt then
     H`Codomain := Cod;
   end if;
-  H`Cat := Cat;
+
   if Check then
     assert RngIntElt notin {Type(Dom), Type(Cod)};
     verified := __VerifyHomotopism(Dom, Cod, H);

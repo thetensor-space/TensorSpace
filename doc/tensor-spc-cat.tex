@@ -1694,6 +1694,9 @@ U0 : Full Vector space of degree 1 over Rational Field
 \section{Homotopisms}
 
 Magma provides functions for homotopisms, i.e.\ morphisms of tensors. Homotopisms are also equipped with a tensor category.
+Because homotopisms can contain mutiple maps between modules, it is not really clear what is meant by the domain or codomain of a given homotopism. 
+In this context, the \emph{domain} of a homotopism $H$ will refer to the tensor, $t:U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$, where an arrow equal to $1$ at coordinate $a$ will mean that the corresponding map at coordinate $a$ has domain equal to $U_a$. 
+And in the same vain, the tensor $s:V_{\vav} \times\cdots \times V_1\rightarrowtail V_0$ is the \emph{codomain} of $H$ if an arrow equal to $1$ at coordinate $a$ implies that the corresponding map at coordinate $a$ has codomain equal to $V_a$. 
 
 \subsection{Constructions of Homotopisms}~
 
@@ -1713,13 +1716,24 @@ Returns the homotopism from $t$ to $s$ given by the list of maps $M$ and the cat
 The default tensor category is the same as tensor categories for $t$ and $s$.
 If the maps $M$ will produce a homotopism, then set \texttt{Check} to \texttt{false} to skip the verification.
 
+\index{Homotopism}
+\begin{intrinsics}
+Homotopism(M, C) : List, TenCat -> Hmtp
+Homootpism(M, C) : SeqEnum, TenCat -> Hmtp
+\end{intrinsics}
+
+Returns the homotopism given by the maps in $M$ with tensor category $C$. 
+
 \index{IsHomotopism}
 \begin{intrinsics}
 IsHomotopism(t, s, M) : TenSpcElt, TenSpcElt, List -> BoolElt
 IsHomotopism(t, s, M) : TenSpcElt, TenSpcElt, SeqEnum -> BoolElt
+IsHomotopism(t, s, M, C) : TenSpcElt, TenSpcElt, List, TenCat -> BoolElt
+IsHomotopism(t, s, M, C) : TenSpcElt, TenSpcElt, SeqEnum, TenCat -> BoolElt
 \end{intrinsics}
 
-Decides if the list of maps $M$ induces a homotopism from $t$ to $s$. 
+Decides if the list of maps $M$ induces a homotopism from $t$ to $s$ in the tensor category $C$. 
+The default tensor category is the homotopism category. 
 If it does induce a homotopism, it is also returned.
 
 \begin{example}[HomotopismConst]
@@ -1838,10 +1852,10 @@ Returns the composition of the homotopisms $H_1$ and $H_2$.
 
 \index{.!homotopisms}
 \begin{intrinsics}
-H.i : Hmtp, RngIntElt -> Map
+H.a : Hmtp, RngIntElt -> Map
 \end{intrinsics}
 
-Returns the map on the $i$th coordinate.
+Returns the map on the $a$th coordinate.
 
 \begin{example}[HomotopismOps]
 
@@ -1919,6 +1933,14 @@ U0 -> V0:
 true
 \end{code}
 \end{example}
+
+\index{AT!homotopism}
+\begin{intrinsics}
+t @ H : TenSpcElt, Hmtp -> TenSpcElt
+\end{intrinsics}
+
+If $H$ is a cohomotopism (a homotopism in the cohomotopism category), then either the domain or codomain of $H$ is returned, depending on the orientation of the arrows of $H$.
+
 
 \subsection{Basic Properties of Homotopisms}~
 
