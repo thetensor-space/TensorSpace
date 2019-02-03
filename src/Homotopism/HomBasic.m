@@ -11,9 +11,14 @@
 
 import "Hom.m" : __GetHomotopism;
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+intrinsic Valence( H::Hmtp ) -> RngIntElt
+{Returns the valence of the underlying category of the homotopism H.}
+  return Valence(TensorCategory(H));
+end intrinsic;
+
 intrinsic Domain( H::Hmtp ) -> TenSpcElt
 {Returns the domain of H.}
   return H`Domain; // Come back to this. H`Domain isn't aways defined.
@@ -109,4 +114,66 @@ intrinsic '.'( H::Hmtp, i::RngIntElt ) -> Map
   M := Maps(H);
   require i in [0..#M-1] : "Integer should be in range [0.." cat IntegerToString(#M-1) cat "].";
   return M[#M-i];
+end intrinsic;
+
+
+intrinsic Shuffle( H::Hmtp, g::GrpPermElt ) -> Hmtp
+{Returns the shuffle of H, in a tensor category of valence v, by the permutation g on the set [0..v-1].}
+  v := Valence(H);
+  Cat_old := TensorCategory(H);
+
+  // check things based on co-/ contra- variance.
+  if Cat_old`Contra then
+    require Labelling(Parent(g)) in {{1..v-1},{0..v-1}} : "Permutation must act on {1..v-1}.";
+    if Labelling(Parent(g)) eq {1..v-1} then
+      g := Sym({0..v-1})!([0] cat Eltseq(g));
+    else
+      require 0^g eq 0 : "Permutation must fix 0 for cotensors.";
+    end if;
+  else
+    require Labelling(Parent(g)) eq {0..v-1} : "Permuation must act on {0..v-1}.";
+  end if;
+
+  // stop if g is trivial
+  if Parent(g)!1 eq g then
+    return H;
+  end if;
+
+  // build the new category
+  Cat_new := New(TenCat);
+  Cat_new`Valence := v;
+  Cat_new`Arrows := map< {0..v-1} -> {-1,0,1} | x :-> (x^g) @ Cat_old`Arrows >;
+  Cat_new`Repeats := {{x^(g^-1) : x in S} : S in Cat_old`Repeats};
+  Cat_new`Contra := Cat_old`Contra;
+
+  // rearrange the maps
+  g_elt := Reverse([v-i : i in Eltseq(g)]);
+  M := Maps(H)[g_elt];
+
+  // shuffle the domain and codomain
+  try
+    dom := Shuffle(Domain(H), g);
+    cod := Shuffle(Codomain(H), g);
+    H_shuf := Homotopism(dom, cod, M, Cat_new);
+  catch err
+    H_shuf := Homotopism(M, Cat_new);
+  end try;
+  
+  return H_shuf;
+end intrinsic;
+
+intrinsic Shuffle( H::Hmtp, g::SeqEnum[RngIntElt] ) -> Hmtp
+{Returns the shuffle of H, in a tensor category of valence v, by the permutation given by g on the set [0..v-1].}
+    if TensorCategory(H)`Contra then
+    isit, perm := IsCoercible(Sym({1..Valence(H)-1}), g);
+    if not isit then
+      isit, perm := IsCoercible(Sym({0..Valence(H)-1}), g);
+      require isit : "Permutation must act on {1..v}.";
+      require Index(g, 0) eq 1 : "Permutation must fix 0.";
+    end if;
+  else
+    isit, perm := IsCoercible(Sym({0..Valence(H)-1}), g);
+    require isit : "Permutation must act on {0..v}.";
+  end if;
+  return Shuffle(H, perm);
 end intrinsic;

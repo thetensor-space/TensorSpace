@@ -189,7 +189,8 @@ intrinsic AsCotensorSpace( t::TenSpcElt ) -> TenSpc, Mtrx
   end for;
   Cat := CotensorCategory(Prune(Arrows(t`Cat)),part); 
   CT := CotensorSpace(t`Domain, Cat);
-  S := sub< CT`Mod | [ CT`Mod!F[i] : i in [1..Nrows(F)] ] >;
+  S := VectorSpaceWithBasis([CT`Mod!F[i] : i in [1..Nrows(F)]]);
+  //S := sub< CT`Mod | [ CT`Mod!F[i] : i in [1..Nrows(F)] ] >;
   CT`Mod := S;
   return CT, F;
 end intrinsic;

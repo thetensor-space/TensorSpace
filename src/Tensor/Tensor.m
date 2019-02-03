@@ -635,6 +635,11 @@ intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
   else
     require Labelling(Parent(g)) eq {0..v-1} : "Permuation must act on {0..v-1}.";
   end if;
+
+  if Parent(g)!1 eq g then
+    return t;
+  end if;
+
   g_elt := Reverse([ v-i : i in Eltseq(g) ]);
   ginv_elt := Reverse([ v-i : i in Eltseq(g^-1) ]);
   spaces := __FRAME(t);
@@ -671,7 +676,7 @@ intrinsic Shuffle( t::TenSpcElt, g::GrpPermElt ) -> TenSpcElt
 end intrinsic;
 
 intrinsic Shuffle( t::TenSpcElt, g::SeqEnum ) -> TenSpcElt
-{Returns the Knuth-Liebler shuffle of t, with valence v, by the permutation given by g on the set [0..v].}
+{Returns the Knuth-Liebler shuffle of t, with valence v, by the permutation given by g on the set [0..v-1].}
   if t`Cat`Contra then
     isit, perm := IsCoercible(Sym({1..t`Valence-1}), g);
     if not isit then
