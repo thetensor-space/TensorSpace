@@ -16,7 +16,7 @@ __get_eval_map := function(t, M, A)
   E := function(x)
     y := x;
     for i in [1..#x] do
-      if v-i in A then
+      if #x-i in A then
         y[i] := x[i] @ M[i];
       end if;
     end for;
@@ -160,9 +160,9 @@ intrinsic Lift1 (t1::TenSpcElt, t2::TenSpcElt, f::Hmtp, a::RngIntElt)
   require {a} in RepeatPartition(C2) : "Given coordinate is fused.";
 
   // construct a permutation
+  v := Valence(t1);
   G := Sym({0..v-1});
   if a ne 0 then
-    v := Valence(t1);
     perm := G!(0, a);
   else
     perm := G!1;
