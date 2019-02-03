@@ -53,7 +53,7 @@ __VerifyHomotopism := function( s, t, H )
           __ActOnTuple(x, H, -1) @ s};
     end if;
   catch err
-    "Something went wrong.";
+    "Something went wrong trying to apply one of the maps.";
     pass := false;
   end try;
 

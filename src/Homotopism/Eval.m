@@ -17,6 +17,22 @@ __Apply := function(s, dims, F, a)
   return new_s;
 end function;
 
+__BlackBoxApply := function(t, F, a)
+  v := Valence(t);
+
+  Eval := function(x)
+    y := x;
+    y[v - a] := x[v - a] @ F;
+    return y @ t;
+  end function;
+
+  Fr := Frame(t);
+  Fr[v - a] := Domain(F);
+
+  s := Tensor(Fr, Eval, TensorCategory(t));
+  return s;
+end function;
+
 
 // -----------------------------------------------------------------------------
 //                                   Evaluation
@@ -41,6 +57,23 @@ intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt
 
   s := Tensor(D, C, F, TensorCategory(t));
   return s;
+end intrinsic;
+
+intrinsic Precompose( t::TenSpcElt, f::Map, a::RngIntElt ) -> TenSpcElt
+{Returns the tensor precomposed with f in coordinate a.}
+  require a gt 0 : "Cannot pre-compose in the 0 coordinate.";
+  return __BlackBoxApply(t, f, a);
+end intrinsic;
+
+intrinsic Precompose( t::TenSpcElt, M::Mtrx, a::RngIntElt ) -> TenSpcElt
+{Returns the tensor precomposed with f in coordinate a.}
+  require a gt 0 : "Cannot pre-compose in the 0 coordinate.";
+  v := Valence(t);
+
+  // Eventually write a slicing version
+  // '@' does not work for general matrices
+  HomSpc := Hom(Domain(M), Codomain(M));
+  return __BlackBoxApply(t, HomSpc!M, a);
 end intrinsic;
 
 /*intrinsic '@'( t::TenSpcElt, H::Hmtp ) -> TenSpcElt

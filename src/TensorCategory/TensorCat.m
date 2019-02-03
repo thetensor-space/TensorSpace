@@ -24,6 +24,9 @@ __TensorCatSanity := function( F, C )
     return false, "Valences do not match.";
   end if;
   parts := [ P : P in C`Repeats | #P gt 1 ];
+  if C`Contra then
+    v +:= 1; //band-aid fix. --JM  02.02.2019
+  end if;
   for P in parts do
     if not forall{ p : p in P | p @ C`Arrows eq Minimum(P) @ C`Arrows } then
       return false, "Arrows do not match repeated modules.";
