@@ -1934,6 +1934,17 @@ true
 \end{code}
 \end{example}
 
+\index{Precompose}
+\begin{intrinsics}
+Precompose(t, f, a) : TenSpcElt, Map, RngIntElt -> TenSpcElt
+Precompose(t, M, a) : TenSpcElt, Mtrx, RngIntElt -> TenSpcElt
+\end{intrinsics}
+
+If $a>0$, then the tensor returned is the tensor that has been pre-composed by the map $f$ or matrix $M$. 
+This currently works on a ``black-box'' level, so structure constants need to be recomputed after pre-composing;
+eventually a slicing option will be included to save work. 
+
+
 \index{AT!homotopism}
 \begin{intrinsics}
 t @ H : TenSpcElt, Hmtp -> TenSpcElt
@@ -1980,6 +1991,13 @@ ChangeTensorCategory(~H, C) : Hmtp, TenCat ->
 \end{intrinsics}
 
 Changes the tensor category of $H$ to the given category.
+
+\index{Valence!homotopism}
+\begin{intrinsics}
+Valence(H) : Hmtp -> RngIntElt
+\end{intrinsics}
+
+Returns the valence of the underlying tensor category of the homotopism $H$. 
 
 \index{Kernel}
 \begin{intrinsics}
@@ -2077,3 +2095,20 @@ U1 : Vector space of degree 4, dimension 0 over Rational Field
 U0 : Vector space of degree 1, dimension 0 over Rational Field
 \end{code}
 \end{example}
+
+
+\index{Shuffle!homotopism}
+\begin{intrinsics}
+Shuffle(H, g) : Hmtp, GrpPermElt -> Hmtp
+Shuffle(H, g) : Hmtp, [RngIntElt] -> Hmtp
+\end{intrinsics}
+
+Just like the shuffle for tensors, this returns the shuffle of the homotopism $H$.
+This is a functor from one tensor category to another and changes the order of the maps to
+\[ \{H_{\vav^g},\dots, H_{1^g}, H_{0^g}\}. \]
+In order to be defined, $g\in\text{Sym}(\{0,\dots,\vav \})$. 
+If $0^g\ne 0$, then both the image and pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
+For cotensors, $g\in\text{Sym}(\{1,\dots,\vav\})$.
+Sequences $[a_1,\dots,a_{\vav+1}]$ will be interpreted as 
+\[ \begin{array}{cccc} 0 & 1 & \cdots & \vav \\ \downarrow & \downarrow & & \downarrow \\ a_1 & a_2 & \cdots & a_{\vav+1}. \end{array}\]
+
