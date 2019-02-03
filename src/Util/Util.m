@@ -14,6 +14,14 @@ import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
 import "../Types.m" : __RF_DERIVED_FROM;
 
 
+__List := function(x)
+  return [*y : y in x*];
+end function;
+
+__Tuple := function(x)
+  return <y : y in x>;
+end function;
+
 __GetInduction := function(X, a)
   t := X`DerivedFrom`Tensor;
   K := BaseRing(t);

@@ -8,6 +8,9 @@
   This file contains all the homotopism constructors.
 */
 
+import "../Util/Util.m" : __List, __Tuple;
+
+
 // arrow is assumed to be in {-1, 1}. 
 __InterpretArrows := function(arrow)
   if arrow eq -1 then
@@ -21,13 +24,13 @@ end function;
 // If k == 1, then acts by maps in H "pointing down;" otherwise "pointing up."
 __ActOnTuple := function(t, H, k)
   v := #t + 1;
-  s := t;
+  s := __List(t);
   for i in [1..#t] do
     if (v-i) @ H`Cat`Arrows eq k then 
       s[i] := t[i] @ H.(v-i);
     end if;
   end for;
-  return s;
+  return __Tuple(s);
 end function;
 
 __VerifyHomotopism := function( s, t, H )
