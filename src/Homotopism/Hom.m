@@ -164,5 +164,3 @@ intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum ) -> BoolElt
 {Decides if the given maps form a homotopism from t to s.}
   return IsHomotopism(t, s, [*X : X in M*], HomotopismCategory(Valence(t)));
 end intrinsic;
-
-
