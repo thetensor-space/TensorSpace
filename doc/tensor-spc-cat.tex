@@ -1726,6 +1726,7 @@ Returns the homotopism given by the maps in $M$ with tensor category $C$.
 
 \index{IsHomotopism}
 \begin{intrinsics}
+IsHomotopism(t, s, H) : TenSpcElt, TenSpcElt, Hmtp -> BoolElt
 IsHomotopism(t, s, M) : TenSpcElt, TenSpcElt, List -> BoolElt
 IsHomotopism(t, s, M) : TenSpcElt, TenSpcElt, SeqEnum -> BoolElt
 IsHomotopism(t, s, M, C) : TenSpcElt, TenSpcElt, List, TenCat -> BoolElt
@@ -1941,8 +1942,6 @@ Precompose(t, M, a) : TenSpcElt, Mtrx, RngIntElt -> TenSpcElt
 \end{intrinsics}
 
 If $a>0$, then the tensor returned is the tensor that has been pre-composed by the map $f$ or matrix $M$. 
-This currently works on a ``black-box'' level, so structure constants need to be recomputed after pre-composing;
-eventually a slicing option will be included to save work. 
 
 
 \index{AT!homotopism}

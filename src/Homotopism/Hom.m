@@ -8,6 +8,7 @@
   This file contains all the homotopism constructors.
 */
 
+import "Eval.m" : __Apply;
 import "../Util/Util.m" : __List, __Tuple;
 
 
@@ -36,29 +37,63 @@ end function;
 __VerifyHomotopism := function( s, t, H )
   v := Valence(s);
 
-  // Bring in only relevant spaces
-  Spaces := <>;
-  for i in [1..v-1] do
-    dom := [*Domain(s)[i], Domain(t)[i]*];
-    Append(~Spaces, dom[__InterpretArrows((v-i) @ H`Cat`Arrows)]);
-  end for;
+  // Decide if we can slice up s and t do decide if H is a homotopism.
+  // This can save considerable time.
+  if assigned s`CoordImages and assigned t`CoordImages and 
+      forall{M : M in Maps(H) | ISA(Type(M), Mtrx)} then
 
-  // Get a structure basis for the tensor product of 'Spaces'
-  B := CartesianProduct(<Basis(X) : X in Spaces>);
+    // Structure constants method
+    seq_s := s`CoordImages;
+    seq_t := t`CoordImages;
+    dims_s := [Dimension(X) : X in Frame(s)];
+    dims_t := [Dimension(X) : X in Frame(t)];
+    
+    for i in [1..v-1] do 
+      if (v-i) @ TensorCategory(H)`Arrows eq 1 then
+        seq_t := __Apply(seq_t, dims_t, H.(v-i), v-i);
+        dims_t[i] := Nrows(H.(v-i));
+      else
+        seq_s := __Apply(seq_s, dims_s, H.(v-i), v-i);
+        dims_s[i] := Nrows(H.(v-i));
+      end if;
+    end for;
 
-  // Run the test
-  try
-    if 0 @ H`Cat`Arrows eq 1 then
-      pass := forall{x : x in B | __ActOnTuple(x, H, 1) @ t eq 
-          (__ActOnTuple(x, H, -1) @ s) @ H.0};
+    if 0 @ TensorCategory(H)`Arrows eq 1 then
+      seq_s := __Apply(seq_s, dims_s, H.0, 0);
     else
-      pass := forall{x : x in B | (__ActOnTuple(x, H, 1) @ t) @ H.0 eq 
-          __ActOnTuple(x, H, -1) @ s};
+      seq_t := __Apply(seq_t, dims_t, H.0, 0);
     end if;
-  catch err
-    "Something went wrong trying to apply one of the maps.";
-    pass := false;
-  end try;
+    
+    pass := seq_s eq seq_t;
+
+  else
+
+    // Black-box method
+    // Bring in only relevant spaces
+    Spaces := <>;
+    for i in [1..v-1] do
+      dom := [*Domain(s)[i], Domain(t)[i]*];
+      Append(~Spaces, dom[__InterpretArrows((v-i) @ H`Cat`Arrows)]);
+    end for;
+
+    // Get a structure basis for the tensor product of 'Spaces'
+    B := CartesianProduct(<Basis(X) : X in Spaces>);
+
+    // Run the test
+    try
+      if 0 @ H`Cat`Arrows eq 1 then
+        pass := forall{x : x in B | __ActOnTuple(x, H, 1) @ t eq 
+            (__ActOnTuple(x, H, -1) @ s) @ H.0};
+      else
+        pass := forall{x : x in B | (__ActOnTuple(x, H, 1) @ t) @ H.0 eq 
+            __ActOnTuple(x, H, -1) @ s};
+      end if;
+    catch err
+      "Something went wrong trying to apply one of the maps.";
+      pass := false;
+    end try;
+
+  end if;
 
   return pass;
 end function;
@@ -163,4 +198,9 @@ end intrinsic;
 intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, M::SeqEnum ) -> BoolElt
 {Decides if the given maps form a homotopism from t to s.}
   return IsHomotopism(t, s, [*X : X in M*], HomotopismCategory(Valence(t)));
+end intrinsic;
+
+intrinsic IsHomotopism( t::TenSpcElt, s::TenSpcElt, H::Hmtp ) -> BoolElt
+{Decides if the homotopism H is a homotopism from t to s.}
+  return IsHomotopism(t, s, Maps(H), TensorCategory(H));
 end intrinsic;
