@@ -132,6 +132,20 @@ __Lift_0_Coordinate := function(s1, s2, g)
 end function;
 
 
+/* 
+  Remark from PAB: this generalizes (and converts to homotopisms) the function
+  
+  IsIsotopism (T1::TenSpcElt, T2::TenSpcElt, L::Tup) -> BoolElt, GrpMatElt
+  
+  from "isom-test.m". This same function can also replace
+  
+  IsPseudoIsometry (T1::TenSpcElt, T2::TenSpcElt, g::GrpMatElt) -> BoolElt , GrpMatElt
+  
+  by making the input f have the same transformation in coordinates 2 and 1.
+  The function Lift2 will be different in that regard. We will need a version tries
+  to put the same transformation in the two missing coordinates.
+*/
+
 /*
   Input:
     (1) tensors t1 and t2 having compatible frames
@@ -186,5 +200,5 @@ intrinsic Lift1 (t1::TenSpcElt, t2::TenSpcElt, f::Hmtp, a::RngIntElt)
   another_check, H := IsHomotopism(t1, t2, Maps(H), TensorCategory(H));
   assert another_check;
 
-  return H;
+  return true, H;
 end intrinsic;
