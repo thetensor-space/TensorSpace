@@ -19,6 +19,9 @@ This software was created by Joshua Maglione and James B. Wilson, Copyright
 If you want a copy of the software under a different license, please contact the
 authors. 
 
+## Acknowledgement
+
+`TensorSpace` was developed by researchers at Colorado State University and partially supported by a National Science Foundation grant DMS-1620454 to Wilson.  We also acknowledge U. Auckland, U. Bielefeld, Bucknell U., and Kent State U. where research was undertook and support provided for this package.
 
 ## Package Contents 
 
