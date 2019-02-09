@@ -40,22 +40,10 @@ undertook and support provided for this package.
 
 ## Installation
 
-
-    <section class="outer">
-
-        <div class="downloads inner">
-
-          <a class="zip_download_link" href="#">Download .zip</a>
-
-          <a class="tar_download_link" href="#">Download .tar.gz</a>
-
-        </div>
-
-    </section>
 #### Linux and Mac users
 
-Download Latest Release zip file and unzip into a folder into 
-magma you would like your Magma packages installed, e.g.:
+Download Latest Release zip file from [here](https://github.com/algeboy/TensorSpace/releases).
+Unzip into a folder into which you would like your Magma packages installed, e.g.:
 ```
 $ mkdir my_magma_packages
 $ cd my_magma_packages
