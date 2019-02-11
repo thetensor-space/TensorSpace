@@ -110,7 +110,11 @@ __BlackBoxSanity := function(S,F)
   try
     y := F(x);
   catch err
-    return false, "Cannot evaluate function.";
+    err_str := Sprintf("Cannot evaluate function. Here is the error.\n" cat 
+        "==== Function error " cat &cat["=" : k in [1..59]] cat "\n" cat 
+        "%o%o\n" cat &cat["=" : k in [1..79]] cat "\n",
+        err`Position, err`Object);
+    return false, err_str;
   end try;
   if IsCoercible(C,y) then
     return true, _;
