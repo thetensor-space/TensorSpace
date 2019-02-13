@@ -89,7 +89,11 @@ __VerifyHomotopism := function( s, t, H )
             __ActOnTuple(x, H, -1) @ s};
       end if;
     catch err
-      "Something went wrong trying to apply one of the maps.";
+      printf "Something went wrong trying to apply one of the maps. ";
+      printf "Here is the error.\n==== Function error ";
+      printf &cat["=" : k in [1..59]] cat "\n";
+      printf "%o%o", err`Position, err`Object;
+      printf &cat["=" : k in [1..79]] cat "\n";
       pass := false;
     end try;
 

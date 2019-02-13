@@ -81,5 +81,5 @@ intrinsic '*'( H1::Hmtp, H2::Hmtp ) -> Hmtp
       error "Cannot compose maps.";
     end try;
   end for;
-  return __GetHomotopism( dom, cod, M );
+  return __GetHomotopism( H1`Cat, M : Cod := cod, Dom := dom );
 end intrinsic;
