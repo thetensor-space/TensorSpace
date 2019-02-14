@@ -57,7 +57,8 @@ __GetInduction := function(X, a)
     Y := sub< A | blocks >;
   end if;
   
-  proj := map< Generic(X) -> Y | x :-> Y!ExtractBlock(x, start, start, d, d) >;
+  proj := map< Generic(X) -> Generic(Y) | 
+      x :-> Generic(Y)!ExtractBlock(x, start, start, d, d) >;
 
   return proj, Y;
 end function;
