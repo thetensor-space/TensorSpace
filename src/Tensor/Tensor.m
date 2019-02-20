@@ -13,7 +13,7 @@ import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "TensorDef.m" : __HasBasis;
 import "../TensorCategory/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
-import "../Types.m" : __RF_BIMAP;
+import "TenSpcEltType.m" : __RF_BIMAP;
 import "TensorData.m" : __GetShuffle, __GetForms, __GetSlice;
 
 __GetBimapRecord := function( B )

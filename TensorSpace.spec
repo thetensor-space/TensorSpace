@@ -2,10 +2,10 @@
   src
   {
     GlobalVars.m
-  	Types.m
     Homotopism
     {
       Eval.m
+      HmtpType.m
       Hom.m
       HomBasic.m
       HomDef.m
@@ -22,15 +22,18 @@
       TensorData.m
       TensorDef.m
       TensorRandom.m
+      TenSpcEltType.m
     }
     TensorCategory
     {
+      TenCatType.m
       TensorCat.m
       TensorCatBasic.m
       TensorCatDef.m
     }
     TensorSpace
     {
+      TenSpcType.m
       TensorSpc.m
       TensorSpcBasic.m
       TensorSpcDef.m
@@ -38,6 +41,7 @@
     Util
     {
       ConjugateCyclic.m
+      DerivedFrom.m
       Util.m
     }
   }

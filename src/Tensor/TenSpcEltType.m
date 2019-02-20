@@ -5,44 +5,10 @@
 
 
 /*
-  This file contains all the definitions of all the new types and attributes 
-  of the Multilinear package.
-*/
-
-
-// -----------------------------------------------------------------------------
-//                             Tensor space categories.
-// -----------------------------------------------------------------------------
-declare type TenCat; 	
-declare attributes TenCat : Arrows, Contra, Repeats, Symmetries, Valence;
-
-/*
-  Description of attributes:
-    Arrows . . . . . . . . The function from Repeats to {-1,0,1} detailing which
-                           spaces are dualized.
-    Contra . . . . . . . . True/false whether the category is contravariant.
-    Repeats. . . . . . . . A partition of {0..vav}.
-    Symmetries . . . . . . The subgroup of Sym({0..vav}) which act on the 
-                           coordinates as symmetries.
-    Valence. . . . . . . . The valence vav + 1.
-*/
-
-// -----------------------------------------------------------------------------
-//                                  Tensor Space
-// -----------------------------------------------------------------------------
-declare type TenSpc[TenSpcElt]; // eventually inherit ModRng structure
-declare attributes TenSpc : Cat, Coerce, Frame, Mod, Ring, UniMap, Valence;
-
-/* 
-  Description of attributes:
-    Cat. . . . . . . . . . The category of the tensor space tensors.
-    Coerce . . . . . . . . If the space is created from some algebraic object, 
-                           this will contain maps to the modules.
-    Frame. . . . . . . . . The sequence of the modules in the frame.
-    Mod. . . . . . . . . . The R-module T.
-    Ring . . . . . . . . . The base ring.
-    UniMap . . . . . . . . The universal map: T -> hom(Va, ... hom(V1, V0) ...).
-    Valence. . . . . . . . The valence of the space.
+  This file contains all the attributes associated to TenSpcElt.
+  See 'src/TensorSpace/TenSpcType.m' for the definition of TenSpcElt. This also 
+  contains definitions and attributes for the types associated to the in-fix 
+  notation and the record format for bilinear maps (i.e. 3-tensors).
 */
 
 // -----------------------------------------------------------------------------
@@ -89,25 +55,6 @@ declare attributes TenSpcElt : Auto, Bimap, Cat, Codomain, Coerce, CoordImages,
     Valence. . . . . . . . The number of modules in the frame.
 */
 
-// -----------------------------------------------------------------------------
-//                                   Homotopism
-// -----------------------------------------------------------------------------
-declare type Hmtp;
-declare attributes Hmtp : Cat, Codomain, Domain, Kernel, Maps;
-
-/* 
-  Description of attributes:
-    Cat. . . . . . . . . . The tensor category.
-    Codomain . . . . . . . The tensor it maps into.
-    Domain . . . . . . . . The tensor in the domain.
-    Kernel . . . . . . . . The kernel of the homotopism.
-    Maps . . . . . . . . . The list of maps from the spaces in the domain to the
-                           spaces in the codomain.
-                           Vn x ... x V1 >-> V0
-                           |          |      |
-                           Un x ... x U1 >-> U0 
-                           The maps go in order from left to right.
-*/
 
 // -----------------------------------------------------------------------------
 //                                  Bimap Spaces
@@ -144,31 +91,5 @@ __RF_BIMAP := recformat< Adjoint : AlgMat, Aut : GrpMat, Isom : GrpMat,
     PIsom. . . . . . . . . The pseudo-isometry group.
     U. . . . . . . . . . . The BmpU space.
     V. . . . . . . . . . . The BmpV space.
-*/
-
-// -----------------------------------------------------------------------------
-//                                 New Attributes
-// -----------------------------------------------------------------------------
-declare attributes GrpMat : DerivedFrom;
-declare attributes AlgMat : DerivedFrom;
-declare attributes AlgMatLie : DerivedFrom;
-declare attributes ModMatFld : DerivedFrom;
-declare attributes AlgGen : Star; 
-
-/*
-  Description of attributes:
-    DerivedFrom. . . . . . The record of tensor information.
-    Star . . . . . . . . . An involution on the algebra.
-*/
-
-__RF_DERIVED_FROM := recformat< Tensor : TenSpcElt, Coords : SetEnum, 
-    Fused : BoolElt, RepCoords : SetEnum >;
-
-/*
-  DerivedFrom record:
-    Tensor . . . . . . . . The tensor from where the object wsa derived from.
-    Coords . . . . . . . . The corresponding coordinates for the blocks. 
-    Fused. . . . . . . . . Whether or not the tensor category was incorporated.
-    RepCoords. . . . . . . The set on which the object is representated on.
 */
 

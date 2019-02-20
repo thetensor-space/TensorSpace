@@ -11,7 +11,6 @@
 
 import "../Tensor/TensorData.m" : __GetSlice, __GetForms;
 import "../GlobalVars.m" : __FRAME, __SANITY_CHECK, __VERSION;
-import "../Types.m" : __RF_DERIVED_FROM;
 
 
 __List := function(x)
@@ -145,9 +144,9 @@ __InduceTemplate := function(X, a)
   end if;
 end function;
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                                  Intrinsics
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 intrinsic HeisenbergGroup( t::TenSpcElt ) -> GrpMat
 {Returns the matrix group of class 2 from the given tensor t.}
   require t`Valence eq 3 : "Tensor must have valence 3.";
@@ -379,25 +378,9 @@ intrinsic Center( A::Alg ) -> Alg
   return S;
 end intrinsic;
 
-intrinsic DerivedFrom( ~X::., t::TenSpcElt, C::{RngIntElt}, RC::{RngIntElt}
-  : Fused := true )
-{This procedure stores the following tensor information to the object X. The 
-tensor t, the corresponding coordinates C, the coordinates RC for which the 
-object is represented on, and the string Type for the type of object X is.}
-  require Type(X) in {AlgMat, AlgMatLie, GrpMat, ModMatFld} : 
-    "No attribute to store tensor information.";
-  R := rec< __RF_DERIVED_FROM | 
-    Tensor := t, 
-    Coords := C,
-    Fused := Fused,
-    RepCoords := RC
-    >;
-  X`DerivedFrom := R;
-end intrinsic;
-
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //                                    Printing
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 intrinsic Sprint( C::TenCat ) -> MonStgElt
 {Returns the string that can be executed in Magma to construct the tensor category.}
@@ -445,9 +428,9 @@ intrinsic Sprint( T::TenSpc ) -> MonStgElt
   return "sub< " * tenspc * " | " * bas * " >";
 end intrinsic;
 
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //                                     Version
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 intrinsic TensorSpaceVersion() -> MonStgElt
 {Returns the version number of the TensorSpace package.}
