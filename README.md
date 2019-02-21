@@ -5,7 +5,16 @@ Tensors have different meanings to different people.
 So why not abstract the differences into _Tensor Spaces_. Now all it means to be a tensor is...
 > A tensor is an element of a tensor space.
 
-[[toc]]
+## Contents
+
+* [Acknowledgements](#Acknowledgements)
+* [Our Team](#Our-Team)
+* [Copying](#Copying)
+* [Repository Structure](#Repository-Structure)
+* [Install](#Install)
+* [Update](#Update)
+* [Uninstall](#Uninstall)
+* [Feedback and Bugs](#Feedback-and-Bugs)
 
 The Experimental Multilinear Algebra Group's distribution of software for 
 integration in the computer algebra system MAGMA, V2.22 and beyond.
@@ -15,7 +24,7 @@ This software was created by Joshua Maglione and James B. Wilson, Copyright 2016
 If you want a copy of the software under a different license, please contact the authors. 
 
 
-## Acknowledgement
+## Acknowledgements
 
 TensorSpace was developed by researchers at Colorado State University and 
 partially supported by a National Science Foundation grant DMS-1620454 to Wilson.  We also acknowledge U. Auckland, U. Bielefeld, Bucknell U., Hausdorff Research Institute for Mathematics, and Kent State U. where research was undertook and support provided for this package.
