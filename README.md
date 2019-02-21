@@ -36,6 +36,7 @@ We invite you explore the repository and join our team.  We welcome and encourag
 
 |                                                                              | Name                | Username                         | 
 -------------------------------------------------------------------------------|---------------------|----------------------------------|
+<img src="https://avatars.githubusercontent.com/galois60" height="50px"/>      | Peter A. Brooksbank | [`@galois60`](https://github.com/galois60)                |
 <img src="https://avatars.githubusercontent.com/joshmaglione" height="50px"/>  | Joshua Maglione     | [`@joshmaglione`](https://github.com/joshmaglione)        |
 <img src="https://avatars.githubusercontent.com/algeboy" height="50px"/>       | James B. Wilson     | [`@algeboy`](https://github.com/algeboy)                  |
 
