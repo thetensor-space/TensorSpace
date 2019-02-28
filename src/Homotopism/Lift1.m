@@ -158,12 +158,12 @@ end function;
         to t2 by changing just the a-th coordinate
     (2) such an isotopism g 
 */
-intrinsic Lift1 (t1::TenSpcElt, t2::TenSpcElt, f::Hmtp, a::RngIntElt) 
-    -> BoolElt, Hmtp
-    
-  {Given tensors t1 and t2, a transformation f between their frames, and
-   a particular coordinate a, find a modification g of f in this single coordinate 
-   so that g is an isotopism from t1 to t2.}
+intrinsic InduceHomotopism(t1::TenSpcElt, t2::TenSpcElt, H::Hmtp, a::RngIntElt) 
+  -> BoolElt, Hmtp
+{Given tensors t1 and t2, a partial homotopism H between their frames, and a 
+particular coordinate a, decide if a homotopism F from t1 to t2 exists such 
+that F.b = H.b for all coordinates except a. If such a homotopism exists, it is 
+returned.}
 
   // some checks to prevent garbage
   require Valence(t1) eq Valence(t2) : "Tensors do not have the same valence.";
@@ -185,10 +185,10 @@ intrinsic Lift1 (t1::TenSpcElt, t2::TenSpcElt, f::Hmtp, a::RngIntElt)
   // permute all the data
   s1 := Shuffle(t1, perm);
   s2 := Shuffle(t2, perm);
-  g := Shuffle(f, perm);
+  H_shuf := Shuffle(H, perm);
 
   // run the magic
-  check, H_shuf := __Lift_0_Coordinate(s1, s2, g);
+  check, F_shuf := __Lift_0_Coordinate(s1, s2, H_shuf);
 
   // interpret the output
   if not check then
@@ -196,9 +196,9 @@ intrinsic Lift1 (t1::TenSpcElt, t2::TenSpcElt, f::Hmtp, a::RngIntElt)
   end if;
 
   // Shuffle back
-  H := Shuffle(H_shuf, perm^-1);
-  another_check, H := IsHomotopism(t1, t2, Maps(H), TensorCategory(H));
+  F := Shuffle(F_shuf, perm^-1);
+  another_check, F := IsHomotopism(t1, t2, Maps(F), TensorCategory(F));
   assert another_check;
 
-  return true, H;
+  return true, F;
 end intrinsic;
