@@ -9,7 +9,7 @@
       Hom.m
       HomBasic.m
       HomDef.m
-      Lift1.m
+      InduceHom.m
     }
     Tensor
     {
