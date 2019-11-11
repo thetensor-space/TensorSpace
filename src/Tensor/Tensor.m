@@ -895,6 +895,9 @@ intrinsic Tensor( M::[Mtrx], a::RngIntElt, b::RngIntElt, Cat::TenCat ) -> TenSpc
     require {a,b} subset {1,2} : "Integers must be contained in [1..2].";
     require #M eq 1 : "Does not represent a cotensor.";
   end if;
+  if #M eq 0 then
+    return Tensor([0, 0, 0], [], Cat);
+  end if;
   if a lt b then
     M := [ Transpose(X) : X in M ];
   end if;
