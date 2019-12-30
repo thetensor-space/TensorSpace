@@ -43,6 +43,9 @@ end function;
 
 // s: seq of elements in K, dims: seq of dims of frame [V_vav, ..., V_0], m: max, n: min (m,n in {0..vav})
 __GetForms := function( s, dims, m, n : op := false )
+  if s eq [] then
+    return [];
+  end if;
   v := #dims;
   m := v-m;
   n := v-n;
