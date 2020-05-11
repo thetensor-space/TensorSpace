@@ -1,8 +1,16 @@
 
-In Magma a tensor space is a parent type for tensors.  It behaves
-as a module but also maintains an interpretation of its elements as
-a multilinear map.  Each tensor space further maintains a tensor category
-which is also assigned to its tensors.
+In Magma a tensor space is a parent type for tensors.  It behaves as a module
+but also maintains an interpretation of its elements as a multilinear map.  Each
+tensor space further maintains a tensor category which is also assigned to its
+tensors.  Note that in \cite{FMW:densors}*{Section~7} tensors do not explicitly
+require a parent tensor space type.  This deviation is in accordance with
+Magma's design patterns for vectors and vector spaces, matrices and matrix
+spaces.  Consequently, the pattern here is more verbose and all primitive data
+types representing tensors are afforded as tensor spaces of specific types,
+e.g. \texttt{KTensorSpace} for tensor spaces for fields $K$, 
+\texttt{RTensorSpace} for commutative ring $R$ and free modules, and 
+\texttt{TensorSpace} for black-box tensor spaces.  Sparse and dense representations
+are indeed handled by system level types to remain efficient.
 
 
 \section{Constructions of tensor and cotensor spaces}
@@ -22,9 +30,9 @@ KTensorSpace(K, S) : Fld, [RngIntElt] -> TenSpc
 KTensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -> TenSpc
 \end{intrinsics}
 
-For a field $K$ and sequence $S=[d_{\vav},\cdots, d_0]$, 
-returns the universal tensor space $\rversor_{a\in [\vav]} K^{d_a}$ with covariant tensor category given by $C$.
-The default category is the homotopism category.
+For a field $K$ and sequence $S=[d_{\vav},\ldots, d_0]$, returns the universal
+tensor space $K^{d_0}\oslash \cdots\oslash K^{d_{\vav}}$ with covariant tensor
+category given by $C$. The default category is the homotopism category.
 
 \index{RTensorSpace}
 \begin{intrinsics}
@@ -33,7 +41,7 @@ RTensorSpace(R, S, C) : Rng, [RngIntElt], TenCat -> TenSpc
 \end{intrinsics}
 
 For a commutative ring $R$ and sequence $S=[d_{\vav},\cdots, d_0]$, returns the
-universal tensor space $\rversor_{a\in [\vav]} R^{d_a}$ with covariant tensor
+universal tensor space $R^{d_0}\oslash\cdots\oslash R^{d_{\vav}}$ with covariant tensor
 category given by $C$. The default category is the homotopism category.
 
 \begin{example}[UniversalKTenSpc]
@@ -84,7 +92,7 @@ TensorSpace(S, C) : List, TenCat -> TenSpc, List
 \end{intrinsics}
 
 Given a sequence $S=[U_{\vav},\dots, U_0]$ of $R$-modules returns a universal tensor 
-space equivalent to $\rversor_{a\in[\vav]} U_a$ with covariant tensor 
+space equivalent to $U_0\oslash \cdots\oslash U_{\vav}$ with covariant tensor 
 category given by $C$ and a list of maps into the vector spaces in the frame. 
 The default category is the homotopism category. 
 
@@ -925,21 +933,59 @@ true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%=============================================================================
+
+
+
 \chapter{Tensor categories}\label{ch:tensor-categories}
 
-Magma allows tensors and tensor spaces to change categories. Unless a user
-specifies otherwise, all tensors are assigned a category that is natural to the
-method by which it was created. For example a tensor created from an algebra
-will be assigned an algebra category, whereas a tensor created by structure
-constants will be assigned the Albert homotopism category
-\cite{Albert:Fundamentals}. Tensor categories influence the behavior of commands
-such as kernels and images as well as the algebraic invariants such as
-derivation algebras of a tensor.  
+Following \cite{FMW:densors}*{Section~5.7 \& Section~7}, Magma allows tensors
+and tensor spaces to change categories. Unless a user specifies otherwise, all
+tensors are assigned a category that is natural to the method by which it was
+created. For example a tensor created from an algebra will be assigned an
+algebra category, whereas a tensor created by structure constants will be
+assigned the homotopism category \citelist{\cite{Albert:Fundamentals}
+\cite{Wilson:division} \cite{FMW:densors}*{Section~5.7}}. Tensor categories
+influence the behavior of commands such as kernels and images as well as the
+algebraic invariants such as derivation algebras of a tensor.  
 
-Our conventions follow \cite{Wilson:division}.  In particular given
+Our conventions follow \citelist{\cite{FMW:densors}*{Section~5.7} \cite{Wilson:division}}.  In particular given
 a tensor $t$ framed by $[U_{\vav},\dots,U_0]$ then a tensor category for
-$t$ will specify a function $A:[\vav]\to \{-1,0,1\}$ along with
-a partition $\mathcal{P}$ of $[\vav]$ such that the following 
+$t$ will specify a function $A:\zrange{\vav}\to \{-1,0,1\}$ along with
+a partition $\mathcal{P}$ of $\zrange{\vav}$ such that the following 
 rules apply to the tensors and morphisms in the category.
 \begin{enumerate}
 \item for each tensor $t$ framed by $[U_{\vav},\dots,U_0]$, if
@@ -987,7 +1033,7 @@ This the third general property stored in Magma's tensor category type
 
 We use the phrase tensor category exclusively for categories that describe tensors and tensor spaces.
 In other words, the data structure of a tensor category is a function 
-$A:[\vav]\rightarrow \{-1,0,1\}$ and a partition $\mathcal{P}$ of $[\vav]$.
+$A:\zrange{\vav}\rightarrow \{-1,0,1\}$ and a partition $\mathcal{P}$ of $\zrange{\vav}$.
 It is useful to distinguish from tensors and cotensors at the categorical level,
 so a tensor category is either covariant or contravariant as well 
 (in the latter case, referred to as a cotensor category).
@@ -1164,7 +1210,7 @@ true
 
 In this section, we define subtensors, local ideals, ideals, and quotients of
 tensors. For the following definitions fix a tensor $t\in T$, with frame
-$\rversor_{a\in[\vav]}U_a$---that is $U_{\vav}\times\cdots\times
+$U_0\oslash \cdots\oslash U_{\vav}$---that is $U_{\vav}\times\cdots\times
 U_1\rightarrowtail U_0$. 
 \begin{defn}
 A tensor $s:V_{\vav}\times \cdots\times V_1\rightarrowtail V_0$ is a
@@ -1172,7 +1218,7 @@ A tensor $s:V_{\vav}\times \cdots\times V_1\rightarrowtail V_0$ is a
 \end{defn}
 
 \begin{defn}
-For $A\subseteq [\vav]-0$, a tensor $s:V_{\vav}\times \cdots\times
+For $A\subseteq \range{\vav}$, a tensor $s:V_{\vav}\times \cdots\times
 V_1\rightarrowtail V_0$ is an \emph{$A$-local ideal} of $t$ if $s$ is a
 subtensor of $t$ and for each $a\in A$, 
 \[ \langle s \,|\, V_{\vav},\dots, V_{a+1}, U_a, V_{a-1},\dots, V_1\rangle \leq V_0 .\]
@@ -1536,7 +1582,7 @@ LocalQuotient(t, s, A : parameters) : TenSpcElt, TenSpcElt, {RngIntElt} -> TenSp
     Check : BoolElt : true
 \end{intrinsics}
 
-Returns the local quotient of $t$ by $s$ at $A\subseteq[\vav]-0$. If you know $s$ is a local 
+Returns the local quotient of $t$ by $s$ at $A\subseteq\range{\vav}$. If you know $s$ is a local 
 ideal of $t$ at $A$, set {\tt Check} to {\tt false} to skip the verification.
 A homotopism is also returned, mapping from $t$ to $t/s$.
 
@@ -1750,14 +1796,15 @@ U0 : Full Vector space of degree 1 over Rational Field
 
 \section{Homotopisms}
 
-Magma provides functions for homotopisms, i.e.\ morphisms of tensors.
+Magma provides functions for homotopisms, i.e.\ morphisms of tensors,
+see definition in \cite{FMW:densors}*{Sections~5.7 \& 7}.
 Homotopisms are also equipped with a tensor category. Because homotopisms can
 contain multiple maps between modules, it is not really clear what is meant by
 the domain or codomain of a given homotopism. In this context, the \emph{domain}
-of a homotopism $H$ will refer to the tensor, $t:U_{\vav}\times \cdots \times
+of a homotopism $H$ will refer to the tensor, $\bra{t}:U_{\vav}\times \cdots \times
 U_1\rightarrowtail U_0$, where an arrow equal to $1$ at coordinate $a$ will mean
 that the corresponding map at coordinate $a$ has domain equal to $U_a$. And in
-the same vain, the tensor $s:V_{\vav} \times\cdots \times V_1\rightarrowtail
+the same vain, the tensor $\bra{s}:V_{\vav} \times\cdots \times V_1\rightarrowtail
 V_0$ is the \emph{codomain} of $H$ if an arrow equal to $1$ at coordinate $a$
 implies that the corresponding map at coordinate $a$ has codomain equal to
 $V_a$. 
@@ -2083,8 +2130,8 @@ Returns the image of $H$ as a submap of the codomain tensor.
 \begin{example}[HomotopismProps]
 
 We demonstrate how to access properties of a homotopism. We construct tensors
-$t:\mathbb{Q}^4\times\mathbb{Q}^4\rightarrowtail \mathbb{Q}$ and
-$s:\mathbb{Q}^6\times\mathbb{Q}^6\rightarrowtail\mathbb{Q}$ given by the dot
+$\bra{t}:\mathbb{Q}^4\times\mathbb{Q}^4\rightarrowtail \mathbb{Q}$ and
+$\bra{s}:\mathbb{Q}^6\times\mathbb{Q}^6\rightarrowtail\mathbb{Q}$ given by the dot
 product.
 \begin{code}
 > t := Tensor(IdentityMatrix(Rationals(), 4), 2, 1);
