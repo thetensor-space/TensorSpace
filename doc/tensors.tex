@@ -19,9 +19,9 @@ of tensors take place within a tensor space. Attributes such as coefficients,
 valence, and frame  apply to the tensor space as well.
 
 When necessary, the user may further direct the operations on tensors to
-appropriate tensor categories (type \texttt{TenCat}).  For instance covariant
-and contravariant variables can be specified as well as imposing symmetry
-conditions.  If no tensor category is prescribed then a default tensor category
+appropriate tensor categories (type \texttt{TenCat}).  For instance, covariant
+and contravariant variables may be specified together with symmetry
+conditions.  If no tensor category is prescribed, then a default tensor category
 is used based on the method of creation.
 \medskip
 
@@ -47,7 +47,7 @@ spaces---essentially forgetting all other structure. The last entry of
 \texttt{S} is assumed to be the codomain of the multilinear map. The
 user-defined function $F$ should take as input a tuple of elements of the domain
 and return an element of the codomain. If no tensor category is provided, the
-Albert's homotopism category is used.
+homotopism category is used.
 
 \begin{example}[BBTensorsFrame] We demonstrate the black-box constructions by
 first constructing the dot product $\cdot : \mathbb{Q}^4\times
@@ -55,7 +55,7 @@ first constructing the dot product $\cdot : \mathbb{Q}^4\times
 black-box tensor, \texttt{Dot}, must take exactly one argument. The argument
 will be a \texttt{Tup}, an element of the Cartesian product $U_{\vav}\times
 \cdots\times U_1$. Note that \texttt{x[i]} is the $i$th entry in the tuple and
-not the $i$th coordinate.
+not the $i$-axis.
 \begin{code}
 > Q := Rationals();
 > U := VectorSpace(Q, 4);
@@ -85,8 +85,8 @@ U0 : Full Vector space of degree 1 over Rational Field
 We will provide a tensor category for the dot product tensor, so that the
 returned tensor is not in the default homotopism category. We will use instead
 the $\{2,1\}$-adjoint category. While the returned tensor prints out the same as
-above, it does indeed live in a universe. The details of tensor categories are
-discussed in Chapter~\ref{ch:tensor-categories}.
+above, it does indeed live in a different universe. The details of tensor
+categories are discussed in Chapter~\ref{ch:tensor-categories}.
 \begin{code}
 > Cat := AdjointCategory(3, 2, 1);
 > Cat;
@@ -139,10 +139,11 @@ Tensor(D, C, F, Cat) : SeqEnum, Any, UserProgram, TenCat -> TenSpcElt, List
 Tensor(D, C, F, Cat) : List, Any, UserProgram, TenCat -> TenSpcElt, List
 \end{intrinsics}
 
-Returns a tensor $t$ and a list of maps from the given frame into vector spaces of the returned frame.
-Note that $t$ is a tensor over vector spaces---essentially forgetting all other structure.
-The user-defined function $F$ should take as input a tuple of elements of $D$ and return an element of $C$.
-If no tensor category is provided, the Albert's homotopism category is used.
+Returns a tensor $t$ and a list of maps from the given frame into vector spaces
+of the returned frame. Note that $t$ is a tensor over vector
+spaces---essentially forgetting all other structure. The user-defined function
+$F$ should take as input a tuple of elements of $D$ and return an element of
+$C$. If no tensor category is provided, then the homotopism category is used.
 
 \begin{example}[BBTripleProduct] Tensors make it easy to create algebras that do
 not fit into traditional categories, such as algebras with triple products.
@@ -215,13 +216,14 @@ true
 
 To confirm this product is left associative, we can create a new tensor for the
 left triple-associator and see that its image is $0$. We will create a
-$6$-tensor $\{ \, \} : \prod_{k=1}^5 \mathbb{M}_{2\times 3}(K)\rightarrowtail
-\mathbb{M}_{2\times 3}(K)$ where
+$6$-tensor $\lla \cdot \rra : \prod_{k=1}^5 \mathbb{M}_{2\times
+3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$ where
 \[ 
     \lla X_1,\dots, X_5\rra = \langle \langle X_1, X_2, X_3 \rangle, 
     X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. 
 \]
-Therefore, if im$(\lla \, \rra)=0$, then $\langle \,\rangle$ is left associative. 
+Therefore, if im$(\lla \cdot \rra)=0$, then $\langle \cdot\rangle$ is left
+associative. 
 
 \begin{code}
 > l_asct := func< X | Eltseq(<<X[1], X[2], X[3]> @ t, X[4], X[5]> @ t \
@@ -247,41 +249,41 @@ Generators:
 \end{code}
 
 Observe that in \texttt{l\_asct} the function \texttt{Eltseq} is called. This is
-because $t$ returns vectors in $K^6$ which is not naturally coercible by Magma
-into $\mathbb{M}_{2\times 3}(K)$. On the other hand, sequences can be coerced
-into $\mathbb{M}_{2\times 3}(K)$. 
+because $t$ returns vectors in $K^6$ which is not naturally coercible by
+\textsf{Magma} into $\mathbb{M}_{2\times 3}(K)$. On the other hand, sequences
+can be coerced into $\mathbb{M}_{2\times 3}(K)$. 
 \end{example}
 
 
 
 
 \subsection{Tensors with structure constant sequences}
-Most computations with tensors $t$ will be carried out using structure constants
-$t_{j_{\vav}\cdots j_0}\in K$. Here $t$ is framed by free $K$-modules
-$[U_{\vav},\dots,U_0]$ with each $U_i$ having an ordered bases
-$\mathcal{B}_i=[e_{i1},\dots,e_{id_i}]$. The interpretation of structure
-constants is that the associated multilinear function $[x_{\vav},\dots,x_1]$
-from $U_{\vav}\times \cdots \times U_1$ into $U_0$ is determined on bases as
-follows:
+Most computations with tensors $t$ will be carried out using structure
+constants, e.g.~in the homotopism category, $t_{j_{\vav}\cdots j_1}^{j_0}\in K$.
+Here $t$ is framed by free $K$-modules $[U_{\vav},\dots,U_0]$ with each $U_i$
+having an ordered bases $\mathcal{B}_i=[e_{i1},\dots,e_{id_i}]$. The
+interpretation of structure constants is that the associated multilinear
+function $[x_{\vav},\dots,x_1]$ from $U_{\vav}\times \cdots \times U_1$ into
+$U_0$ is determined on bases as follows:
 \begin{align*}
-	[e_{\vav j_{\vav}},\dots,e_{1j_1} ]& = \sum_{k=1}^{d_0} T_{j_{\vav} \cdots j_0} e_{0k}.
+	[e_{\vav j_{\vav}},\dots,e_{1j_1} ]& = \sum_{k=1}^{d_0} t_{j_{\vav} \cdots j_1}^{j_0} e_{0k}.
 \end{align*}
 Structure constants are input and stored as sequences $S$ in $K$ according to the
 following assignment. Set $f:\mathbb{Z}^{\vav+1}\to \mathbb{Z}$ to be:
 \begin{align*}
-		 f(j_{\vav},\dots,j_0) & = 1+\sum_{s=0}^{\vav} (j_s-1)\prod_{t=0}^{s-1} d_t.
+		 f(j_{\vav},\dots,j_0) & = 1+\sum_{k=0}^{\vav} (j_k-1)\prod_{\ell=0}^{k-1} d_\ell.
 \end{align*}
-So $S[f(j_{\vav},\dots,j_0)]=T_{j_{\vav}\cdots j_0}$ specifies the structure constants as a sequence.  
+So $S[f(j_{\vav},\dots,j_0)]=t_{j_{\vav}\cdots j_1}^{j_0}$ specifies the structure constants as a sequence.  
 \smallskip
 
 \noindent{\bf Notes.}
 \begin{itemize}
-\item Magma does not presently support the notion of a sparse sequence of structure constants.
+\item \textsf{Magma} does not presently support the notion of a sparse sequence of structure constants.
 A user can provide this functionality by specifying a tensor with a user program rather
 than structure constants. 
 
-\item Some routines in Magma require structure constant sequences.  If they 
-are not provided, Magma may compute and store a structure constant representation
+\item Some routines in \textsf{Magma} require structure constant sequences.  If they 
+are not provided, \textsf{Magma} may compute and store a structure constant representation
 inside the tensor.
 
 \item We do not separate structure constant indices that are contravariant.
@@ -302,11 +304,11 @@ Tensor(D, S, Cat) : [RngIntElt], [RngElt], TenCat -> TenSpcElt
 Tensor(R, D, S, Cat) : Rng, [RngIntElt], [RngElt], TenCat -> TenSpcElt
 \end{intrinsics}
 
-Given dimensions $D=[d_{\vav},\dots,d_0]$, returns the tensor
-in $R^{d_{\vav}\cdots d_0}$ identified by structure constant sequence $S$.
-If $R$ is not provided then the parent ring of the first element of $S$ is used.  
-$R$ must be a commutative unital ring.
-The default tensor category $Cat$ is the homotopism category.
+Given dimensions $D=[d_{\vav},\dots,d_0]$, returns the tensor in
+$R^{d_{\vav}\cdots d_0}$ identified by structure constant sequence $S$. If $R$
+is not provided, then the parent ring of the first element of $S$ is used. The
+ring $R$ must be commutative and unital. The default tensor category
+\texttt{Cat} is the homotopism category.
 
 
 \begin{example}[SCTensors]
@@ -382,10 +384,10 @@ $(a,b,c)$ entry of a $3$-tensor, set \texttt{ind}$\,=[a,b,c]$.
 We will construct the natural Lie module action for $\mathfrak{sl}_2$, but we
 will construct it as a \emph{left} module. To do this, we construct a function
 that takes elements from $\mathfrak{sl}_2\times V$ and returns an element that
-Magma can coerce into $V$. We run a quick test to make sure our function runs on
+\textsf{Magma} can coerce into $V$. We run a quick test to make sure our function runs on
 the trivial example; this is the only check the intrinsic runs on black-box
 tensors. Since $\mathfrak{sl}_2$ and $V$ are part of different universes in
-Magma, we must use the \texttt{List} environment when constructing this
+\textsf{Magma}, we must use the \texttt{List} environment when constructing this
 black-box tensor. 
 
 \begin{code}
@@ -436,7 +438,7 @@ The structure constants are convenient data structure for nearly all the
 algorithms in TensorSpace. In fact, most computations require structure
 constants, so we store the structure constants sequence with the tensor. This
 means that after the initial structure constant sequence computation, every time
-\texttt{StructureConstants} or \texttt{Eltseq} is called, Magma retrieves what
+\texttt{StructureConstants} or \texttt{Eltseq} is called, \textsf{Magma} retrieves what
 was previously computed. 
 
 We will demonstrate this on a large black-box example, so some time is spent
@@ -1360,7 +1362,7 @@ true
 \subsection{General properties}
 
 We provide basic intrinsics to get data stored in the \texttt{TenSpcElt} object
-in Magma. Most of these functions are already stored as attributes. The ones
+in \textsf{Magma}. Most of these functions are already stored as attributes. The ones
 that are not initially stored at construction are stored immediately after the
 initial computation, such as \texttt{Image}.
 
@@ -1766,7 +1768,7 @@ x @ t : Tup, TenSpcElt -> Any
 \end{intrinsics}
 
 Evaluates the tensor $t$ at $x\in U_{\vav}\times \cdots \times U_1$. The entries
-can be elements from the vector space $U_i$ or sequences that Magma can
+can be elements from the vector space $U_i$ or sequences that \textsf{Magma} can
 naturally coerce into the vector space $U_i$. In some circumstances, tensors
 come from algebraic objects (e.g.\! algebras), and in these cases the entries of
 $x$ can be contained in the original algebraic object as well. 
@@ -2002,7 +2004,7 @@ U0 : Full Vector space of degree 4 over Rational Field
 \end{code}
 
 Like tensor evaluation, the infix notation will accept elements of a vector
-space (or objects that Magma can easily coerce into a vector space) or elements
+space (or objects that \textsf{Magma} can easily coerce into a vector space) or elements
 from the original algebraic object. For $M=\left(\begin{smallmatrix} 0 & 1 \\ 0
 & 0 \end{smallmatrix}\right)$, we will use the infix notation to construct the
 2-tensor $* : A\rightarrowtail A$, where $X\mapsto MX$. 
@@ -2131,7 +2133,7 @@ Bimap space V: Full Vector space of degree 5 over GF(2)
 
 Like with the other styles of notation (infix and tuple), users can evaluate
 elements from the original algebraic object, vectors from the vector spaces, and
-even sequences that Magma can easily coerce into vector spaces. To use the
+even sequences that \textsf{Magma} can easily coerce into vector spaces. To use the
 product notation, coerce elements into the \texttt{LeftDomain} and
 \texttt{RightDomain}.
 
@@ -2410,7 +2412,7 @@ U0 : Full Vector space of degree 2 over Rational Field
 \end{code}
 
 We will use \texttt{Foliation} to compute the 2-radical of $t$. 
-(This is essentially what \texttt{Radical} does in Magma.)
+(This is essentially what \texttt{Radical} does in \textsf{Magma}.)
 That is, we will compute the subspace $U_{\hat{2}}^\perp\leq \mathbb{Q}^4$ 
 such that $U_{\hat{2}}^\perp*\mathbb{Q}^3=0$. 
 This computation can be regarded as a nullspace computation.
