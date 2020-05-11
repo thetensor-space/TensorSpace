@@ -1311,8 +1311,9 @@ Returns the compression of the tensor. This removes all 1-dimensional spaces in 
 
 \begin{example}[CompressAssocForm]
 
-We will construct the associated form of the tensor from the Lie algebra $B_3(5)$. 
-The codomain of the original tensor gets moved (and dualized) to the domain. 
+We will construct the associated form of the tensor from the Lie algebra of type
+$B_3$ over $\mathbb{F}_5$. The codomain of the original tensor gets moved (and
+dualized) to the domain. 
 \begin{code}
 > L := LieAlgebra("B3", GF(5));
 > t := Tensor(L); 
@@ -1415,7 +1416,7 @@ Returns the base ring or field of the tensor.
 \begin{example}[BasicProps]
 
 We demonstrate how to get basic properties of a tensor and what to expect as an
-output. We will construct a tensor $*:\mathbb{M}_{2\times 3}(\mathbb{Q})\times
+output. We will construct a tensor $\bra{t}:\mathbb{M}_{2\times 3}(\mathbb{Q})\times
 \mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ given by multiplication. Nearly all of
 this information is displayed when printing a tensor.
 \begin{code}
@@ -1488,8 +1489,8 @@ Decides if the underlying category of $t$ is covariant or contravariant.
 
 \begin{example}[TensorCatProps]
 
-We will construct a tensor from a right module, 
-$*:\mathbb{Q}^2 \times \mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
+We will construct a tensor from a right module, $\bra{t}:\mathbb{Q}^2 \times
+\mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
 \begin{code}
 > K := Rationals();
 > U := KMatrixSpace(K, 2, 2);
