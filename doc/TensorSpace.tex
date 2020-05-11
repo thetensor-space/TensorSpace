@@ -29,12 +29,12 @@
 
 \chapter{Introduction}
 
-This documentation describes Magma operations with multilinear algebra.
-Our notation follows \cite{FMW:densors} closely and can be viewed as companion literature. 
-Wherever possible we follow the conventions in use in physics \cite{Weyl}*{Chapter V}, differential geometry \cite{Lee:geom}*{Chapter 10}, and algebra \cite{Landsberg:tensors}.
-Necessary categorical formalism is drawn largely from
-\cite{Wilson:division}.  
-The package covers:
+This documentation describes Magma operations with multilinear algebra. Our
+notation follows \cite{FMW:densors} closely and can be viewed as companion
+literature. Wherever possible we follow the conventions in use in physics
+\cite{Weyl}*{Chapter V}, differential geometry \cite{Lee:geom}*{Chapter 10}, and
+algebra \cite{Landsberg:tensors}. Necessary categorical formalism is drawn
+largely from \cite{Wilson:division}. The package covers:
 \begin{enumerate}
 \item Tensors and multilinear functions and their associated groups and algebras.
 \item Spaces of tensors.
@@ -46,7 +46,9 @@ The package covers:
 \subsection*{Citing TensorSpace} 
 To cite the TensorSpace package, please use the following\\
 \\
-Joshua Maglione and James B. Wilson, \emph{TensorSpace}, version 2.2, GitHub, 2019. Contributions from Peter A. Brooksbank, \url{https://github.com/algeboy/TensorSpace}. \\
+Joshua Maglione and James B. Wilson, \emph{TensorSpace}, version 2.2, GitHub,
+2019. Contributions from Peter A. Brooksbank,
+\url{https://github.com/algeboy/TensorSpace}. \\
 \\
 For AMSRefs:
 \begin{verbatim}
@@ -64,16 +66,21 @@ For AMSRefs:
 
 
 \section{Overview}
-We set up some notation used throughout.
-Define $K$ to be a commutative ring (typically a field), $\vav$ (Hebrew ``vav'') to be a nonnegative integer, and a sequence of right $K$-modules $U_0,\dots,U_{\vav}$.
-Set $[\vav]=\{0,\dots,\vav\}$, and for a subset $A\subset[\vav]$, let $\comp{A}=[\vav]-A$. 
-Let $\rversor_{a\in[\vav]} U_a$ denote the set of multilinear maps $U_{\vav}\times\cdots U_1\rightarrowtail U_0$. 
-Here, we use $\rightarrowtail$ exclusively for multilinear maps. 
+We set up some notation used throughout. Define $K$ to be a commutative ring
+(typically a field), $\vav$ (Hebrew ``vav'') to be a nonnegative integer, and a
+sequence of right $K$-modules $U_0,\dots,U_{\vav}$. Set
+$[\vav]=\{0,\dots,\vav\}$, and for a subset $A\subset[\vav]$, let
+$\comp{A}=[\vav]-A$. Let $\rversor_{a\in[\vav]} U_a$ denote the set of
+multilinear maps $U_{\vav}\times\cdots U_1\rightarrowtail U_0$. Here, we use
+$\rightarrowtail$ exclusively for multilinear maps. 
 
 A \emph{tensor space} $T$ is a $K$-module equipped with a monomorphism 
-\[ \bra{\cdot} : T \hookrightarrow \rversor_{a\in[\vav]}U_a.\]
-\emph{Tensors} are elements of $T$, $(U_{\vav},\dots,U_0)$ is the \emph{frame}, and $\vav+1$ is the valence. 
-In Diarac styled $\bra{t}$ ``bra t'' and $\ket{u}$ ``ket u'' notation, we evaluate $\bra{t}\in\rversor_{a\in[\vav]}U_a$ on inputs $\ket{u}=\ket{u_{\vav},\dots, u_1}\in U_{\vav}\times\cdots\times U_1$ denote $\bra{t}u\rangle$ or $\bra{t} u_{\vav},\dots,u_1\rangle$. 
+\[ \bra{\cdot} : T \hookrightarrow \rversor_{a\in[\vav]}U_a.\] \emph{Tensors}
+are elements of $T$, $(U_{\vav},\dots,U_0)$ is the \emph{frame}, and $\vav+1$ is
+the valence. In Dirac styled $\bra{t}$ ``bra t'' and $\ket{u}$ ``ket u''
+notation, we evaluate $\bra{t}\in\rversor_{a\in[\vav]}U_a$ on inputs
+$\ket{u}=\ket{u_{\vav},\dots, u_1}\in U_{\vav}\times\cdots\times U_1$ denote
+$\bra{t}u\rangle$ or $\bra{t} u_{\vav},\dots,u_1\rangle$. 
 
 The module $U_0$ is reserved for the codomain which inturn makes
 reverse indexing the simplest notation.
@@ -117,7 +124,9 @@ Currently, there is only one level of printing, so either verbose printing is on
 SetVerbose(MonStgElt, RngIntElt) : -> 
 \end{intrinsics}
 
-{\tt SetVerbose} is a built in Magma function, but with this package, this intrinsic accepts the string \texttt{"TensorSpace"} and an integer in $\{0,1\}$. 
+{\tt SetVerbose} is a built in Magma function, but with this package, this
+intrinsic accepts the string \texttt{"TensorSpace"} and an integer in $\{0,1\}$.
+
 
 We have included an intrinsic to check which version of TensorSpace you have attached in Magma.
 
@@ -143,8 +152,10 @@ Sprint(T) : TenSpc -> MonStgElt
 Sprint(C) : TenCat -> MonStgElt
 \end{intrinsics}
 
-Returns strings that can be executed in Magma to construct the given object. 
-If $t$ is a black-box tensor where structure constants cannot be computed, then the returned string is equivalent to \texttt{print t}, which cannot be executed to construct $t$. 
+Returns strings that can be executed in Magma to construct the given object. If
+$t$ is a black-box tensor where structure constants cannot be computed, then the
+returned string is equivalent to \texttt{print t}, which cannot be executed to
+construct $t$. 
 
 \begin{example}[PrintToString]
 
@@ -249,7 +260,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    volume={43},
    date={1942},
    pages={685--707},
-   issn={0003-486X},
    review={\MR{0007747}},
 }
 
@@ -264,7 +274,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    date={1997},
    number={3-4},
    pages={235--265},
-   issn={0747-7171},
    review={\MR{1484478}},
 }
 
@@ -277,7 +286,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    volume={473},
    date={2017},
    pages={545--590},
-   issn={0021-8693},
    review={\MR{3591162}},
 }
 
@@ -290,7 +298,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    date={2012},
    number={4},
    pages={1975--1996},
-   issn={0002-9947},
    review={\MR{2869196}},
 }
 
@@ -303,7 +310,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    date={2014},
    number={3},
    pages={405--416},
-   issn={0022-4049},
    review={\MR{3124207}},
 }
 
@@ -417,7 +423,6 @@ Even though \texttt{TensorSpaceVersion} has no arguments, \texttt{()} is still r
    date={2017},
    number={4},
    pages={1452--1478},
-   issn={0092-7872},
    review={\MR{3576669}},
 }
 

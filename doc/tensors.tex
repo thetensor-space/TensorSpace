@@ -13,19 +13,16 @@ By default, a tensor's parent space is a universal tensor space:
 \begin{align*}
 	\hom_K(U_v,\dots,\hom_K(U_1,U_0)\cdots) \cong \hom_K(U_v\otimes_K\cdots \otimes_K U_1,U_0).
 \end{align*}
-The left hand module is used primarily as it avoids the need to work with 
-the equivalence classes of a tensor product.
-Operations such as linear combinations of tensors take place within a  
-tensor space.
-Attributes such as coefficients, valence, and frame  apply to the tensor space 
-as well.
+The left hand module is used primarily as it avoids the need to work with the
+equivalence classes of a tensor product. Operations such as linear combinations
+of tensors take place within a tensor space. Attributes such as coefficients,
+valence, and frame  apply to the tensor space as well.
 
-When necessary, the user may further direct the operations on tensors to 
-appropriate tensor categories 
-(type \texttt{TenCat}).  For instance covariant and contravariant variables can 
-be specified
-as well as imposing symmetry conditions.  If no tensor category is prescribed
-then a default tensor category is used based on the method of creation.
+When necessary, the user may further direct the operations on tensors to
+appropriate tensor categories (type \texttt{TenCat}).  For instance covariant
+and contravariant variables can be specified as well as imposing symmetry
+conditions.  If no tensor category is prescribed then a default tensor category
+is used based on the method of creation.
 \medskip
 
 \minitoc
@@ -44,17 +41,21 @@ Tensor(S, F, Cat) : SeqEnum, UserProgram, TenCat -> TenSpcElt, List
 Tensor(S, F, Cat) : List, UserProgram, TenCat -> TenSpcElt, List
 \end{intrinsics}
 
-Returns a tensor $t$ and a list of maps from the given frame into vector spaces of the returned frame.
-Note that $t$ is a tensor over vector spaces---essentially forgetting all other structure.
-The last entry of \texttt{S} is assumed to be the codomain of the multilinear map. 
-The user-defined function $F$ should take as input a tuple of elements of the domain and return an element of the codomain.
-If no tensor category is provided, the Albert's homotopism category is used.
+Returns a tensor $t$ and a list of maps from the given frame into vector spaces
+of the returned frame. Note that $t$ is a tensor over vector
+spaces---essentially forgetting all other structure. The last entry of
+\texttt{S} is assumed to be the codomain of the multilinear map. The
+user-defined function $F$ should take as input a tuple of elements of the domain
+and return an element of the codomain. If no tensor category is provided, the
+Albert's homotopism category is used.
 
-\begin{example}[BBTensorsFrame]
-We demonstrate the black-box constructions by first constructing the dot product $\cdot : \mathbb{Q}^4\times \mathbb{Q}^4\rightarrowtail \mathbb{Q}$.
-The function used to evaluate our black-box tensor, \texttt{Dot}, must take exactly one argument.
-The argument will be a \texttt{Tup}, an element of the Cartesian product $U_{\vav}\times \cdots\times U_1$.
-Note that \texttt{x[i]} is the $i$th entry in the tuple and not the $i$th coordinate.
+\begin{example}[BBTensorsFrame] We demonstrate the black-box constructions by
+first constructing the dot product $\cdot : \mathbb{Q}^4\times
+\mathbb{Q}^4\rightarrowtail \mathbb{Q}$. The function used to evaluate our
+black-box tensor, \texttt{Dot}, must take exactly one argument. The argument
+will be a \texttt{Tup}, an element of the Cartesian product $U_{\vav}\times
+\cdots\times U_1$. Note that \texttt{x[i]} is the $i$th entry in the tuple and
+not the $i$th coordinate.
 \begin{code}
 > Q := Rationals();
 > U := VectorSpace(Q, 4);
@@ -63,10 +64,11 @@ Note that \texttt{x[i]} is the $i$th entry in the tuple and not the $i$th coordi
 > Dot := func< x | x[1]*Matrix(4, 1, Eltseq(x[2])) >;
 \end{code}
 
-Now we will construct the tensor from the data above.
-The first object returned is the tensor, and the second is a list of maps, mapping the given frame into the vector space frame.
-In this example, since the given frame consists of vector spaces, these maps are trivial.
-Note that the list of maps are not needed to work with the given tensor, we will demonstrate this later. 
+Now we will construct the tensor from the data above. The first object returned
+is the tensor, and the second is a list of maps, mapping the given frame into
+the vector space frame. In this example, since the given frame consists of
+vector spaces, these maps are trivial. Note that the list of maps are not needed
+to work with the given tensor, we will demonstrate this later. 
 \begin{code}
 > Tensor([U, V, W], Dot);
 Tensor of valence 3, U2 x U1 >-> U0
@@ -80,10 +82,11 @@ U0 : Full Vector space of degree 1 over Rational Field
 *]
 \end{code}
 
-We will provide a tensor category for the dot product tensor, so that the returned tensor is not in the default homotopism category. 
-We will use instead the $\{2,1\}$-adjoint category.
-While the returned tensor prints out the same as above, it does indeed live in a universe.
-The details of tensor categories are discussed in Chapter~\ref{ch:tensor-categories}.
+We will provide a tensor category for the dot product tensor, so that the
+returned tensor is not in the default homotopism category. We will use instead
+the $\{2,1\}$-adjoint category. While the returned tensor prints out the same as
+above, it does indeed live in a universe. The details of tensor categories are
+discussed in Chapter~\ref{ch:tensor-categories}.
 \begin{code}
 > Cat := AdjointCategory(3, 2, 1);
 > Cat;
@@ -103,8 +106,10 @@ Tensor category of valence 3 (<-,->,==) ({ 1 },{ 2 },{ 0 })
 
 \begin{example}[BBCrossProduct]
 
-We will construct the cross product $\times : \mathbb{R}^3\times \mathbb{R}^3\rightarrowtail \mathbb{R}^3$ and verify that ${\bf i}\times {\bf j} = {\bf k}$.
-However, to do this test, we will input integer sequences (specifically \texttt{[RngIntElt]}), and we will still be able to evaluate.
+We will construct the cross product $\times : \mathbb{R}^3\times
+\mathbb{R}^3\rightarrowtail \mathbb{R}^3$ and verify that ${\bf i}\times {\bf j}
+= {\bf k}$. However, to do this test, we will input integer sequences
+(specifically \texttt{[RngIntElt]}), and we will still be able to evaluate.
 \begin{code}
 > K := RealField(5);
 > V := VectorSpace(K, 3);
@@ -139,9 +144,12 @@ Note that $t$ is a tensor over vector spaces---essentially forgetting all other 
 The user-defined function $F$ should take as input a tuple of elements of $D$ and return an element of $C$.
 If no tensor category is provided, the Albert's homotopism category is used.
 
-\begin{example}[BBTripleProduct]
-Tensors make it easy to create algebras that do not fit into traditional categories, such as algebras with triple products.
-Here, we create a triple product $\langle \,\rangle : \mathbb{M}_{2\times 3}(K)\times \mathbb{M}_{2\times 3}(K)\times\mathbb{M}_{2\times 3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$, given by $\langle A, B, C\rangle = AB^tC$.
+\begin{example}[BBTripleProduct] Tensors make it easy to create algebras that do
+not fit into traditional categories, such as algebras with triple products.
+Here, we create a triple product $\langle \,\rangle : \mathbb{M}_{2\times
+3}(K)\times \mathbb{M}_{2\times 3}(K)\times\mathbb{M}_{2\times
+3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$, given by $\langle A, B,
+C\rangle = AB^tC$.
 
 \begin{code}
 > K := GF(541);
@@ -169,8 +177,9 @@ However, the returned value form the tensor will be in the codomain of the tenso
 (  1   0   0   0   0   0)
 \end{code}
 
-We can experiment to see if this triple product is left associative.
-To do this, we will construct five random matrices $\{ X_1,\dots,X_5\}\subset \mathbb{M}_{2\times 3}(K)$, and then we test if 
+We can experiment to see if this triple product is left associative. To do this,
+we will construct five random matrices $\{ X_1,\dots,X_5\}\subset
+\mathbb{M}_{2\times 3}(K)$, and then we test if 
 \[ \langle \langle X_1, X_2, X_3 \rangle, X_4, X_5\rangle = \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. \]
 Observe that the tuples have mixed entries, one from $K^6$ and two others from $\mathbb{M}_{2\times 3}(K)$. 
 
@@ -204,9 +213,14 @@ Observe that the tuples have mixed entries, one from $K^6$ and two others from $
 true
 \end{code}
 
-To confirm this product is left associative, we can create a new tensor for the left triple-associator and see that its image is $0$.
-We will create a $6$-tensor $\{ \, \} : \prod_{k=1}^5 \mathbb{M}_{2\times 3}(K)\rightarrowtail \mathbb{M}_{2\times 3}(K)$ where
-\[ \lla X_1,\dots, X_5\rra = \langle \langle X_1, X_2, X_3 \rangle, X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. \]
+To confirm this product is left associative, we can create a new tensor for the
+left triple-associator and see that its image is $0$. We will create a
+$6$-tensor $\{ \, \} : \prod_{k=1}^5 \mathbb{M}_{2\times 3}(K)\rightarrowtail
+\mathbb{M}_{2\times 3}(K)$ where
+\[ 
+    \lla X_1,\dots, X_5\rra = \langle \langle X_1, X_2, X_3 \rangle, 
+    X_4, X_5\rangle - \langle X_1, \langle X_4, X_3, X_2\rangle, X_5\rangle. 
+\]
 Therefore, if im$(\lla \, \rra)=0$, then $\langle \,\rangle$ is left associative. 
 
 \begin{code}
@@ -232,21 +246,23 @@ Generators:
 0
 \end{code}
 
-Observe that in \texttt{l\_asct} the function \texttt{Eltseq} is called. 
-This is because $t$ returns vectors in $K^6$ which is not naturally coercible by Magma into $\mathbb{M}_{2\times 3}(K)$. 
-On the other hand, sequences can be coerced into $\mathbb{M}_{2\times 3}(K)$. 
+Observe that in \texttt{l\_asct} the function \texttt{Eltseq} is called. This is
+because $t$ returns vectors in $K^6$ which is not naturally coercible by Magma
+into $\mathbb{M}_{2\times 3}(K)$. On the other hand, sequences can be coerced
+into $\mathbb{M}_{2\times 3}(K)$. 
 \end{example}
 
 
 
 
 \subsection{Tensors with structure constant sequences}
-Most computations with tensors $t$ will be carried out using structure constants $t_{j_{\vav}\cdots j_0}\in K$. 
-Here $t$ is framed by free $K$-modules $[U_{\vav},\dots,U_0]$ 
-with each $U_i$ having an ordered bases $\mathcal{B}_i=[e_{i1},\dots,e_{id_i}]$.
-The interpretation of structure constants is that the associated multilinear function 
-$[x_{\vav},\dots,x_1]$ from $U_{\vav}\times \cdots \times U_1$ into $U_0$ is determined on 
-bases as follows:
+Most computations with tensors $t$ will be carried out using structure constants
+$t_{j_{\vav}\cdots j_0}\in K$. Here $t$ is framed by free $K$-modules
+$[U_{\vav},\dots,U_0]$ with each $U_i$ having an ordered bases
+$\mathcal{B}_i=[e_{i1},\dots,e_{id_i}]$. The interpretation of structure
+constants is that the associated multilinear function $[x_{\vav},\dots,x_1]$
+from $U_{\vav}\times \cdots \times U_1$ into $U_0$ is determined on bases as
+follows:
 \begin{align*}
 	[e_{\vav j_{\vav}},\dots,e_{1j_1} ]& = \sum_{k=1}^{d_0} T_{j_{\vav} \cdots j_0} e_{0k}.
 \end{align*}
@@ -268,9 +284,13 @@ than structure constants.
 are not provided, Magma may compute and store a structure constant representation
 inside the tensor.
 
-\item We do not separate structure constant indices that are contravariant.  Instead contravariant variables are signaled by tensor categories.  So Ricci styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as $T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor
-category changed to mark $\{q,\dots,1\}$ as contravariant. Intrinsics are provided to facilitate this approach.
-See Chapter~\ref{ch:tensor-categories} for more details on tensor categories.
+\item We do not separate structure constant indices that are contravariant.
+Instead contravariant variables are signaled by tensor categories.  So Ricci
+styled tensors $T_{a_p\cdots a_1}^{b_q\cdots b_1}$ should be input as
+$T_{a_{p+q}\cdots a_{1+q} b_q\cdots b_1}$ and the tensor category changed to
+mark $\{q,\dots,1\}$ as contravariant. Intrinsics are provided to facilitate
+this approach. See Chapter~\ref{ch:tensor-categories} for more details on tensor
+categories.
 \end{itemize}
 \medskip
 
@@ -353,15 +373,20 @@ Assign(t, ind, k) : TenSpcElt, [RngIntElt], Any -> TenSpcElt
 Assign(~t, ind, k) : TenSpcElt, [RngIntElt], Any -> 
 \end{intrinsics}
 
-Returns the tensor $t$ where the \texttt{ind} element (viewed as a multi-dimensional array) is replaced with $k$. 
-For example, replacing the $(a,b,c)$ entry of a $3$-tensor, set \texttt{ind}$\,=[a,b,c]$. 
+Returns the tensor $t$ where the \texttt{ind} element (viewed as a
+multi-dimensional array) is replaced with $k$. For example, replacing the
+$(a,b,c)$ entry of a $3$-tensor, set \texttt{ind}$\,=[a,b,c]$. 
 
 \begin{example}[SCFromBBTensors]
 
-We will construct the natural Lie module action for $\mathfrak{sl}_2$, but we will construct it as a \emph{left} module. 
-To do this, we construct a function that takes elements from $\mathfrak{sl}_2\times V$ and returns an element that Magma can coerce into $V$. 
-We run a quick test to make sure our function runs on the trivial example; this is the only check the intrinsic runs on black-box tensors. 
-Since $\mathfrak{sl}_2$ and $V$ are part of different universes in Magma, we must use the \texttt{List} environment when constructing this black-box tensor. 
+We will construct the natural Lie module action for $\mathfrak{sl}_2$, but we
+will construct it as a \emph{left} module. To do this, we construct a function
+that takes elements from $\mathfrak{sl}_2\times V$ and returns an element that
+Magma can coerce into $V$. We run a quick test to make sure our function runs on
+the trivial example; this is the only check the intrinsic runs on black-box
+tensors. Since $\mathfrak{sl}_2$ and $V$ are part of different universes in
+Magma, we must use the \texttt{List} environment when constructing this
+black-box tensor. 
 
 \begin{code}
 > sl2 := MatrixLieAlgebra("A1", GF(7));
@@ -384,8 +409,9 @@ U1 : Full Vector space of degree 2 over GF(7)
 U0 : Full Vector space of degree 2 over GF(7)
 \end{code}
 
-Now we will extract the structure constants from this Lie module action. 
-We will then construct a tensor with these structure constants and compare it with our first tensor above.
+Now we will extract the structure constants from this Lie module action. We will
+then construct a tensor with these structure constants and compare it with our
+first tensor above.
 
 \begin{code}
 > StructureConstants(T);
@@ -406,13 +432,19 @@ true
 
 \begin{example}[SCStored]
 
-The structure constants are convenient data structure for nearly all the algorithms in TensorSpace. 
-In fact, most computations require structure constants, so we store the structure constants sequence with the tensor. 
-This means that after the initial structure constant sequence computation, every time \texttt{StructureConstants} or \texttt{Eltseq} is called, Magma retreives what was previously computed. 
+The structure constants are convenient data structure for nearly all the
+algorithms in TensorSpace. In fact, most computations require structure
+constants, so we store the structure constants sequence with the tensor. This
+means that after the initial structure constant sequence computation, every time
+\texttt{StructureConstants} or \texttt{Eltseq} is called, Magma retrieves what
+was previously computed. 
 
-We will demonstrate this on a large black-box example, so some time is spent computing the structure constants. 
-Of course, the exact timing will vary by machine.
-We will construct a product of two subalgebras of $\mathbb{M}_{20}(\mathbb{F}_3)$, namely $* : \mathfrak{sl}_{20}(\mathbb{F}_3)\times \mathbb{M}_4(\mathbb{F}_3)\rightarrowtail \mathbb{M}_{20}(\mathbb{F}_3)$.
+We will demonstrate this on a large black-box example, so some time is spent
+computing the structure constants. Of course, the exact timing will vary by
+machine. We will construct a product of two subalgebras of
+$\mathbb{M}_{20}(\mathbb{F}_3)$, namely $* :
+\mathfrak{sl}_{20}(\mathbb{F}_3)\times \mathbb{M}_4(\mathbb{F}_3)\rightarrowtail
+\mathbb{M}_{20}(\mathbb{F}_3)$.
 
 \begin{code}
 > sl20 := MatrixLieAlgebra("A19", GF(3));
@@ -426,7 +458,8 @@ U1 : Full Vector space of degree 16 over GF(3)
 U0 : Full Vector space of degree 400 over GF(3)
 \end{code}
 
-We record the time it takes to initially compute the structure constants sequence, and then we record the time when we call the function again.
+We record the time it takes to initially compute the structure constants
+sequence, and then we record the time when we call the function again.
 \begin{code}
 > time sc := StructureConstants(t);
 Time: 58.670
@@ -441,14 +474,13 @@ Time: 0.000
 
 
 \subsection{Bilinear tensors}
-A special case of structure constants for bilinear maps $U_2\times U_1\rightarrowtail U_0$
-is to format the data as lists of matrices $[M_1,\dots, M_d]$.
-This can be considered as a left (resp. right) representation
-$U_2\to \hom_K(U_1,U_0)$, (resp. $U_1\to \hom_K(U_2,U_0)$).  
-Or it can be treated as {\em systems of bilinear forms} 
-$[M_1,\dots,M_d]$ where the matrices are the Gram matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$.
-Here the associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is 
-specified by
+A special case of structure constants for bilinear maps $U_2\times
+U_1\rightarrowtail U_0$ is to format the data as lists of matrices $[M_1,\dots,
+M_d]$. This can be considered as a left (resp. right) representation $U_2\to
+\hom_K(U_1,U_0)$, (resp. $U_1\to \hom_K(U_2,U_0)$). Or it can be treated as {\em
+systems of bilinear forms} $[M_1,\dots,M_d]$ where the matrices are the Gram
+matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$. Here the
+associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is specified by
 \begin{align*}
 	(u_2,u_1) & \mapsto ( \phi_1(u_2,u_1),\dots, \phi_a(u_2,u_1)).
 \end{align*}
@@ -469,9 +501,9 @@ Optionally a tensor category $Cat$ can be assigned.
 
 \begin{example}[SymplecticForm]
 
-We will construct a symplectic bilinear form on $V=K^8$. 
-It would be cumbersome to construct this tensor as a black-box tensor or by providing the structure constants sequence. 
-Instead, we will provide a (Gram) matrix. 
+We will construct a symplectic bilinear form on $V=K^8$. It would be cumbersome
+to construct this tensor as a black-box tensor or by providing the structure
+constants sequence. Instead, we will provide a (Gram) matrix. 
 \begin{code}
 > K := GF(17);
 > MS := KMatrixSpace(K, 2, 2);
@@ -497,7 +529,8 @@ U0 : Full Vector space of degree 1 over GF(17)
 true
 \end{code}
 
-Now we will construct the symplectic form using the black-box construction and verify that the two tensors are the same. 
+Now we will construct the symplectic form using the black-box construction and
+verify that the two tensors are the same. 
 \begin{code}
 > V := VectorSpace(K, 8);
 > symp := func< x | x[1]*J*Matrix(8, 1, Eltseq(x[2])) >;
@@ -537,10 +570,15 @@ For \texttt{SystemOfForms}, $t$ must have valence $3$ and the implied values are
 
 \begin{example}[TrilinearAsMats]
 
-We construct the associator of $\mathfrak{sl}_2(\mathbb{Q})$ where $\langle \, \rangle : \prod_{k=1}^3\mathfrak{sl}_2\rightarrowtail \mathfrak{sl}_2$ given by
-\[ \langle x,y,z \rangle = [[x,y],z] - [x,[y,z]]. \]
-It can be hard to understand some of the features of this trilinear map by only looking at the structure constants sequence. 
-The function \texttt{AsMatrices} slices the sequence asnd presents the data as a sequence of matrices.
+We construct the associator of $\mathfrak{sl}_2(\mathbb{Q})$ where 
+$\langle \,\rangle : \prod_{k=1}^3\mathfrak{sl}_2\rightarrowtail \mathfrak{sl}_2$ 
+given by
+\[ 
+    \langle x,y,z \rangle = [[x,y],z] - [x,[y,z]]. 
+\]
+It can be hard to understand some of the features of this trilinear map by only
+looking at the structure constants sequence. The function \texttt{AsMatrices}
+slices the sequence and presents the data as a sequence of matrices.
 \begin{code}
 > K := Rationals();
 > L := LieAlgebra("A1", K);
@@ -559,8 +597,10 @@ U0 : Full Vector space of degree 3 over Rational Field
 0, 0, 0, 0, 0, 0 ]
 \end{code}
 
-Calling \texttt{AsMatrices(t, 3, 1)} returns a sequence of nine matrices, but we only show the first four.
-As explained in the documentation above, this sequence of matrices can be interpreted as the system of bilinear forms for the 3-tensor $\circ_{31} : V_3 \times V_1 \rightarrowtail \Hom_K(V_2,V_0)$ given by
+Calling \texttt{AsMatrices(t, 3, 1)} returns a sequence of nine matrices, but we
+only show the first four. As explained in the documentation above, this sequence
+of matrices can be interpreted as the system of bilinear forms for the 3-tensor
+$\circ_{31} : V_3 \times V_1 \rightarrowtail \Hom_K(V_2,V_0)$ given by
 \[ x\circ_{31} z = \langle x, -,z \rangle = [[x,-],z] - [x,[-,z]].\]
 
 \begin{code}
@@ -588,11 +628,14 @@ As explained in the documentation above, this sequence of matrices can be interp
 
 
 \subsection{Tensors from algebraic objects}
-A natural and important source of tensors come from algebraic object with a distributive property.
-One main source is from algebras, where $*:A\times A\rightarrowtail A$ is given by multiplication in $A$. 
-Like with the previous sections on tensor constructions, all tensors will be constructed over vector spaces. 
-The user can still input elements from the original algebra, but map(s) will also be returned.
-Furthermore, each tensor is assigned a category relevant to its origin, see Chapter~\ref{ch:tensor-categories} for more details on tensor categories. 
+A natural and important source of tensors come from algebraic object with a
+distributive property. One main source is from algebras, where $*:A\times
+A\rightarrowtail A$ is given by multiplication in $A$. Like with the previous
+sections on tensor constructions, all tensors will be constructed over vector
+spaces. The user can still input elements from the original algebra, but map(s)
+will also be returned. Furthermore, each tensor is assigned a category relevant
+to its origin, see Chapter~\ref{ch:tensor-categories} for more details on tensor
+categories. 
 
 
 \index{Tensor!algebra}
@@ -604,9 +647,10 @@ Returns the bilinear tensor given by the product in algebra $A$.
 
 \begin{example}[D4LieAlgebra]
 
-We want to get the Lie bracket from $D_4(11)$. 
-Tensors created from algebras will have a homotopism category, but with $U_2=U_1=U_0$. 
-This forces the operators acting to be the same on all the coordinates; in other words, $\Omega=\End(U_2)$ instead of $\Omega=\End(U_2)\times\End(U_1)\times\End(U_0)$. 
+We want to get the Lie bracket from $D_4(11)$. Tensors created from algebras
+will have a homotopism category, but with $U_2=U_1=U_0$. This forces the
+operators acting to be the same on all the coordinates; in other words,
+$\Omega=\End(U_2)$ instead of $\Omega=\End(U_2)\times\End(U_1)\times\End(U_0)$. 
 \begin{code}
 > D := DerivationAlgebra(T);
 > L := LieAlgebra("D4", GF(11));
@@ -622,8 +666,9 @@ true
 Tensor category of valence 3 (->,->,->) ({ 0, 1, 2 })
 \end{code}
 
-If we compute the derivation algebra of $L$, our operators will act in the same way on each coordinate.
-This is the standard definition of the derivation algebra of a ring.
+If we compute the derivation algebra of $L$, our operators will act in the same
+way on each coordinate. This is the standard definition of the derivation
+algebra of a ring.
 \begin{code}
 > D := DerivationAlgebra(t);
 > Dimension(D);
@@ -632,7 +677,8 @@ This is the standard definition of the derivation algebra of a ring.
 D4
 \end{code}
 
-Now we will change the category to the standard homotopism category, where we do \emph{not} fuse $U_2$, $U_1$, and $U_0$. 
+Now we will change the category to the standard homotopism category, where we do
+\emph{not} fuse $U_2$, $U_1$, and $U_0$. 
 \begin{code}
 > ChangeTensorCategory(~t, HomotopismCategory(3));
 > t;
@@ -644,9 +690,8 @@ U0 : Full Vector space of degree 28 over GF(11)
 Tensor category of valence 3 (->,->,->) ({ 1 },{ 2 },{ 0 })
 \end{code}
 
-We compare the same computation of derivation algebra. 
-This time, the theory tells us that there will be a solvable radical.
-In this example, Rad$(D)=K^2$. 
+We compare the same computation of derivation algebra. This time, the theory
+tells us that there will be a solvable radical. In this example, Rad$(D)=K^2$. 
 \begin{code}
 > D := DerivationAlgebra(t);
 > Dimension(D);
@@ -666,10 +711,12 @@ Returns the bilinear tensor given by the product in quotient polynomial ring $Q$
 
 \begin{example}[WittAlgebra]
 
-The Witt algebra, over a finite field of characteristic $p$, is isomorphic to the derivation algebra of $K[x]/(x^p)$.
-The Witt algebra is a simple Lie algebra with dimension $p$ and a trivial Killing form.
-First, we will construct the tensor from the ring $\mathbb{F}_5[x]/(x^5)$.
-Note that, like with algebras, the tensor category will fuse $U_2$, $U_1$, and $U_0$, so that the operators act the same way on every coordinate.
+The Witt algebra, over a finite field of characteristic $p$, is isomorphic to
+the derivation algebra of $K[x]/(x^p)$. The Witt algebra is a simple Lie algebra
+with dimension $p$ and a trivial Killing form. First, we will construct the
+tensor from the ring $\mathbb{F}_5[x]/(x^5)$. Note that, like with algebras, the
+tensor category will fuse $U_2$, $U_1$, and $U_0$, so that the operators act the
+same way on every coordinate.
 \begin{code}
 > p := 5;
 > R<x> := PolynomialRing(GF(p));
@@ -711,8 +758,10 @@ CommutatorTensor(A) : Alg -> TenSpcElt, Map
 AnticommutatorTensor(A) : Alg -> TenSpcElt, Map
 \end{intrinsics}
 
-Returns the bilinear commutator map $[a,b]=ab-ba$ or the anticommutator map $\langle a,b\rangle = ab+ba$ of the algebra $A$.
-This should not be used to get the tensor given by the Lie or Jordan product in a Lie or Jordan algebra; instead use \texttt{Tensor}.
+Returns the bilinear commutator map $[a,b]=ab-ba$ or the anticommutator map
+$\langle a,b\rangle = ab+ba$ of the algebra $A$. This should not be used to get
+the tensor given by the Lie or Jordan product in a Lie or Jordan algebra;
+instead use \texttt{Tensor}.
 
 \begin{example}[CommutatorFromAlgebra]
 
@@ -729,8 +778,10 @@ U0 : Full Vector space of degree 16 over Rational Field
 true
 \end{code}
 
-With this tensor, we will compute the dimension of the centralizer of the diagonal matrix $M$ with diagonal entries $(1,1,-1,-1)$ in $\mathbb{M}_4(\mathbb{Q})$. 
-To do this, we will subtract the dimension of the image of $[M, A]$ from the dimension of $A$. 
+With this tensor, we will compute the dimension of the centralizer of the
+diagonal matrix $M$ with diagonal entries $(1,1,-1,-1)$ in
+$\mathbb{M}_4(\mathbb{Q})$. To do this, we will subtract the dimension of the
+image of $[M, A]$ from the dimension of $A$. 
 
 \begin{code}
 > M := A![1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,-1];
@@ -746,7 +797,9 @@ To do this, we will subtract the dimension of the image of $[M, A]$ from the dim
 
 \begin{example}[MatrixJordanAlgebra]
 This time, we will obtain a Jordan product from $\mathbb{M}_4(\mathbb{Q})$. 
-That is, we will construct the bilinear map $* : \mathbb{M}_4(\mathbb{Q})\times \mathbb{M}_4(\mathbb{Q})\rightarrowtail \mathbb{M}_4(\mathbb{Q})$ where $A*B = \frac{1}{2}(AB+BA)$. 
+That is, we will construct the bilinear map 
+$* : \mathbb{M}_4(\mathbb{Q})\times \mathbb{M}_4(\mathbb{Q})\rightarrowtail \mathbb{M}_4(\mathbb{Q})$ 
+where $A*B = \frac{1}{2}(AB+BA)$. 
 \begin{code}
 > A := MatrixAlgebra(Rationals(), 4);
 > t := AnticommutatorTensor(A);
@@ -776,16 +829,18 @@ U0 : Full Vector space of degree 16 over Rational Field
 (2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 \end{code}
 
-From the documentation on \texttt{AnticommutatorTensor}, we have to scale our tensor above $t$ by $1/2$ to get what we want.
-Of course this won't affect the proceeding tests though.
+From the documentation on \texttt{AnticommutatorTensor}, we have to scale our
+tensor above $t$ by $1/2$ to get what we want. Of course this won't affect the
+proceeding tests though.
 \begin{code}
 > s := (1/2)*t;
 > A.1*s*A.1;
 (1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 \end{code}
 
-Now we will confirm that $s$ is a Jordan product. 
-First, we check that $s$ is commutative, and then we check that it satisfies the Jordan identity: $(xy)(xx)=x(y(xx))$.
+Now we will confirm that $s$ is a Jordan product. First, we check that $s$ is
+commutative, and then we check that it satisfies the Jordan identity:
+$(xy)(xx)=x(y(xx))$.
 \begin{code}
 > IsSymmetric(s);
 true
@@ -841,20 +896,20 @@ pCentralTensor(G, a, b) : GrpPC, RngIntElt, RngIntElt -> TenSpcElt, List
 pCentralTensor(G) : Grp -> TenSpcElt, List
 \end{intrinsics}
 
-Returns the bilinear map of commutation from the associated graded Lie algebra of the lower exponent-$p$ central
-series $\eta$ of $G$.  The bilinear map pairs $\eta_a/\eta_{a+1}$ with $
-\eta_{b}/\eta_{b+1}$ into $\eta_{a+b}/\eta_{a+b+1}$.  If $a=b$ the tensor 
-category is set to force $U_2=U_1$; 
-otherwise it is the general homotopism category.
-In addition, maps from the subgroups into the vector spaces are returned as a list. 
-If $p$, $a$, and $b$ are not given, it is assumed $G$ is a $p$-group and $a=b=1$.
+Returns the bilinear map of commutation from the associated graded Lie algebra
+of the lower exponent-$p$ central series $\eta$ of $G$.  The bilinear map pairs
+$\eta_a/\eta_{a+1}$ with $ \eta_{b}/\eta_{b+1}$ into $\eta_{a+b}/\eta_{a+b+1}$.
+If $a=b$ the tensor category is set to force $U_2=U_1$; otherwise it is the
+general homotopism category. In addition, maps from the subgroups into the
+vector spaces are returned as a list. If $p$, $a$, and $b$ are not given, it is
+assumed $G$ is a $p$-group and $a=b=1$.
 
-\begin{example}[TensorPGroup]
-Groups have a single binary operation. So even when groups are built from
-rings it can be difficult to recover the ring from the group operations. 
-Tensors supply one approach for that task.
-We will get the $p$-central tensor of $G=\SL(3,125)$; however, we will lose the fact that there is a field $\mathbb{F}_{125}$. 
-The tensor we will get back is $[,] : K^6\times K^6 \rightarrowtail K^3$, where $K=\mathbb{F}_5$. 
+\begin{example}[TensorPGroup] Groups have a single binary operation. So even
+when groups are built from rings it can be difficult to recover the ring from
+the group operations. Tensors supply one approach for that task. We will get the
+$p$-central tensor of $G=\SL(3,125)$; however, we will lose the fact that there
+is a field $\mathbb{F}_{125}$. The tensor we will get back is 
+$[,] : K^6\times K^6 \rightarrowtail K^3$, where $K=\mathbb{F}_5$. 
 
 \begin{code}
 > P := ClassicalSylow(SL(3,125),5);
@@ -879,8 +934,11 @@ U1 : Full Vector space of degree 6 over GF(5)
 U0 : Full Vector space of degree 3 over GF(5)
 \end{code}
 
-Knowing that $G$ is defined over $\mathbb{F}_{125}$, we know that the commutator is really just the alternating form $\cdot : \mathbb{F}_{125}^2\times \mathbb{F}_{125}^2\rightarrowtail \mathbb{F}_{125}$.
-This information can be extracted from the centroid of $t$ above, and we can rewrite $t$ over the field $\mathbb{F}_{125}$.
+Knowing that $G$ is defined over $\mathbb{F}_{125}$, we know that the commutator
+is really just the alternating form $\cdot : \mathbb{F}_{125}^2\times
+\mathbb{F}_{125}^2\rightarrowtail \mathbb{F}_{125}$. This information can be
+extracted from the centroid of $t$ above, and we can rewrite $t$ over the field
+$\mathbb{F}_{125}$.
 \begin{code}
 > F := Centroid(t); // Recover GF(125)
 > Dimension(F);
@@ -904,10 +962,15 @@ U0 : Full Vector space of degree 1 over GF(5^3)
 MatrixTensor(K, S) : Fld, [RngIntElt] -> TenSpcElt, List
 \end{intrinsics}
 
-Given a field $K$ and a sequence of positive integers $S=[s_1,\dots, s_{\vav}]$, return the tensor 
-\[ \mathbb{M}_{s_1\times s_2}(K) \times \cdots \times \mathbb{M}_{s_{\vav-1}\times s_{\vav}}(K)\rightarrowtail \mathbb{M}_{s_1\times s_{\vav}}(K), \]
-given by matrix multiplcation. 
-A list of maps from the matrix spaces to the vector spaces is given as well even though the given tensor will evaluate matrices as well. 
+Given a field $K$ and a sequence of positive integers $S=[s_1,\dots, s_{\vav}]$,
+return the tensor 
+\[ 
+    \mathbb{M}_{s_1\times s_2}(K) \times \cdots 
+        \times \mathbb{M}_{s_{\vav-1}\times s_{\vav}}(K)\rightarrowtail \mathbb{M}_{s_1\times s_{\vav}}(K), 
+\]
+given by matrix multiplication. A list of maps from the matrix spaces to the
+vector spaces is given as well even though the given tensor will evaluate
+matrices as well. 
 
 
 \index{Polarisation}\index{Polarization}
@@ -918,13 +981,16 @@ Polarization(f) : MPolElt -> TenSpcElt, MPolElt
 Polarization(f) : RngUPolElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the polarization of the homogeneous multivariate polynomial (or univariate polynomial) $f$ as a tensor and as a multivariate polynomial. 
-Polarization does \emph{not} normalize by $1/d!$, where $d$ is the degree of $f$.  
+Returns the polarization of the homogeneous multivariate polynomial (or
+univariate polynomial) $f$ as a tensor and as a multivariate polynomial.
+Polarization does \emph{not} normalize by $1/d!$, where $d$ is the degree of
+$f$.  
 
-\begin{example}[TensorPolarization]
-We polarize the polynomial $f(x,y)=x^2y$. 
-Because $f$ is homogeneous of degree 3 with 2 variables, we expect that the polarization will have 6 variables and that the corresponding mulilinear form will be $K^2\times K^2\times K^2\rightarrowtail K$.
-The polarization of $f$ is given by $P(x_1,x_2,y_1,y_2,z_1,z_2 ) = 2 (x_1y_1z_2 + x_1y_2z_1 + x_2y_1z_1)$.
+\begin{example}[TensorPolarization] We polarize the polynomial $f(x,y)=x^2y$.
+Because $f$ is homogeneous of degree 3 with 2 variables, we expect that the
+polarization will have 6 variables and that the corresponding multilinear form
+will be $K^2\times K^2\times K^2\rightarrowtail K$. The polarization of $f$ is
+given by $P(x_1,x_2,y_1,y_2,z_1,z_2 ) = 2 (x_1y_1z_2 + x_1y_2z_1 + x_2y_1z_1)$.
 
 \begin{code}
 > R<x,y> := PolynomialRing(Rationals(),2);
@@ -1014,8 +1080,10 @@ U0 : Full Vector space of degree 9 over Rational Field
 [0 0 0 0 0 0 0 0 0]
 \end{code}
 
-We see that the first matrix in the sequence of bilinear forms of $t$ is not symmetric, so $t$ is not symmetric (of course matrix multiplcation is not commutative also). 
-We will construct a symmetric version of $t$ and inspect the first matrix of the bilinear forms.
+We see that the first matrix in the sequence of bilinear forms of $t$ is not
+symmetric, so $t$ is not symmetric (of course matrix multiplication is not
+commutative also). We will construct a symmetric version of $t$ and inspect the
+first matrix of the bilinear forms.
 \begin{code}
 > s := SymmetricTensor(t);
 > s;
@@ -1050,12 +1118,20 @@ In order to be defined, $g\in\text{Sym}(\{0,\dots,\vav \})$.
 If $0^g\ne 0$, then both the image and pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
 For cotensors, $g\in\text{Sym}(\{1,\dots,\vav\})$.
 Sequences $[a_1,\dots,a_{\vav+1}]$ will be interpreted as 
-\[ \begin{array}{cccc} 0 & 1 & \cdots & \vav \\ \downarrow & \downarrow & & \downarrow \\ a_1 & a_2 & \cdots & a_{\vav+1}. \end{array}\]
+\[ 
+    \begin{array}{cccc} 
+        0 & 1 & \cdots & \vav \\ 
+    \downarrow & \downarrow & & \downarrow \\ 
+    a_1 & a_2 & \cdots & a_{\vav+1}. 
+    \end{array}
+\]
 
 \begin{example}[ShuffleToTranspose]
 
-We will shuffle the alternating form $\mathbb{Q}^2\times\mathbb{Q}^2\rightarrowtail \mathbb{Q}$ as a means of performing a transpose on the Gram matrix.
-To do this, we need to shuffle by the transposition $(1, 2)$ in Sym$(\{0,1,2\})$. 
+We will shuffle the alternating form
+$\mathbb{Q}^2\times\mathbb{Q}^2\rightarrowtail \mathbb{Q}$ as a means of
+performing a transpose on the Gram matrix. To do this, we need to shuffle by the
+transposition $(1, 2)$ in Sym$(\{0,1,2\})$. 
 \begin{code}
 > t := Tensor(Rationals(), [2, 2, 1], [0, 1, -1, 0]);
 > t;
@@ -1118,8 +1194,11 @@ U0 : Full Vector space of degree 3 over GF(2)
 TensorProduct(t, s) : TenSpcElt, TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-Given $K$-tensors $t:U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$ and $s:V_{\vav}\times \cdots \times V_1\rightarrowtail V_0$, returns the tensor $t\otimes s : U_{\vav}\otimes V_{\vav}\times \cdots \times U_1\otimes V_1\rightarrowtail U_0\otimes V_0$. 
-This is like a generalized Kronecker product. 
+Given $K$-tensors $t:U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$ and
+$s:V_{\vav}\times \cdots \times V_1\rightarrowtail V_0$, returns the tensor
+$t\otimes s : U_{\vav}\otimes V_{\vav}\times \cdots \times U_1\otimes
+V_1\rightarrowtail U_0\otimes V_0$. This is like a generalized Kronecker
+product. 
 
 
 \section{Operations with Tensors}
@@ -1140,8 +1219,10 @@ k * t : RngElt, TenSpcElt -> TenSpcElt
 -t : TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the sum, difference, scalar multiple, or additive inverse of the given tensor(s) as module elements of the tensor space. 
-The corresponding multilinear maps are the sum, difference, scalar multiple, or additive inverse of the multilinear maps.
+Returns the sum, difference, scalar multiple, or additive inverse of the given
+tensor(s) as module elements of the tensor space. The corresponding multilinear
+maps are the sum, difference, scalar multiple, or additive inverse of the
+multilinear maps.
 
 \begin{example}[ModuleOperations]
 
@@ -1228,7 +1309,7 @@ Returns the compression of the tensor. This removes all 1-dimensional spaces in 
 \begin{example}[CompressAssocForm]
 
 We will construct the associated form of the tensor from the Lie algebra $B_3(5)$. 
-The codomain of the original tensor gets moved (and dualed) to the domain. 
+The codomain of the original tensor gets moved (and dualized) to the domain. 
 \begin{code}
 > L := LieAlgebra("B3", GF(5));
 > t := Tensor(L); 
@@ -1278,9 +1359,10 @@ true
 
 \subsection{General properties}
 
-We provide basic intrinsics to get data stored in the \texttt{TenSpcElt} object in Magma.
-Most of these functions are already stored as attributes. 
-The ones that are not initially stored at construction are stored immediately after the initial computation, such as \texttt{Image}.
+We provide basic intrinsics to get data stored in the \texttt{TenSpcElt} object
+in Magma. Most of these functions are already stored as attributes. The ones
+that are not initially stored at construction are stored immediately after the
+initial computation, such as \texttt{Image}.
 
 \index{Parent!tensor}
 \begin{intrinsics}
@@ -1329,9 +1411,10 @@ Returns the base ring or field of the tensor.
 
 \begin{example}[BasicProps]
 
-We demonstrate how to get basic properties of a tensor and what to expect as an output.
-We will construct a tensor $*:\mathbb{M}_{2\times 3}(\mathbb{Q})\times \mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ given by multiplication.
-Nearly all of this information is displayed when printing a tensor.
+We demonstrate how to get basic properties of a tensor and what to expect as an
+output. We will construct a tensor $*:\mathbb{M}_{2\times 3}(\mathbb{Q})\times
+\mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ given by multiplication. Nearly all of
+this information is displayed when printing a tensor.
 \begin{code}
 > K := Rationals();
 > U2 := KMatrixSpace(K, 2, 3);
@@ -1402,7 +1485,8 @@ Decides if the underlying category of $t$ is covariant or contravariant.
 
 \begin{example}[TensorCatProps]
 
-We will construct a tensor from a right module, $*:\mathbb{Q}^2 \times \mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
+We will construct a tensor from a right module, 
+$*:\mathbb{Q}^2 \times \mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
 \begin{code}
 > K := Rationals();
 > U := KMatrixSpace(K, 2, 2);
@@ -1471,8 +1555,10 @@ U1 : Full Vector space of degree 5 over GF(541)
 U0 : Full Vector space of degree 5 over GF(541)
 \end{code}
 
-In this example, both $U_{\widehat{2}}^\perp$ and $U_{\widehat{1}}^\perp$ are nontrivial.
-We will construct the associated nondegenerate tensor $s$, which is given by $U_2/U_{\widehat{2}}^\perp \times U_1/U_{\widehat{1}}^\perp \rightarrowtail U_0$. 
+In this example, both $U_{\widehat{2}}^\perp$ and $U_{\widehat{1}}^\perp$ are
+nontrivial. We will construct the associated nondegenerate tensor $s$, which is
+given by $U_2/U_{\widehat{2}}^\perp \times U_1/U_{\widehat{1}}^\perp
+\rightarrowtail U_0$. 
 \begin{code}
 > IsNondegenerate(t);
 false
@@ -1535,8 +1621,9 @@ U1 : Full Vector space of degree 5 over GF(541)
 U0 : Full Vector space of degree 5 over GF(541)
 \end{code}
 
-Here, we want to construct a fully nondegenerate tensor. 
-Of course, the tensor form the previous example is not fully nondegenerate as it is not degenerate, but we check that the image is not isomorphic to the codomain.
+Here, we want to construct a fully nondegenerate tensor. Of course, the tensor
+form the previous example is not fully nondegenerate as it is not degenerate,
+but we check that the image is not isomorphic to the codomain.
 \begin{code}
 > IsFullyNondegenerate(t);
 false
@@ -1552,8 +1639,10 @@ Echelonized basis:
 (  0   0   1   0   0)
 \end{code}
 
-Now we will construct the associated fully nondegenerate tensor: $U_2/U_{\widehat{2}}^\perp\times U_1/U_{\widehat{1}}^\perp\rightarrowtail U_2*U_1$.
-Notice that the morphism between the original tensor and the fully nondegenerate tensor is a cohomotopism.
+Now we will construct the associated fully nondegenerate tensor:
+$U_2/U_{\widehat{2}}^\perp\times U_1/U_{\widehat{1}}^\perp\rightarrowtail
+U_2*U_1$. Notice that the morphism between the original tensor and the fully
+nondegenerate tensor is a cohomotopism.
 \begin{code}
 > s, H := FullyNondegenerateTensor(t);
 > s;
@@ -1607,8 +1696,9 @@ Decides whether $t$ is a symmetric tensor.
 
 \begin{example}[SymmetricPolar]
 
-We will construct the multilinear form given by polarizing the homogeneous polynomial $f(x,y,z)=x^3+y^3+z^3+xyz$. 
-Since $f$ is a symmetric polynomial, its multilinear form is also symmetric. 
+We will construct the multilinear form given by polarizing the homogeneous
+polynomial $f(x,y,z)=x^3+y^3+z^3+xyz$. Since $f$ is a symmetric polynomial, its
+multilinear form is also symmetric. 
 \begin{code}
 > K := Rationals();
 > R<x,y,z> := PolynomialRing(K, 3);
@@ -1627,7 +1717,11 @@ U0 : Full Vector space of degree 1 over Rational Field
 \end{code} %$ 
 
 The resulting homogeneous polynomial from polarizing is 
-\[ p(x_1,x_2,x_3,y_1,y_2,y_3,z_1,z_2,z_3) =\sum_{\sigma\in S_3} (x_{1^\sigma}y_{2^\sigma}z_{3^\sigma} + 3x_{1^\sigma}y_{1^\sigma}z_{1^\sigma}).\]
+\[ 
+    p(x_1,x_2,x_3,y_1,y_2,y_3,z_1,z_2,z_3) 
+        =\sum_{\sigma\in S_3} (x_{1^\sigma}y_{2^\sigma}z_{3^\sigma} 
+            + 3x_{1^\sigma}y_{1^\sigma}z_{1^\sigma}).
+\]
 \begin{code}
 > IsSymmetric(t);
 true
@@ -1651,7 +1745,8 @@ true
 ]
 \end{code}
 
-Because the underlying field is $\mathbb{Q}$ and because $t$ is symmetric, we know that $t$ is not alternating nor antisymmetric.
+Because the underlying field is $\mathbb{Q}$ and because $t$ 
+is symmetric, we know that $t$ is not alternating nor antisymmetric.
 \begin{code}
 > IsAlternating(t);
 false
@@ -1670,9 +1765,11 @@ Regarding tensors as multilinear maps, we allow for evaluation and composition.
 x @ t : Tup, TenSpcElt -> Any
 \end{intrinsics}
 
-Evaluates the tensor $t$ at $x\in U_{\vav}\times \cdots \times U_1$.
-The entries can be elements from the vector space $U_i$ or sequences that Magma can naturally coerce into the vector space $U_i$.
-In some circumstances, tensors come from algebraic objects (e.g.\! algebras), and in these cases the entries of $x$ can be contained in the original algebraic object as well. 
+Evaluates the tensor $t$ at $x\in U_{\vav}\times \cdots \times U_1$. The entries
+can be elements from the vector space $U_i$ or sequences that Magma can
+naturally coerce into the vector space $U_i$. In some circumstances, tensors
+come from algebraic objects (e.g.\! algebras), and in these cases the entries of
+$x$ can be contained in the original algebraic object as well. 
 
 \begin{example}[MultiMapEval]
 
@@ -1695,10 +1792,13 @@ U0 : Full Vector space of degree 9 over GF(3)
 Tensor category of valence 4 (->,->,->,->) ({ 0 .. 3 })
 \end{code}
 
-Even though our tensor originated over the algebra $A=\mathbb{M}_{3}(\mathbb{F}_3)$, the returned tensor is over vector spaces $\mathbb{F}_3^9$. 
-However, the tensor $t$ can still evaluate elements from $\mathbb{M}_3(\mathbb{F}_3)$ as well as $\mathbb{F}_3^9$. 
-Observe that the out of $t$ will be a vector regardless of the input. 
-The second output at construction, the \texttt{List} of maps, can be used to map the vectors to $\mathbb{M}_3(\mathbb{F}_3)$. 
+Even though our tensor originated over the algebra
+$A=\mathbb{M}_{3}(\mathbb{F}_3)$, the returned tensor is over vector spaces
+$\mathbb{F}_3^9$. However, the tensor $t$ can still evaluate elements from
+$\mathbb{M}_3(\mathbb{F}_3)$ as well as $\mathbb{F}_3^9$. Observe that the out
+of $t$ will be a vector regardless of the input. The second output at
+construction, the \texttt{List} of maps, can be used to map the vectors to
+$\mathbb{M}_3(\mathbb{F}_3)$. 
 \begin{code}
 > x := <A.1, A.2, A.2^2>;
 > x;
@@ -1726,7 +1826,9 @@ The second output at construction, the \texttt{List} of maps, can be used to map
 (2 0 0 0 1 0 0 0 0)
 \end{code}
 
-Because \texttt{@} takes \texttt{Tup} as input, $t$ can evaluate mixed tuples as well: where some entries are contained in $\mathbb{M}_3(\mathbb{F}_3)$ and other entries are contained in $\mathbb{F}_3^9$. 
+Because \texttt{@} takes \texttt{Tup} as input, $t$ can evaluate mixed tuples as
+well: where some entries are contained in $\mathbb{M}_3(\mathbb{F}_3)$ and other
+entries are contained in $\mathbb{F}_3^9$. 
 \begin{code}
 > x := <A.1, A.2 @ phi, Eltseq(A.2^2)>;
 > x;
@@ -1760,12 +1862,14 @@ If a tensor $s$ is used instead of a \texttt{Map}, $s$ must have valence $\leq 1
 t eq s : TenSpcElt, TenSpcElt -> BoolElt
 \end{intrinsics}
 
-Decides if the tensors $t$ and $s$ are the same. 
-Two tensors are equivalent if, and only if, they have the same tensor category, base ring, frame, and structure constants. 
+Decides if the tensors $t$ and $s$ are the same. Two tensors are equivalent if,
+and only if, they have the same tensor category, base ring, frame, and structure
+constants. 
 
 \begin{example}[TensorComp]
 
-We start with the same tensor as the previous example: the tensor given by the Jacobi identity on the algebra $A=\mathbb{M}_3(\mathbb{F}_3)$. 
+We start with the same tensor as the previous example: the tensor given by the
+Jacobi identity on the algebra $A=\mathbb{M}_3(\mathbb{F}_3)$. 
 \begin{code}
 > A := MatrixAlgebra(GF(3), 3);
 > JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
@@ -1801,7 +1905,7 @@ true
 Let $\mathcal{E}\subset A$ be an orthogonal frame---a set of primitive, orthogonal, idempotents. 
 We will compose $t$ with the linear transformation 
 \[ a \mapsto \sum_{e\in\mathcal{E}} eae.\]
-Because the codomain of $t$ is a vector space, we will precompose this map by $\phi^{-1}$. 
+Because the codomain of $t$ is a vector space, we will pre-compose this map by $\phi^{-1}$. 
 \begin{code}
 > E := [A.1, A.2^-1*A.1*A.2, A.2^-2*A.1*A.2^2];
 > E;
@@ -1848,15 +1952,15 @@ true
 
 
 \subsection{Operations with Bilinear maps}
-Tensors of valence $3$, also known as bilinear tensors, or
-as bilinear maps,  are commonly described as distributive products.
-For instance as the product of an algebra, the product of a ring on 
-a module, or an inner product.  We support these interpretations in two ways:
-by permitting an infix $x*t*y$ notation for a 3-tensor $t$, and a product $x*y$ notation for the evaluation of bilinear
-tensors.  For the latter, We do this by creating special types 
-\texttt{BmpU[Elt]}, \texttt{BmpV[Elt]}, and \texttt{BmpW[Elt]} for the frame
-of a bilinear tensor.
-For bilinear maps, we refer to the modules in the frame as $U\times V\rightarrowtail W$. 
+Tensors of valence $3$, also known as bilinear tensors, or as bilinear maps,
+are commonly described as distributive products. For instance as the product of
+an algebra, the product of a ring on a module, or an inner product.  We support
+these interpretations in two ways: by permitting an infix $x*t*y$ notation for a
+3-tensor $t$, and a product $x*y$ notation for the evaluation of bilinear
+tensors.  For the latter, We do this by creating special types
+\texttt{BmpU[Elt]}, \texttt{BmpV[Elt]}, and \texttt{BmpW[Elt]} for the frame of
+a bilinear tensor. For bilinear maps, we refer to the modules in the frame as
+$U\times V\rightarrowtail W$. 
 
 \index{$*$!bilinear tensor (infix)}
 \begin{intrinsics}
@@ -1864,11 +1968,13 @@ x * t : Any, TenSpcElt -> Any
 t * y : Any, TenSpcElt -> Any
 \end{intrinsics}
 
-Given a bilinear tensor $t$ framed by $[U, V, W]$, $x*t$ returns the action on the right as a linear map $L : V\rightarrow W$ given by $vL = x* v$ if $x$ is an element of $U$. 
-If $x$ is a subspace of $U$, then this returns a subspace of the tensor space $T$ with frame $V\rightarrowtail W$.
-For the left action use $t*y$ instead.
-If $t$ is valence 1, then the image of either $x$ or $y$ is returned.
-Therefore, the possible outputs are a tensor space \texttt{TenSpc}, a tensor \texttt{TenSpcElt}, or a vector \texttt{ModTupFld}. 
+Given a bilinear tensor $t$ framed by $[U, V, W]$, $x*t$ returns the action on
+the right as a linear map $L : V\rightarrow W$ given by $vL = x* v$ if $x$ is an
+element of $U$. If $x$ is a subspace of $U$, then this returns a subspace of the
+tensor space $T$ with frame $V\rightarrowtail W$. For the left action use $t*y$
+instead. If $t$ is valence 1, then the image of either $x$ or $y$ is returned.
+Therefore, the possible outputs are a tensor space \texttt{TenSpc}, a tensor
+\texttt{TenSpcElt}, or a vector \texttt{ModTupFld}. 
 
 Related to this intrinsic is the following: using tensor spaces with the infix notation.
 
@@ -1878,12 +1984,13 @@ x * T : Any, TenSpc -> Any
 T * y : Any, TenSpc -> Any
 \end{intrinsics}
 
-Given a subspace of bilinear tensors, return the subspace generated by all $x*t$, for $t\in T$. 
-This is either a tensor space or a vector space. 
+Given a subspace of bilinear tensors, return the subspace generated by all
+$x*t$, for $t\in T$. This is either a tensor space or a vector space. 
 
 \begin{example}[BimapInfix]
 
-We demonstrate the infix notation by constructing the tensor in $A=\mathbb{M}_2(\mathbb{Q})$ given by multiplication.
+We demonstrate the infix notation by constructing the tensor in
+$A=\mathbb{M}_2(\mathbb{Q})$ given by multiplication.
 \begin{code}
 > A := MatrixAlgebra(Rationals(), 2);
 > t := Tensor(A);
@@ -1894,8 +2001,11 @@ U1 : Full Vector space of degree 4 over Rational Field
 U0 : Full Vector space of degree 4 over Rational Field
 \end{code}
 
-Like tensor evaluation, the infix notation will accept elements of a vector space (or objects that Magma can easily coerce into a vector space) or elements from the original algebraic object.
-For $M=\left(\begin{smallmatrix} 0 & 1 \\ 0 & 0 \end{smallmatrix}\right)$, we will use the infix notation to construct the 2-tensor $* : A\rightarrowtail A$, where $X\mapsto MX$. 
+Like tensor evaluation, the infix notation will accept elements of a vector
+space (or objects that Magma can easily coerce into a vector space) or elements
+from the original algebraic object. For $M=\left(\begin{smallmatrix} 0 & 1 \\ 0
+& 0 \end{smallmatrix}\right)$, we will use the infix notation to construct the
+2-tensor $* : A\rightarrowtail A$, where $X\mapsto MX$. 
 \begin{code}
 > M := A![0, 1, 0, 0];
 > M;
@@ -1915,8 +2025,9 @@ U0 : Full Vector space of degree 4 over Rational Field
 ]
 \end{code}
 
-From the structure constants above, evaluating \texttt{M*t} at \texttt{V.3} should output \texttt{W.1}.
-Furthermore, the image of \texttt{M*t} is 2-dimensional in $W$.
+From the structure constants above, evaluating \texttt{M*t} at \texttt{V.3}
+should output \texttt{W.1}. Furthermore, the image of \texttt{M*t} is
+2-dimensional in $W$.
 \begin{code}
 > M*t*[0, 0, 1, 0];
 (1 0 0 0)
@@ -1930,9 +2041,11 @@ Echelonized basis:
 (0 1 0 0)
 \end{code}
 
-If we switch the order and multiply $t$ by $U$ on the left first, we will get a tensor space $T$.
-Because that tensor space came from $t$, which originally came from algebraic objects, we can use the returned tensor space to evaluate $M$. 
-An arbitrary tensor space, however, would not evaluate $M$ unless it is an appropriate vector. 
+If we switch the order and multiply $t$ by $U$ on the left first, we will get a
+tensor space $T$. Because that tensor space came from $t$, which originally came
+from algebraic objects, we can use the returned tensor space to evaluate $M$. An
+arbitrary tensor space, however, would not evaluate $M$ unless it is an
+appropriate vector. 
 \begin{code}
 > T := VectorSpace(Rationals(), 4)*t;
 > T;
@@ -1952,8 +2065,9 @@ Echelonized basis:
 
 
 
-The next style of notation we support is the product notation, $x*y$.
-In order to use this style, the user needs to coerce both $x$ and $y$ into the \texttt{LeftDomain} and \texttt{RightDomain} respectively. 
+The next style of notation we support is the product notation, $x*y$. In order
+to use this style, the user needs to coerce both $x$ and $y$ into the
+\texttt{LeftDomain} and \texttt{RightDomain} respectively. 
 
 \index{$*$!bilinear tensor (product)}
 \begin{intrinsics}
@@ -1994,8 +2108,11 @@ Decides if $x$ can be coerced into $U$ or $V$, and if it can, it returns the coe
 
 \begin{example}[BimapProduct]
 
-We demonstrate the product notation for tensors of valence 3 using a tensor derived from a $p$-group. 
-Suppose $G$ is a $p$-group and $[,] : U\times V\rightarrowtail W$ is the tensor given by commutation where $U=V=G/\eta_2$ and $W=\eta_2/\eta_3$, where $\eta_i$ denotes the $i$th term of the exponent-$p$ central series of $G$.
+We demonstrate the product notation for tensors of valence 3 using a tensor
+derived from a $p$-group. Suppose $G$ is a $p$-group and $[,] : U\times
+V\rightarrowtail W$ is the tensor given by commutation where $U=V=G/\eta_2$ and
+$W=\eta_2/\eta_3$, where $\eta_i$ denotes the $i$th term of the exponent-$p$
+central series of $G$.
 \begin{code}
 > G := SmallGroup(512, 10^6);
 > t := pCentralTensor(G);
@@ -2012,8 +2129,11 @@ Bimap space U: Full Vector space of degree 5 over GF(2)
 Bimap space V: Full Vector space of degree 5 over GF(2)
 \end{code}
 
-Like with the other styles of notation (infix and tuple), users can evaluate elements from the original algebraic object, vectors from the vector spaces, and even sequences that Magma can easily coerce into vector spaces. 
-To use the product notation, coerce elements into the \texttt{LeftDomain} and \texttt{RightDomain}.
+Like with the other styles of notation (infix and tuple), users can evaluate
+elements from the original algebraic object, vectors from the vector spaces, and
+even sequences that Magma can easily coerce into vector spaces. To use the
+product notation, coerce elements into the \texttt{LeftDomain} and
+\texttt{RightDomain}.
 
 \begin{code}
 > x := U!(G.1*G.2*G.4);
@@ -2114,10 +2234,12 @@ true
 
 
 \subsection{Manipulating tensor data} 
-The data from a tensor is accessible in multiple ways. 
-For tensors given by structure constants this can be described as the multidimensional analog of choosing a row or column of a matrix.
-Other operations are generalization of the transpose of a matrix.
-We do these operations with some care towards efficiency, e.g.\! it may not physically move the values in a structure constant sequence but instead permute the lookup of the values.
+The data from a tensor is accessible in multiple ways. For tensors given by
+structure constants this can be described as the multidimensional analog of
+choosing a row or column of a matrix. Other operations are generalization of the
+transpose of a matrix. We do these operations with some care towards efficiency,
+e.g.\! it may not physically move the values in a structure constant sequence
+but instead permute the lookup of the values.
 
 
 \index{Slice}\index{InducedTensor}
@@ -2126,19 +2248,21 @@ Slice(t, grid) : TenSpcElt, [SetEnum] -> SeqEnum
 InducedTensor(t, grid) : TenSpcElt, [SetEnum] -> TenSpcElt
 \end{intrinsics}
 
-Returns the slice of the structure constants running through the given grid. 
-For a tensor $t$ framed by free modules $[U_{\vav},\dots,U_0]$ with $d_i=\dim U_i$, 
-a \texttt{grid} is a sequence $[G_{\vav},\dots,G_0]$ of subsets $G_i\subseteq \{1,\dots, d_i\}\cup \{-d_i,\dots, -1\}$.
-If an entry $g\in G_i$ is negative, it will be taken to mean $d_i+g+1$, so $-1$ would be equivalent to $d_i$. 
-The slice is the list of entries in the structure constants of the tensor
-indexed by $G_{\vav}\times \cdots \times G_0$. \texttt{Slice} returns the structure
-constants whereas \texttt{InducedTensor} produces a tensor with these
-structure constants.
+Returns the slice of the structure constants running through the given grid. For
+a tensor $t$ framed by free modules $[U_{\vav},\dots,U_0]$ with $d_i=\dim U_i$,
+a \texttt{grid} is a sequence $[G_{\vav},\dots,G_0]$ of subsets $G_i\subseteq
+\{1,\dots, d_i\}\cup \{-d_i,\dots, -1\}$. If an entry $g\in G_i$ is negative, it
+will be taken to mean $d_i+g+1$, so $-1$ would be equivalent to $d_i$. The slice
+is the list of entries in the structure constants of the tensor indexed by
+$G_{\vav}\times \cdots \times G_0$. \texttt{Slice} returns the structure
+constants whereas \texttt{InducedTensor} produces a tensor with these structure
+constants.
 
 \begin{example}[TensorSlicing]
 
-We will construct a tensor $*: \mathbb{Q}^4\times \mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ with a structure constants sequence equal to $[1,\dots,24]$. 
-If every $G_i=\{1,\dots, d_i\}$, then the result is the same as \texttt{Eltseq}.
+We will construct a tensor $*: \mathbb{Q}^4\times \mathbb{Q}^3\rightarrowtail
+\mathbb{Q}^2$ with a structure constants sequence equal to $[1,\dots,24]$. If
+every $G_i=\{1,\dots, d_i\}$, then the result is the same as \texttt{Eltseq}.
 \begin{code}
 > U := VectorSpace(Rationals(),4);
 > V := VectorSpace(Rationals(),3);
@@ -2174,7 +2298,8 @@ If, instead, we slice $W$ at its last basis vector, we get the following.
 [ 4, 10, 16, 22 ]
 \end{code}
 
-Notice that if we use $-1$ and $2$ in the last set of the grid we get the same output we got above.
+Notice that if we use $-1$ and $2$ in the last set of the grid we get the same
+output we got above.
 \begin{code}
 > Slice(t, [{1..4},{2},{-1,2}]);
 [ 4, 10, 16, 22 ]
@@ -2208,8 +2333,10 @@ true
 SliceAsMatrices(t, grid, a, b) : TenSpcElt, [SetEnum], RngIntElt, RngIntElt -> SeqEnum
 \end{intrinsics}
 
-Returns a sequence of matrices whose output is equivalent to composing \texttt{InducedTensor} and \texttt{AsMatrices}.
-This intrinsic will be slightly faster than actually composing those two functions together as a tensor is not constructed with \texttt{SliceAsMatrices}.
+Returns a sequence of matrices whose output is equivalent to composing
+\texttt{InducedTensor} and \texttt{AsMatrices}. This intrinsic will be slightly
+faster than actually composing those two functions together as a tensor is not
+constructed with \texttt{SliceAsMatrices}.
 
 \begin{example}[SliceAsMatrices]
 
@@ -2241,8 +2368,8 @@ U0 : Full Vector space of degree 2 over Rational Field
 ]
 \end{code}
 
-Now we will slice up this sequence of matrices. 
-We will remove the second row and the second and third matrix from the sequence above.
+Now we will slice up this sequence of matrices. We will remove the second row
+and the second and third matrix from the sequence above.
 \begin{code}
 > SliceAsMatrices(t, [{1,-1}, {1,-1}, {1,2}], 1, 0);
 [
@@ -2263,12 +2390,14 @@ Foliation(t, a) : TenSpcElt, RngIntElt -> Mtrx
 For a tensor $t$ with frame $U_{\vav}\times\cdots\times U_1\rightarrowtail U_0$,
 return the matrix representing the linear map 
 $U_a\rightarrow \hom(\bigotimes_{b\ne a}U_b,U_0)$ using the bases of each $U_b$.
-If $a=0$, then the returned matrix is given by the represention 
+If $a=0$, then the returned matrix is given by the representation 
 $U_0^*\rightarrow \hom(\bigotimes U_b,K)$.
 
 \begin{example}[ExfoliateFoliation]
 
-We will, again, construct the same tensor, $*:\mathbb{Q}^4\times\mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$, from the previous two examples whose structure constants sequence is $[1,\dots,24]$.
+We will, again, construct the same tensor, 
+$*:\mathbb{Q}^4\times\mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$, 
+from the previous two examples whose structure constants sequence is $[1,\dots,24]$.
 \begin{code}
 > K := Rationals();
 > Forms := [Matrix(K, 3, 2, [6*i+1..6*(i+1)]) : i in [0..3]];
@@ -2282,7 +2411,8 @@ U0 : Full Vector space of degree 2 over Rational Field
 
 We will use \texttt{Foliation} to compute the 2-radical of $t$. 
 (This is essentially what \texttt{Radical} does in Magma.)
-That is, we will compute the subspace $U_{\hat{2}}^\perp\leq \mathbb{Q}^4$ such that $U_{\hat{2}}^\perp*\mathbb{Q}^3=0$. 
+That is, we will compute the subspace $U_{\hat{2}}^\perp\leq \mathbb{Q}^4$ 
+such that $U_{\hat{2}}^\perp*\mathbb{Q}^3=0$. 
 This computation can be regarded as a nullspace computation.
 \begin{code}
 > F2 := Foliation(t, 2);
@@ -2299,9 +2429,10 @@ Echelonized basis:
 ( 0  1 -2  1)
 \end{code}
 
-We claim this is the 2-radical of $t$. 
-Our claim is verified if \texttt{R*t} is a 0-dimensional subspace of the tensor space $T$ with frame $\mathbb{Q}^3\rightarrowtail\mathbb{Q}^2$.
-In other words, \texttt{R*t} is the trivial 2-tensor.
+We claim this is the 2-radical of $t$. Our claim is verified if \texttt{R*t} is
+a 0-dimensional subspace of the tensor space $T$ with frame
+$\mathbb{Q}^3\rightarrowtail\mathbb{Q}^2$. In other words, \texttt{R*t} is the
+trivial 2-tensor.
 \begin{code}
 > R*t;
 Tensor space of dimension 0 over Rational Field with valence 2
@@ -2329,17 +2460,17 @@ For $a=0$, use \texttt{AsCotensorSpace}.
 AsCotensorSpace(t) : TenSpcElt -> TenSpc, Mtrx
 \end{intrinsics}
 
-Returns the associated cotensor space of $t$ along with a matrix given by
-the foliation of $t$ at $0$. 
-The returned cotensor space is framed by 
-$U_{\vav}\times \cdots \times U_1\rightarrowtail K$
-and is generated by the tensors $t_f$ for each $f$ in the basis of $U_0^*$.
-In the case that $t$ is a bilinear map, this is equivalent to the cotensor space generated by the \texttt{SystemOfForms}.
+Returns the associated cotensor space of $t$ along with a matrix given by the
+foliation of $t$ at $0$. The returned cotensor space is framed by
+$U_{\vav}\times \cdots \times U_1\rightarrowtail K$ and is generated by the
+tensors $t_f$ for each $f$ in the basis of $U_0^*$. In the case that $t$ is a
+bilinear map, this is equivalent to the cotensor space generated by the
+\texttt{SystemOfForms}.
 
 \begin{example}[TensorsToSpaces]
 
-We begin by creating a 4-tensor and constructing the associated tensor space at the third coordinate.
-\texttt{AsCotensorSpace} works similarly but when $a=0$. 
+We begin by creating a 4-tensor and constructing the associated tensor space at
+the third coordinate. \texttt{AsCotensorSpace} works similarly but when $a=0$. 
 \begin{code}
 > t := Tensor(Rationals(), [5,4,3,2], [1..120]);
 > t;
@@ -2356,19 +2487,19 @@ U1 : Full Vector space of degree 3 over Rational Field
 U0 : Full Vector space of degree 2 over Rational Field
 \end{code}
 
-The dimension of $T$ cannot be larger than 5 because that is the dimension of $U_3$.
-However, $T$ is 2-dimensional. 
-Slicing $t$ as a sequence of matrices will illuminate why $T$ is 2-dimensional.
+The dimension of $T$ cannot be larger than 5 because that is the dimension of
+$U_3$. However, $T$ is 2-dimensional. Slicing $t$ as a sequence of matrices will
+illuminate why $T$ is 2-dimensional.
 \begin{code}
 > F := [SliceAsMatrices(t, [{k},{1..4},{1..3},{1,2}], 2, 1) : \
 >     k in [1..5]];
 \end{code}
 
-Here, $F$ is a sequence of a system of forms for $t$, one for each basis vector in $U_3$. 
-If $T$ were 5-dimensional, the systems of forms in $F$ would be linearly independent. 
-However, it is not, and evidently, three of the five systems of forms are linear combinations two systems of forms. 
-We will determine the linear combinations.
-The first two systems of forms are independent.
+Here, $F$ is a sequence of a system of forms for $t$, one for each basis vector
+in $U_3$. If $T$ were 5-dimensional, the systems of forms in $F$ would be
+linearly independent. However, it is not, and evidently, three of the five
+systems of forms are linear combinations two systems of forms. We will determine
+the linear combinations. The first two systems of forms are independent.
 \begin{code}
 > F[1];
 [
@@ -2441,10 +2572,13 @@ Vector space of degree 5 over Rational Field given by a rule
 AsTensor(T) : TenSpc -> TenSpcElt
 \end{intrinsics}
 
-Returns a tensor corresponding to the given tensor space $T$. 
-If the given tensor space is contravariant, then the returned tensor has the frame $U_{\vav}\times \cdots \times U_1\rightarrowtail T$, where $T$ is thought of as a free $K$-module.
-If the given tensor space is covariant, then the returned tensor has the frame $T\times U_{\vav}\times \cdots \times U_1\rightarrowtail U_0$.
-Note that \texttt{AsTensor} is ``inverse'' to \texttt{AsCotensorSpace} and \texttt{AsTensorSpace} when $a=\vav$.
+Returns a tensor corresponding to the given tensor space $T$. If the given
+tensor space is contravariant, then the returned tensor has the frame
+$U_{\vav}\times \cdots \times U_1\rightarrowtail T$, where $T$ is thought of as
+a free $K$-module. If the given tensor space is covariant, then the returned
+tensor has the frame $T\times U_{\vav}\times \cdots \times U_1\rightarrowtail
+U_0$. Note that \texttt{AsTensor} is ``inverse'' to \texttt{AsCotensorSpace} and
+\texttt{AsTensorSpace} when $a=\vav$.
 
 \begin{example}[SpacesToTensors]
 
@@ -2512,8 +2646,9 @@ We can even see the same sequences of matrices in $s$.
 
 \section{Invariants of tensors}
 
-In this subsection, we detail functions to construct invariants of tensors.
-To access the projections or the objects acting on a specific factor $U_i$, the following function(s) should be used.
+In this subsection, we detail functions to construct invariants of tensors. To
+access the projections or the objects acting on a specific factor $U_i$, the
+following function(s) should be used.
 
 \index{Induce}
 \begin{intrinsics}
@@ -2522,11 +2657,13 @@ Induce(X, a) : AlgMatLie, RngIntElt -> Map, AlgMatLie
 Induce(X, a) : GrpMat, RngIntElt -> Map, GrpMat
 \end{intrinsics}
 
-Returns the projection from the given object to the induced sub-object on the $a$th coordinate and the induced sub-object of the associated tensor.
+Returns the projection from the given object to the induced sub-object on the
+$a$th coordinate and the induced sub-object of the associated tensor.
 
 \begin{example}[Inducing]
 
-To demonstrate how to \texttt{Induce}, we construct the 2-dimensional symplectic form on $K =$ GF$(3)$. 
+To demonstrate how to \texttt{Induce}, we construct the 2-dimensional symplectic
+form on $K =$ GF$(3)$. 
 \begin{code}
 > t := Tensor(GF(3), [2, 2, 1], [0, 1, 2, 0]);
 > t;
@@ -2538,9 +2675,10 @@ U0 : Full Vector space of degree 1 over GF(3)
 true
 \end{code}
 
-This tensor has a nontrivial derivation algebra, isomorphic to $K^2\rtimes \mathfrak{sl}_2(3)$. 
-However, $\Der(t)$ is represented in $\End(U_2)\times\End(U_1)\times \End(U_0)$. 
-We will induce the action on the $1$st coordinate.
+This tensor has a nontrivial derivation algebra, isomorphic to $K^2\rtimes
+\mathfrak{sl}_2(3)$. However, $\Der(t)$ is represented in
+$\End(U_2)\times\End(U_1)\times \End(U_0)$. We will induce the action on the
+$1$st coordinate.
 \begin{code}
 > D := DerivationAlgebra(t);
 > D.1;
@@ -2581,10 +2719,15 @@ DerivedFrom(~X, t, C, RC) : Any, TenSpcElt, {RngIntElt}, {RngIntElt}
     Fused : BoolElt : true
 \end{intrinsics}
 
-Includes the following tensor data in the matrix object $X$: the tensor $t$, the relevant coordinates which are in the set $C\subseteq \{0,\dots,\vav\}$, and the coordinates $RC\subseteq C$ for which the object is represented on.
-The reason for the subset $C$ is so that we know the coordinates which can be induced on, see \texttt{Induce}.
-Currently, this only works for objects of type \texttt{AlgMat}, \texttt{AlgMatLie}, \texttt{GrpMat}, and \texttt{ModMatFld}.
-It is assumed that $X$ is block diagonal, whose blocks starting from the top left go in decreasing order in the coordinates---in the same way the coordinates of the frame decrease from left to right for a tensor. 
+Includes the following tensor data in the matrix object $X$: the tensor $t$, the
+relevant coordinates which are in the set $C\subseteq \{0,\dots,\vav\}$, and the
+coordinates $RC\subseteq C$ for which the object is represented on. The reason
+for the subset $C$ is so that we know the coordinates which can be induced on,
+see \texttt{Induce}. Currently, this only works for objects of type
+\texttt{AlgMat}, \texttt{AlgMatLie}, \texttt{GrpMat}, and \texttt{ModMatFld}. It
+is assumed that $X$ is block diagonal, whose blocks starting from the top left
+go in decreasing order in the coordinates---in the same way the coordinates of
+the frame decrease from left to right for a tensor. 
 
 % Maybe include an example at some point.
 
@@ -2619,8 +2762,10 @@ This is the quotient $U_0 / \langle t | U_{\vav}, \dots, U_1\rangle$.
 
 \begin{example}[Radicals]
 
-We will construct the tensor for multiplcation in $\mathfrak{gl}_3(\mathbb{Q})$, or equivalently, the commutator tensor of $\mathbb{M}_3(\mathbb{Q})$.
-Because $\mathfrak{gl}_3(\mathbb{Q})$ contains the center of $\mathbb{M}_3(\mathbb{Q})$, there will be a 2- and 1-radical.
+We will construct the tensor for multiplication in
+$\mathfrak{gl}_3(\mathbb{Q})$, or equivalently, the commutator tensor of
+$\mathbb{M}_3(\mathbb{Q})$. Because $\mathfrak{gl}_3(\mathbb{Q})$ contains the
+center of $\mathbb{M}_3(\mathbb{Q})$, there will be a 2- and 1-radical.
 \begin{code}
 > K := Rationals();
 > A := MatrixAlgebra(K, 3);
@@ -2726,9 +2871,10 @@ Returns the Pfaffian of the antisymmetric bilinear map.
 
 \begin{example}[Genus2Pfaff]
 
-In this demonstration, we pull from \cite{BMW:genus2}.
-A $p$-group $G$ has genus 2, if the image of the exponent-$p$ central tensor of $G$ is 2-dimensional over the centroid. 
-One of the algorithms in \cite{BMW:genus2} to decide isomorphism of such groups depends on the Pfaffian of the tensor. 
+In this demonstration, we pull from \cite{BMW:genus2}. A $p$-group $G$ has genus
+2, if the image of the exponent-$p$ central tensor of $G$ is 2-dimensional over
+the centroid. One of the algorithms in \cite{BMW:genus2} to decide isomorphism
+of such groups depends on the Pfaffian of the tensor. 
 
 First, we create two $3$-groups with genus 2. 
 The first group we create as a quotient of the Sylow 3-subgroup of $\GL(3,\GF(3^5))$. 
@@ -2773,8 +2919,10 @@ U1 : Full Vector space of degree 10 over GF(3)
 U0 : Full Vector space of degree 2 over GF(3)
 \end{code}
 
-An implication of the main algorithm in \cite{BMW:genus2} is that if the splitting behavior of the Pfaffians are different, then the groups are not isomorphic.
-Therefore, because the Pfaffian of $G$ has a different splitting behavior from the Pfaffian of $H$, we conclude that $G\not\cong H$. 
+An implication of the main algorithm in \cite{BMW:genus2} is that if the
+splitting behavior of the Pfaffians are different, then the groups are not
+isomorphic. Therefore, because the Pfaffian of $G$ has a different splitting
+behavior from the Pfaffian of $H$, we conclude that $G\not\cong H$. 
 \begin{code}
 > R<x,y> := PolynomialRing(GF(3), 2);
 > f := R!Pfaffian(t);
@@ -2801,27 +2949,32 @@ x^5 + 2*x^4*y + x^3*y^2 + 2*x^2*y^3 + x*y^4 + y^5
 
 \section{Exporting tensors}
 
-In the previous sections, we used groups, rings, and algebras to define tensors, but tensors can be used define algebraic structures as well.
-In this section, we describe ways to build groups and algebras from tensors. 
-Currently, all intrinsics in this section only support 3-tensors.
+In the previous sections, we used groups, rings, and algebras to define tensors,
+but tensors can be used define algebraic structures as well. In this section, we
+describe ways to build groups and algebras from tensors. Currently, all
+intrinsics in this section only support 3-tensors.
 
 \index{HeisenbergAlgebra}
 \begin{intrinsics}
 HeisenbergAlgebra(t) : TenSpcElt -> AlgGen
 \end{intrinsics}
 
-Returns the Heisenberg algebra $A$ induced by the bilinear tesnor $t: U\times V\rightarrowtail W$. 
-The algebra $A$ depends on the tensor category of $t$. 
-If the tensor category forces equality between $U$, $V$, and $W$, then $A\cong U$ as vector spaces and is a nonassociative algebra (i.e.\! not necessarily associative). 
-If the tensor category forces equality between $U$ and $V$, then $A\cong U\oplus W$ as vector spaces and is a nilpotent algebra where $C(A)\geq W$ and $A^2\leq W$. 
-Otherwise, $A\cong U\oplus V\oplus W$ as vector spaces, and using $*$ for $t$, 
+Returns the Heisenberg algebra $A$ induced by the bilinear tensor $t: U\times
+V\rightarrowtail W$. The algebra $A$ depends on the tensor category of $t$. If
+the tensor category forces equality between $U$, $V$, and $W$, then $A\cong U$
+as vector spaces and is a nonassociative algebra (i.e.\! not necessarily
+associative). If the tensor category forces equality between $U$ and $V$, then
+$A\cong U\oplus W$ as vector spaces and is a nilpotent algebra where $C(A)\geq
+W$ and $A^2\leq W$. Otherwise, $A\cong U\oplus V\oplus W$ as vector spaces, and
+using $*$ for $t$, 
 \[ (u,v,w)\cdot (u',v',w') = (0,0,u*v'). \]
 
 \begin{example}[CraftingAlgebras]
 
-We will demonstrate some of the nuances of \texttt{HeisenbergAlgebra} and how it interacts with the tensor category of the given tensor. 
-We will use the same tensor throughout but changing the categories. 
-The frame of the tensor is $\mathbb{Q}^3\times\mathbb{Q}^3\rightarrowtail\mathbb{Q}^3$.
+We will demonstrate some of the nuances of \texttt{HeisenbergAlgebra} and how it
+interacts with the tensor category of the given tensor. We will use the same
+tensor throughout but changing the categories. The frame of the tensor is
+$\mathbb{Q}^3\times\mathbb{Q}^3\rightarrowtail\mathbb{Q}^3$.
 \begin{code}
 > t := Tensor(Rationals(), [3, 3, 3], [i : i in [1..27]]);
 > t;
@@ -2863,9 +3016,12 @@ Echelonized basis:
 ( 0  1  2)
 \end{code}
 
-The default tensor category of $t$ above is the homotopism category where none of the modules are fused together.
-Therefore, if we construct the Heisenberg algebra of $t$, the resulting algebra will be 9-dimensional.
-Looking at the system of forms, the first 6 matrices will be zero, and the last 3 matrices will contain the above system of forms as a $3\times 3$ block, starting at the $(1,4)$ entry.
+The default tensor category of $t$ above is the homotopism category where none
+of the modules are fused together. Therefore, if we construct the Heisenberg
+algebra of $t$, the resulting algebra will be 9-dimensional. Looking at the
+system of forms, the first 6 matrices will be zero, and the last 3 matrices will
+contain the above system of forms as a $3\times 3$ block, starting at the
+$(1,4)$ entry.
 \begin{code}
 > A := HeisenbergAlgebra(t);
 > A;
@@ -2906,9 +3062,9 @@ Algebra of dimension 5 with base ring Rational Field
 ]
 \end{code}
 
-Now we will fuse $U$ and $V$ together with a new category. 
-The resulting algebra will then be 6-dimensional.
-We will also look at the system of forms of $A$ to see the structure constants of $A$. 
+Now we will fuse $U$ and $V$ together with a new category. The resulting algebra
+will then be 6-dimensional. We will also look at the system of forms of $A$ to
+see the structure constants of $A$. 
 \begin{code}
 > NilCat := TensorCategory([1, 1, 1], {{2,1},{0}});
 > NilCat;
@@ -2978,10 +3134,12 @@ Algebra of dimension 3 with base ring Rational Field
 HeisenbergLieAlgebra(t) : TenSpcElt -> AlgLie
 \end{intrinsics}
 
-Returns the Heisenberg Lie algebra $L$ with Lie bracket given by the 3-tensor $t:U\times V\rightarrowtail W$. 
-If the tensor category of $t$ forces equality only between $U$ and $V$ and $t$ is alternating, then the Heisenberg Lie algebra will have structure constants equal to $t$.
-In this case, $L\cong U\oplus W$ as vector spaces. 
-Otherwise, $L\cong U\oplus V\oplus W$ as vector spaces, and, using $*$ in place for $t$, the product in $L$ is given by
+Returns the Heisenberg Lie algebra $L$ with Lie bracket given by the 3-tensor
+$t:U\times V\rightarrowtail W$. If the tensor category of $t$ forces equality
+only between $U$ and $V$ and $t$ is alternating, then the Heisenberg Lie algebra
+will have structure constants equal to $t$. In this case, $L\cong U\oplus W$ as
+vector spaces. Otherwise, $L\cong U\oplus V\oplus W$ as vector spaces, and,
+using $*$ in place for $t$, the product in $L$ is given by
 \[ (u,v,w) * (u',v',w') = (0,0,uv'-u'v). \]
 
 \begin{example}[CraftingLieAlgberas]
@@ -3007,8 +3165,9 @@ U0 : Full Vector space of degree 2 over Rational Field
 ]
 \end{code}
 
-First, we will just construct the Heisenberg Lie algebra from $t$ as is. 
-Because the tensor category of $t$ does not fuse together $U$, $V$, and $W$, the Lie algebra will be 8-dimensional.
+First, we will just construct the Heisenberg Lie algebra from $t$ as is. Because
+the tensor category of $t$ does not fuse together $U$, $V$, and $W$, the Lie
+algebra will be 8-dimensional.
 \begin{code}
 > L := HeisenbergLieAlgebra(t);
 > L;
@@ -3035,7 +3194,8 @@ Lie Algebra of dimension 8 with base ring Rational Field
 ]
 \end{code}
 
-Now if we fuse $U$ and $V$ together, the resulting Lie algebra will be 5-dimensional, and the Lie bracket will essentially be equal to $t$.
+Now if we fuse $U$ and $V$ together, the resulting Lie algebra will be
+5-dimensional, and the Lie bracket will essentially be equal to $t$.
 \begin{code}
 > NilCat := TensorCategory([1, 1, 1], {{2,1},{0}});
 > NilCat;
@@ -3067,15 +3227,19 @@ HeisenbergGroup(t) : TenSpcElt -> GrpMat
 HeisenbergGroupPC(t) : TenSpcElt -> GrpPC
 \end{intrinsics}
 
-Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given by the bilinear tensor $t: U \times V \rightarrowtail W$ over a finite field. 
-If $t$ is alternating and the tensor category of $t$ forces equality between $U$ and $V$, then the group returned is an extension of $V$ by $W$, so $|G| = |V|\cdot |W|$. 
-Otherwise, the group returned is an extension of $U\oplus V$ by $W$, so $|G| = |U|\cdot |V| \cdot |W|$. 
-If $t$ is not full, then $G$ is an extension of $U\oplus V\oplus W/\im(t)$ (or $V\oplus W/\im(t)$) by $\im(t)$. 
+Returns the class 2, exponent $p$, Heisenberg $p$-group with commutator given by
+the bilinear tensor $t: U \times V \rightarrowtail W$ over a finite field. If
+$t$ is alternating and the tensor category of $t$ forces equality between $U$
+and $V$, then the group returned is an extension of $V$ by $W$, so $|G| =
+|V|\cdot |W|$. Otherwise, the group returned is an extension of $U\oplus V$ by
+$W$, so $|G| = |U|\cdot |V| \cdot |W|$. If $t$ is not full, then $G$ is an
+extension of $U\oplus V\oplus W/\im(t)$ (or $V\oplus W/\im(t)$) by $\im(t)$. 
 
 \begin{example}[CraftingPGroups]
 
-Here we demonstrate how to export a group from a tensor. 
-We will start with a tensor that is alternating and compare the different outputs based on the category of the tensor. 
+Here we demonstrate how to export a group from a tensor. We will start with a
+tensor that is alternating and compare the different outputs based on the
+category of the tensor. 
 \begin{code}
 > t := KTensorSpace(GF(5), [5, 5, 4])!0;
 > for i in [1..4] do
@@ -3124,8 +3288,9 @@ The next example demonstrates a tensor that is not full.
 true
 \end{code}
 
-Even though $t$ is alternating, the category does not fuse together $U$ and $V$. 
-Therefore, the Heisenberg group $H$ is an extension of $U\oplus V$ by $W$, and hence, $|H|=5^{5+5+4}$.
+Even though $t$ is alternating, the category does not fuse together $U$ and $V$.
+Therefore, the Heisenberg group $H$ is an extension of $U\oplus V$ by $W$, and
+hence, $|H|=5^{5+5+4}$.
 \begin{code}
 > H := HeisenbergGroup(t);
 > LMGOrder(LMGCenter(H)) eq 5^4;
@@ -3155,9 +3320,10 @@ U1 : Full Vector space of degree 5 over GF(5)
 U0 : Full Vector space of degree 4 over GF(5)
 \end{code}
 
-Note that $t$ and $s$ are not the same tensor.
-However, they are pseudo-isometric (isotopic in the category with $U_2=U_1$). 
-This effect is exaggerated with \texttt{HeisenbergGroupPC} because of how PC-generators are organized.
+Note that $t$ and $s$ are not the same tensor. However, they are
+pseudo-isometric (isotopic in the category with $U_2=U_1$). This effect is
+exaggerated with \texttt{HeisenbergGroupPC} because of how PC-generators are
+organized.
 \begin{code}
 > SystemOfForms(s);
 [
@@ -3190,7 +3356,8 @@ This effect is exaggerated with \texttt{HeisenbergGroupPC} because of how PC-gen
 
 \begin{example}[PGroupsHalfFull]
 
-We will start with an alternating tensor that is not full with the frame $\mathbb{F}_3^4\times\mathbb{F}_3^4\rightarrowtail \mathbb{F}_3^3$.
+We will start with an alternating tensor that is not full with the frame
+$\mathbb{F}_3^4\times\mathbb{F}_3^4\rightarrowtail \mathbb{F}_3^3$.
 \begin{code}
 > t := Tensor(GF(3), [4, 4, 3], &cat[[1,0,0,1] : i in [1..12]]);
 > t := AlternatingTensor(t);
@@ -3236,9 +3403,13 @@ Echelonized basis:
 ]
 \end{code}
 
-Because the tensor category of $t$ does not force equality between $U$ and $V$, the group $H$ created from $t$ will have order $3^{11}$ and be 8-generated. 
-Furthermore, the tensor has a 2-dimensional image, so the tensor from the exponent-$p$ central series of $H$ will have frame $\mathbb{F}_3^{4+4+1}\times \mathbb{F}_3^{4+4+1}\rightarrowtail\mathbb{F}_3^2$. 
-We display the system of forms of the exponent-$p$ central tensor of $H$ to show how different it looks compared to the original. 
+Because the tensor category of $t$ does not force equality between $U$ and $V$,
+the group $H$ created from $t$ will have order $3^{11}$ and be 8-generated.
+Furthermore, the tensor has a 2-dimensional image, so the tensor from the
+exponent-$p$ central series of $H$ will have frame $\mathbb{F}_3^{4+4+1}\times
+\mathbb{F}_3^{4+4+1}\rightarrowtail\mathbb{F}_3^2$. We display the system of
+forms of the exponent-$p$ central tensor of $H$ to show how different it looks
+compared to the original. 
 \begin{code}
 > G := HeisenbergGroup(t);
 > LMGOrder(G) eq 3^11;
