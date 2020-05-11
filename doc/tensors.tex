@@ -478,8 +478,8 @@ Time: 0.000
 \subsection{Bilinear tensors}
 A special case of structure constants for bilinear maps $U_2\times
 U_1\rightarrowtail U_0$ is to format the data as lists of matrices $[M_1,\dots,
-M_d]$. This can be considered as a left (resp. right) representation $U_2\to
-\hom_K(U_1,U_0)$, (resp. $U_1\to \hom_K(U_2,U_0)$). Or it can be treated as {\em
+M_d]$. This can be considered as a left (resp.~right) representation $U_2\to
+\hom_K(U_1,U_0)$, (resp.~$U_1\to \hom_K(U_2,U_0)$). Or it can be treated as {\em
 systems of bilinear forms} $[M_1,\dots,M_d]$ where the matrices are the Gram
 matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$. Here the
 associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is specified by
@@ -496,9 +496,9 @@ Tensor(M, a, b, Cat) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
 \end{intrinsics}
 
 Returns the bilinear tensor given by the list of matrices.  The interpretation
-of the matrices as structure constants is specified by the coordinates $a$ and $b$
-which must be positions in $\{2,1,0\}$.  
-Optionally a tensor category $Cat$ can be assigned.
+of the matrices as structure constants is specified by the coordinates $a$ and
+$b$ which must be positions in $\{2,1,0\}$. Optionally a tensor category
+\texttt{Cat} can be assigned.
 
 
 \begin{example}[SymplecticForm]
@@ -564,7 +564,7 @@ SystemOfForms(t) : TenSpcElt -> SeqEnum
 \end{intrinsics}
 
 For a tensor $t$ with frame $[K^{d_{\vav}},\dots,K^{d_0}]$, 
-returns a list $[M_1,\dots,M_d]$, $d=(d_{\vav}\cdots d_0)/d_a d_b$, 
+returns a list $[M_1,\dots,M_d]$, $d=(d_{\vav}\cdots d_0)/(d_a d_b)$, 
 of $(d_a\times d_b)$-matrices in $K$ representing the tensor
 as an element of $\hom_K(K^{d_a}\otimes_K K^{d_b},K^d)$.
 For \texttt{SystemOfForms}, $t$ must have valence $3$ and the implied values are $a=2$ and $b=1$.
