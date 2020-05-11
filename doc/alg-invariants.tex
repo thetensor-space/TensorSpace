@@ -1,8 +1,10 @@
 
 \section{Invariants of nonassociative algebras}
 
-Converting an algebra to a tensor enables Magma to compute standard invariants of any algebra. 
-We note that there are known errors for $\mathbb{R}$ and $\mathbb{C}$ due to the numerical stability of the linear algebra involved in the computations.
+Converting an algebra to a tensor enables Magma to compute standard invariants
+of any algebra. We note that there are known errors for $\mathbb{R}$ and
+$\mathbb{C}$ due to the numerical stability of the linear algebra involved in
+the computations.
 
 \index{Center}\index{Centre}
 \begin{intrinsics}
@@ -41,9 +43,11 @@ U0 : Full Vector space of degree 8 over GF(3)
 Algebra of dimension 8 with base ring GF(3)
 \end{code}
 
-Our Lie algebra is not simple as it has a nontrivial center, so we will obtain $\mathfrak{sl}_2$ by factoring out the center.
-Note that our algebras are over the prime field $\mathbb{F}_3$, so the center is 2-dimensional (over $\mathbb{F}_3$). 
-Notice that $\mathfrak{sl}_2(9)$ has a trivial center but has a 2-dimensional centroid.
+Our Lie algebra is not simple as it has a nontrivial center, so we will obtain
+$\mathfrak{sl}_2$ by factoring out the center. Note that our algebras are over
+the prime field $\mathbb{F}_3$, so the center is 2-dimensional (over
+$\mathbb{F}_3$). Notice that $\mathfrak{sl}_2(9)$ has a trivial center but has a
+2-dimensional centroid.
 \begin{code}
 > sl2 := gl2/Center(gl2);
 > sl2;
@@ -62,21 +66,23 @@ RightNucleus(A) : Alg -> AlgMat
 MidNucleus(A) : Alg -> AlgMat
 \end{intrinsics}
 
-Returns the nucleus of the algebra $A$ as a subalgebra of the enveloping algebra of right multiplication $\mathcal{R}(A)$.
+Returns the nucleus of the algebra $A$ as a subalgebra of the enveloping algebra
+of right multiplication $\mathcal{R}(A)$.
 
 \index{DerivationAlgebra!algebra}
 \begin{intrinsics}
 DerivationAlgebra(A) : Alg -> AlgMatLie
 \end{intrinsics}
 
-Returns the derivation algebra of the algebra $A$ as a Lie subaglebra of $\text{End}_K(A)$.
+Returns the derivation algebra of the algebra $A$ as a Lie subalgebra of $\text{End}_K(A)$.
 
 \begin{example}[DerivationAlg]
 
-We will compute the derivation algebra of the (rational) octonions $\mathbb{O}$ and also the 27 dimension exceptional Jordan algebra $\mathfrak{H}_3(\mathbb{O})$.
-Because the intrinsics use exact linear algebra, we do not use the more familiar field $\mathbb{C}$ in this context.
-First we consider $\mathbb{O}$.
-We verify that $\Der(\mathbb{O})\cong G_2$.
+We will compute the derivation algebra of the (rational) octonions $\mathbb{O}$
+and also the 27 dimension exceptional Jordan algebra
+$\mathfrak{H}_3(\mathbb{O})$. Because the intrinsics use exact linear algebra,
+we do not use the more familiar field $\mathbb{C}$ in this context. First we
+consider $\mathbb{O}$. We verify that $\Der(\mathbb{O})\cong G_2$.
 \begin{code}
 > A := OctonionAlgebra(Rationals(), -1, -1, -1);
 > A;
@@ -97,7 +103,8 @@ Now we will just briefly perform a sanity check and verify that \texttt{D} acts 
 true
 \end{code}
 
-Finally, we construct $\mathfrak{H}_3(\mathbb{O})$ the $3\times 3$ Hermitian matrices, and we verify that $\Der(\mathfrak{H}_3(\mathbb{O})\cong F_4$. 
+Finally, we construct $\mathfrak{H}_3(\mathbb{O})$ the $3\times 3$ Hermitian
+matrices, and we verify that $\Der(\mathfrak{H}_3(\mathbb{O})\cong F_4$. 
 \begin{code}
 > J := ExceptionalJordanCSA(A);
 > J;
