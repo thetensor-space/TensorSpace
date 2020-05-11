@@ -1559,10 +1559,9 @@ U1 : Full Vector space of degree 5 over GF(541)
 U0 : Full Vector space of degree 5 over GF(541)
 \end{code}
 
-In this example, both $U_{\widehat{2}}^\perp$ and $U_{\widehat{1}}^\perp$ are
-nontrivial. We will construct the associated nondegenerate tensor $s$, which is
-given by $U_2/U_{\widehat{2}}^\perp \times U_1/U_{\widehat{1}}^\perp
-\rightarrowtail U_0$. 
+In this example, both $U_{2}^\perp$ and $U_{1}^\perp$ are nontrivial. We will
+construct the associated nondegenerate tensor $\bra{s} : U_2/U_{2}^\perp \times
+U_1/U_{1}^\perp \rightarrowtail U_0$. 
 \begin{code}
 > IsNondegenerate(t);
 false
@@ -1626,7 +1625,7 @@ U0 : Full Vector space of degree 5 over GF(541)
 \end{code}
 
 Here, we want to construct a fully nondegenerate tensor. Of course, the tensor
-form the previous example is not fully nondegenerate as it is not degenerate,
+from the previous example is not fully nondegenerate as it is not degenerate,
 but we check that the image is not isomorphic to the codomain.
 \begin{code}
 > IsFullyNondegenerate(t);
@@ -1643,10 +1642,10 @@ Echelonized basis:
 (  0   0   1   0   0)
 \end{code}
 
-Now we will construct the associated fully nondegenerate tensor:
-$U_2/U_{\widehat{2}}^\perp\times U_1/U_{\widehat{1}}^\perp\rightarrowtail
-U_2*U_1$. Notice that the morphism between the original tensor and the fully
-nondegenerate tensor is a cohomotopism.
+Now we will construct the associated fully nondegenerate tensor: $\bra{s}:
+U_2/U_{2}^\perp\times U_1/U_{1}^\perp\rightarrowtail \bra{t} U_2, U_1\rangle$.
+Notice that the morphism between the original tensor and the fully nondegenerate
+tensor is a cohomotopism.
 \begin{code}
 > s, H := FullyNondegenerateTensor(t);
 > s;
