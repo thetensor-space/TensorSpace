@@ -478,8 +478,8 @@ Time: 0.000
 \subsection{Bilinear tensors}
 A special case of structure constants for bilinear maps $U_2\times
 U_1\rightarrowtail U_0$ is to format the data as lists of matrices $[M_1,\dots,
-M_d]$. This can be considered as a left (resp. right) representation $U_2\to
-\hom_K(U_1,U_0)$, (resp. $U_1\to \hom_K(U_2,U_0)$). Or it can be treated as {\em
+M_d]$. This can be considered as a left (resp.~right) representation $U_2\to
+\hom_K(U_1,U_0)$, (resp.~$U_1\to \hom_K(U_2,U_0)$). Or it can be treated as {\em
 systems of bilinear forms} $[M_1,\dots,M_d]$ where the matrices are the Gram
 matrices of bilinear forms $\phi_i:U_2\times U_1\rightarrowtail K$. Here the
 associated bilinear map $U_2\times U_1\rightarrowtail U_0$ is specified by
@@ -496,9 +496,9 @@ Tensor(M, a, b, Cat) : [Mtrx], RngIntElt, RngIntElt, TenCat -> TenSpcElt
 \end{intrinsics}
 
 Returns the bilinear tensor given by the list of matrices.  The interpretation
-of the matrices as structure constants is specified by the coordinates $a$ and $b$
-which must be positions in $\{2,1,0\}$.  
-Optionally a tensor category $Cat$ can be assigned.
+of the matrices as structure constants is specified by the coordinates $a$ and
+$b$ which must be positions in $\{2,1,0\}$. Optionally a tensor category
+\texttt{Cat} can be assigned.
 
 
 \begin{example}[SymplecticForm]
@@ -564,7 +564,7 @@ SystemOfForms(t) : TenSpcElt -> SeqEnum
 \end{intrinsics}
 
 For a tensor $t$ with frame $[K^{d_{\vav}},\dots,K^{d_0}]$, 
-returns a list $[M_1,\dots,M_d]$, $d=(d_{\vav}\cdots d_0)/d_a d_b$, 
+returns a list $[M_1,\dots,M_d]$, $d=(d_{\vav}\cdots d_0)/(d_a d_b)$, 
 of $(d_a\times d_b)$-matrices in $K$ representing the tensor
 as an element of $\hom_K(K^{d_a}\otimes_K K^{d_b},K^d)$.
 For \texttt{SystemOfForms}, $t$ must have valence $3$ and the implied values are $a=2$ and $b=1$.
@@ -649,7 +649,7 @@ Returns the bilinear tensor given by the product in algebra $A$.
 
 \begin{example}[D4LieAlgebra]
 
-We want to get the Lie bracket from $D_4(11)$. Tensors created from algebras
+We want to get the Lie bracket from $\mathfrak{so}_8(\mathbb{F}_{11})$. Tensors created from algebras
 will have a homotopism category, but with $U_2=U_1=U_0$. This forces the
 operators acting to be the same on all the coordinates; in other words,
 $\Omega=\End(U_2)$ instead of $\Omega=\End(U_2)\times\End(U_1)\times\End(U_0)$. 
@@ -713,7 +713,7 @@ Returns the bilinear tensor given by the product in quotient polynomial ring $Q$
 
 \begin{example}[WittAlgebra]
 
-The Witt algebra, over a finite field of characteristic $p$, is isomorphic to
+The Witt algebra over a finite field of characteristic $p$ is isomorphic to
 the derivation algebra of $K[x]/(x^p)$. The Witt algebra is a simple Lie algebra
 with dimension $p$ and a trivial Killing form. First, we will construct the
 tensor from the ring $\mathbb{F}_5[x]/(x^5)$. Note that, like with algebras, the
@@ -906,12 +906,13 @@ general homotopism category. In addition, maps from the subgroups into the
 vector spaces are returned as a list. If $p$, $a$, and $b$ are not given, it is
 assumed $G$ is a $p$-group and $a=b=1$.
 
-\begin{example}[TensorPGroup] Groups have a single binary operation. So even
-when groups are built from rings it can be difficult to recover the ring from
-the group operations. Tensors supply one approach for that task. We will get the
-$p$-central tensor of $G=\SL(3,125)$; however, we will lose the fact that there
-is a field $\mathbb{F}_{125}$. The tensor we will get back is 
-$[,] : K^6\times K^6 \rightarrowtail K^3$, where $K=\mathbb{F}_5$. 
+\begin{example}[TensorPGroup] 
+Groups have a single binary operation. So even when groups are built from rings
+it can be difficult to recover the ring from the group operations. Tensors
+supply one approach for that task. We will get the $p$-central tensor of a Sylow
+$p$-subgroup $P$ of $\SL(3,125)$; however, we will lose the fact that there is a
+field $\mathbb{F}_{125}$. The tensor we will get back is $[,] : K^6\times K^6
+\rightarrowtail K^3$, where $K=\mathbb{F}_5$. 
 
 \begin{code}
 > P := ClassicalSylow(SL(3,125),5);
@@ -936,7 +937,7 @@ U1 : Full Vector space of degree 6 over GF(5)
 U0 : Full Vector space of degree 3 over GF(5)
 \end{code}
 
-Knowing that $G$ is defined over $\mathbb{F}_{125}$, we know that the commutator
+Knowing that $P$ is defined over $\mathbb{F}_{125}$, we know that the commutator
 is really just the alternating form $\cdot : \mathbb{F}_{125}^2\times
 \mathbb{F}_{125}^2\rightarrowtail \mathbb{F}_{125}$. This information can be
 extracted from the centroid of $t$ above, and we can rewrite $t$ over the field
@@ -1116,10 +1117,10 @@ Shuffle(t, g) : TenSpcElt, SeqEnum -> TenSpcElt
 For a tensor $t$ in $\hom(U_{\vav},\dots,\hom(U_1,U_0)\cdots)$, 
 generates a representation of $t$ in 
 \[ \hom(U_{{\vav}^g},\dots,\hom(U_{1^g},U_{0^g})\dots). \]
-In order to be defined, $g\in\text{Sym}(\{0,\dots,\vav \})$. 
+In order to be defined, $g\in\text{Sym}(\zrange{\vav})$. 
 If $0^g\ne 0$, then both the image and pre-image of $0$ under $g$ will be replaced by their $K$-dual space.
-For cotensors, $g\in\text{Sym}(\{1,\dots,\vav\})$.
-Sequences $[a_1,\dots,a_{\vav+1}]$ will be interpreted as 
+For cotensors, $g\in\text{Sym}(\range{\vav})$.
+Sequences $[a_1,\dots,a_{\vav+1}]$ are interpreted as 
 \[ 
     \begin{array}{cccc} 
         0 & 1 & \cdots & \vav \\ 
@@ -1310,8 +1311,9 @@ Returns the compression of the tensor. This removes all 1-dimensional spaces in 
 
 \begin{example}[CompressAssocForm]
 
-We will construct the associated form of the tensor from the Lie algebra $B_3(5)$. 
-The codomain of the original tensor gets moved (and dualized) to the domain. 
+We will construct the associated form of the tensor from the Lie algebra of type
+$B_3$ over $\mathbb{F}_5$. The codomain of the original tensor gets moved (and
+dualized) to the domain. 
 \begin{code}
 > L := LieAlgebra("B3", GF(5));
 > t := Tensor(L); 
@@ -1414,7 +1416,7 @@ Returns the base ring or field of the tensor.
 \begin{example}[BasicProps]
 
 We demonstrate how to get basic properties of a tensor and what to expect as an
-output. We will construct a tensor $*:\mathbb{M}_{2\times 3}(\mathbb{Q})\times
+output. We will construct a tensor $\bra{t}:\mathbb{M}_{2\times 3}(\mathbb{Q})\times
 \mathbb{Q}^3\rightarrowtail \mathbb{Q}^2$ given by multiplication. Nearly all of
 this information is displayed when printing a tensor.
 \begin{code}
@@ -1487,8 +1489,8 @@ Decides if the underlying category of $t$ is covariant or contravariant.
 
 \begin{example}[TensorCatProps]
 
-We will construct a tensor from a right module, 
-$*:\mathbb{Q}^2 \times \mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
+We will construct a tensor from a right module, $\bra{t}:\mathbb{Q}^2 \times
+\mathbb{M}_{2\times 2}(\mathbb{Q})\rightarrowtail \mathbb{Q}^2$.
 \begin{code}
 > K := Rationals();
 > U := KMatrixSpace(K, 2, 2);
