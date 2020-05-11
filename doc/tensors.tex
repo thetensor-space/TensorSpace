@@ -1768,18 +1768,20 @@ Regarding tensors as multilinear maps, we allow for evaluation and composition.
 x @ t : Tup, TenSpcElt -> Any
 \end{intrinsics}
 
-Evaluates the tensor $t$ at $x\in U_{\vav}\times \cdots \times U_1$. The entries
-can be elements from the vector space $U_i$ or sequences that \textsf{Magma} can
-naturally coerce into the vector space $U_i$. In some circumstances, tensors
-come from algebraic objects (e.g.\! algebras), and in these cases the entries of
-$x$ can be contained in the original algebraic object as well. 
+Returns $\bra{t} x\rangle$, where $x\in U_{\vav}\times \cdots \times U_1$. The
+entries can be elements from the vector space $U_i$ or sequences that
+\textsf{Magma} can naturally coerce into the vector space $U_i$. In some
+circumstances, tensors come from algebraic objects (e.g.\! algebras), and in
+these cases the entries of $x$ can be contained in the original algebraic object
+as well. 
 
 \begin{example}[MultiMapEval]
 
-Here we create the 4-tensor $\langle \,\rangle$ of an algebra $A$ given by the Jacobi identity: 
+Here we create the 4-tensor $\bra{t}$ of an algebra $A$ given by the Jacobi identity: 
 \[ (x,y,z)\mapsto (xy)z + (yz)x + (zx)y. \]
-Therefore, the algebra satisfies the Jacobi identity if $\langle A, A, A \rangle = 0$. 
-We will also change the tensor category so that all the coordinates are fused together.
+Therefore, the algebra satisfies the Jacobi identity if $\bra{t} A, A, A \rangle
+= 0$. We will also change the tensor category so that all the coordinates are
+fused together.
 \begin{code}
 > A := MatrixAlgebra(GF(3), 3);
 > JacobiID := func< x | x[1]*x[2]*x[3]+x[2]*x[3]*x[1]+x[3]*x[1]*x[2] >;
@@ -1797,9 +1799,9 @@ Tensor category of valence 4 (->,->,->,->) ({ 0 .. 3 })
 
 Even though our tensor originated over the algebra
 $A=\mathbb{M}_{3}(\mathbb{F}_3)$, the returned tensor is over vector spaces
-$\mathbb{F}_3^9$. However, the tensor $t$ can still evaluate elements from
+$\mathbb{F}_3^9$. However, the tensor $\bra{t}$ can still evaluate elements from
 $\mathbb{M}_3(\mathbb{F}_3)$ as well as $\mathbb{F}_3^9$. Observe that the out
-of $t$ will be a vector regardless of the input. The second output at
+of $\bra{t}$ will be a vector regardless of the input. The second output at
 construction, the \texttt{List} of maps, can be used to map the vectors to
 $\mathbb{M}_3(\mathbb{F}_3)$. 
 \begin{code}
@@ -1829,9 +1831,9 @@ $\mathbb{M}_3(\mathbb{F}_3)$.
 (2 0 0 0 1 0 0 0 0)
 \end{code}
 
-Because \texttt{@} takes \texttt{Tup} as input, $t$ can evaluate mixed tuples as
-well: where some entries are contained in $\mathbb{M}_3(\mathbb{F}_3)$ and other
-entries are contained in $\mathbb{F}_3^9$. 
+Because \texttt{@} takes \texttt{Tup} as input, $\bra{t}$ can evaluate mixed
+tuples as well: where some entries are contained in $\mathbb{M}_3(\mathbb{F}_3)$
+and other entries are contained in $\mathbb{F}_3^9$. 
 \begin{code}
 > x := <A.1, A.2 @ phi, Eltseq(A.2^2)>;
 > x;
@@ -1857,17 +1859,18 @@ t * f : TenSpcElt, Map -> TenSpcElt
 t * s : TenSpcElt, TenSpcElt -> TenSpcElt
 \end{intrinsics}
 
-Returns the tensor which is the composition of $t$ with the given map $f$.
-If a tensor $s$ is used instead of a \texttt{Map}, $s$ must have valence $\leq 1$. 
+Returns the tensor $f\bra{t}$ which is the composition of $\bra{t}$ with the
+given map $f$. If a tensor $\bra{s}$ is used instead of a \texttt{Map},
+$\bra{s}$ must have valence $\leq 1$. 
 
 \index{eq!tensor}
 \begin{intrinsics}
 t eq s : TenSpcElt, TenSpcElt -> BoolElt
 \end{intrinsics}
 
-Decides if the tensors $t$ and $s$ are the same. Two tensors are equivalent if,
-and only if, they have the same tensor category, base ring, frame, and structure
-constants. 
+Decides if the tensors $\bra{t}$ and $\bra{s}$ are the same. Two tensors are
+equivalent if, and only if, they have the same tensor category, base ring,
+frame, and structure constants. 
 
 \begin{example}[TensorComp]
 
@@ -1889,10 +1892,10 @@ Tensor category of valence 4 (->,->,->,->) ({ 0 .. 3 })
 \end{code}
 
 The maps in \texttt{Maps} are vector space isomorphisms and map $A$ to $V$. 
-Suppose $\phi: A\rightarrow V$ is a vector space isomorphism. 
-If we compose $t$ with $\phi^{-1}$, the returned tensor is \emph{still} over vector spaces.
-The codomain is \emph{not} $A$; this is because all tensors are over vector spaces.
-In fact, the returned tensor is exactly the same as $t$.
+Suppose $\phi: A\rightarrow V$ is a vector space isomorphism. If we compose
+$\bra{t}$ with $\phi^{-1}$, the returned tensor is \emph{still} over vector
+spaces. The codomain is \emph{not} $A$; this is because all tensors are over
+vector spaces. In fact, the returned tensor is exactly the same as $\bra{t}$.
 \begin{code}
 > phi := maps[1];
 > t * (phi^-1);
@@ -1905,10 +1908,12 @@ U0 : Full Vector space of degree 9 over GF(3)
 true
 \end{code}
 
-Let $\mathcal{E}\subset A$ be an orthogonal frame---a set of primitive, orthogonal, idempotents. 
-We will compose $t$ with the linear transformation 
+Let $\mathcal{E}\subset A$ be an orthogonal frame---a set of primitive,
+orthogonal, idempotents. We will compose $\bra{t}$ with the linear
+transformation 
 \[ a \mapsto \sum_{e\in\mathcal{E}} eae.\]
-Because the codomain of $t$ is a vector space, we will pre-compose this map by $\phi^{-1}$. 
+Because the codomain of $\bra{t}$ is a vector space, we will pre-compose this
+map by $\phi^{-1}$. 
 \begin{code}
 > E := [A.1, A.2^-1*A.1*A.2, A.2^-2*A.1*A.2^2];
 > E;
@@ -1939,7 +1944,7 @@ U0 : Full Vector space of degree 9 over GF(3)
 false
 \end{code}
 
-We can also wrap $f$ as a 2-tensor and compose it with $t$.
+We can also wrap $f$ as a 2-tensor and compose it with $\bra{t}$.
 \begin{code}
 > g := Tensor([A, A], func< x | x[1]@f >);
 > g;
@@ -1960,10 +1965,10 @@ are commonly described as distributive products. For instance as the product of
 an algebra, the product of a ring on a module, or an inner product.  We support
 these interpretations in two ways: by permitting an infix $x*t*y$ notation for a
 3-tensor $t$, and a product $x*y$ notation for the evaluation of bilinear
-tensors.  For the latter, We do this by creating special types
+tensors.  For the latter, we do this by creating special types
 \texttt{BmpU[Elt]}, \texttt{BmpV[Elt]}, and \texttt{BmpW[Elt]} for the frame of
-a bilinear tensor. For bilinear maps, we refer to the modules in the frame as
-$U\times V\rightarrowtail W$. 
+a bilinear tensor. For bilinear maps, we fix an interpretation $\bra{\cdot} : T 
+\rightarrow W\oslash V\oslash U$. 
 
 \index{$*$!bilinear tensor (infix)}
 \begin{intrinsics}
@@ -2088,16 +2093,16 @@ If $x$ and $y$ are associated to the bilinear map $t$, these operations return
 LeftDomain(t) : TenSpcElt -> BmpU
 \end{intrinsics}
 
-Returns the left domain, $U$, of $t$ framed by $[U,V,W]$, 
-setup for use with infix notation.
+Returns the left domain $U$ of $t$, framed by $W\oslash V\oslash U$, setup for
+use with infix notation.
 
 \index{RightDomain}
 \begin{intrinsics}
 RightDomain(t) : TenSpcElt -> BmpV
 \end{intrinsics}
 
-Returns the right domain, $V$, of $t$ framed by $[U,V,W]$,
-setup for use with infix notation.
+Returns the right domain $V$ of $t$ framed by $W\oslash V\oslash U$, setup for
+use with infix notation.
 
 \index{IsCoercible!bilinear}\index{BANG!bilinear}
 \begin{intrinsics}
@@ -2107,7 +2112,8 @@ U ! x : BmpU, Any -> BmpUElt
 V ! x : BmpV, Any -> BmpVElt
 \end{intrinsics}
 
-Decides if $x$ can be coerced into $U$ or $V$, and if it can, it returns the coerced element.
+Decides if $x$ can be coerced into $U$ or $V$, and if it can, it returns the
+coerced element.
 
 \begin{example}[BimapProduct]
 
