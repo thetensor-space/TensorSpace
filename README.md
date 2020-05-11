@@ -7,19 +7,25 @@ So why not abstract the differences into _Tensor Spaces_. Now all it means to be
 
 ## Contents
 
-* [Acknowledgements](#Acknowledgements)
-* [Our Team](#Our-Team)
-* [Copying](#Copying)
-* [Repository Structure](#Repository-Structure)
-* [Install](#Install)
-* [Update](#Update)
-* [Uninstall](#Uninstall)
-* [Feedback and Bugs](#Feedback-and-Bugs)
+- [Contents](#contents)
+- [Acknowledgements](#acknowledgements)
+- [Our Team](#our-team)
+- [Copying](#copying)
+- [Repository Structure](#repository-structure)
+- [Install](#install)
+    - [Downloading Latest Release](#downloading-latest-release)
+    - [Linux and Mac users](#linux-and-mac-users)
+    - [Manually](#manually)
+- [Update](#update)
+    - [Linux and Mac users](#linux-and-mac-users-1)
+    - [Manually](#manually-1)
+- [Uninstall](#uninstall)
+- [Feedback and Bugs](#feedback-and-bugs)
 
 The Experimental Multilinear Algebra Group's distribution of software for 
 integration in the computer algebra system MAGMA, V2.22 and beyond.
 
-This software was created by Joshua Maglione and James B. Wilson, Copyright 2016--2019. Distributed under MIT License.
+This software was created by Joshua Maglione and James B. Wilson, Copyright 2016--2020. Distributed under MIT License.
 
 If you want a copy of the software under a different license, please contact the authors. 
 
@@ -107,7 +113,7 @@ to use.  To attach the spec file, run the following, where `<location>` is the d
 
 ## Update
 
-##### Linux and Mac users
+#### Linux and Mac users
 
 To update the package and all its dependencies, run the following shell command.
 ```
