@@ -11,7 +11,7 @@
 
 import "../GlobalVars.m" : __LIST, __SANITY_CHECK, __FRAME;
 import "Tensor.m" : __GetTensor, __TensorOnVectorSpaces;
-import "../TensorCategory/Hom.m" : __GetHomotopism;
+import "../Homotopisms/Hom.m" : __GetHomotopism;
 import "../TensorCategory/TensorCat.m" : __TensorCatSanity;
 
 __GetCoercedElt := function( t, x, i )
@@ -312,7 +312,7 @@ Here, A is a subset of integers corresponding to the Cartesian factors in the do
   end function;
 
   Q := __GetTensor( D, C, F : Cat := t`Cat );
-  H := __GetHomotopism( t, Q, projs : Cat := HomotopismCategory(t`Valence : Contravariant := t`Cat`Contra) );
+  H := __GetHomotopism( HomotopismCategory(t`Valence : Contravariant := t`Cat`Contra), projs : Cod := Q, Dom := t );
   if assigned H2 then
     H := H2*H;
   end if;
