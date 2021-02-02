@@ -193,6 +193,11 @@ intrinsic IsNondegenerate( t::TenSpcElt ) -> BoolElt
   return forall{a : a in [1..Valence(t)-1] | Dimension(Radical(t, a)) eq 0};
 end intrinsic;
 
+intrinsic IsDegenerate( t::TenSpcElt ) -> BoolElt
+{Decides if t is nondegenerate.}
+  return not IsNondegenerate(t); 
+end intrinsic;
+
 intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
 {Returns the fully nondegenerate tensor of t and a homotopism.}
   if assigned t`FullyNondeg then

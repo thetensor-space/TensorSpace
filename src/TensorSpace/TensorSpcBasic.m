@@ -290,17 +290,12 @@ intrinsic IsSubtensorSpace( T::TenSpc, S::TenSpc ) -> BoolElt
   return S subset T;
 end intrinsic;
 
-//intrinsic Quotient( T::TenSpc, S::TenSpc ) -> TenSpc, Map
-//{Returns the quotient tensor space of T by S.}
-//  require S subset T : "Tensor space is not a subtensor space.";
-//  Q,pi := T`Mod/S`Mod;
-//  U := __GetTensorSpace( T`Ring, T`Frame, T`Cat );
-//  U`Mod := Q;
-//  U`UniMap := pi^-1 * T`UniMap;
-//  return U;
-//  "Quotient is being depreciated. Use `/' or quo< ... > instead.";
-//  return quo<T|S>;
-//end intrinsic;
+intrinsic Quotient( T::TenSpc, S::TenSpc ) -> TenSpc, Map
+{Returns the quotient tensor space of T by S.}
+  require S subset T : "Tensor space is not a subtensor space.";
+  "Quotient is being depreciated. Use `/' or quo< ... > instead.";
+  return quo<T|S>;
+end intrinsic;
 
 intrinsic QuoConstructor( T::TenSpc, X::Any ) -> TenSpc, Map
 {Returns the quotient tensor space of T by X.}
