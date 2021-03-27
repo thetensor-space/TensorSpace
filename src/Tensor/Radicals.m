@@ -24,8 +24,7 @@ intrinsic Radical( t::TenSpcElt, a::RngIntElt ) -> ModTupRng, Mtrx
   D := t`Domain[v - a];
   B := Basis(D);
   V := VectorSpace(BaseRing(t), #B);
-  vprint TensorSpace, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) \
-    cat " by " cat IntegerToString(Ncols(F));
+  vprint TensorSpace, 1 : "Solving linear system " cat IntegerToString(Nrows(F)) cat " by " cat IntegerToString(Ncols(F));
   R := Nullspace(F);
   
   // Construct the matrix
