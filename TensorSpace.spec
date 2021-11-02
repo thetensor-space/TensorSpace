@@ -23,6 +23,7 @@
       TensorDef.m
       TensorRandom.m
       TenSpcEltType.m
+      Tensor3D.mag
     }
     TensorCategory
     {

@@ -1,0 +1,150 @@
+
+color := function( val, real, norm )
+    d := RealField(4)!0.5;
+    if real then 
+        n := val/norm;
+        if n gt 0 then 
+            return "255 0 0", <d*n,d*n,d*n>, <n,n,n>;
+        else
+            return "0 255 0", <d*n,d*n,d*n>, <n,n,n>;
+        end if;
+    else 
+        return "0 0 0", <d*0.85,d*0.85,d*0.85>, <0.85,0.85,0.85>;
+    end if;
+end function;
+
+xwidth := 1; ywidth := 1; zwidth := 1;
+ 
+
+printBoxCorner := function(  x,y,z, val, real, norm )
+    s := "";
+    col, shift, widths := color(val, real, norm);
+    // 0 0 0
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*x-shift[1], 
+        ywidth*y-shift[2], 
+        zwidth*z-shift[3], col);
+    // 0 0 1
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*x-shift[1], 
+        ywidth*y-shift[2], 
+        zwidth*(z+widths[3])-shift[3], col);
+    // 0 1 1
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*x-shift[1], 
+        ywidth*(y+widths[2])-shift[2], 
+        zwidth*(z+widths[3])-shift[3], col);
+    // 0 1 0
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*x-shift[1], 
+        ywidth*(y+widths[2])-shift[2], 
+        zwidth*z-shift[3], col);
+    // 1 0 0
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*(x+widths[1])-shift[1], 
+        ywidth*y-shift[2], 
+        zwidth*z-shift[3], col);
+    // 1 0 1
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*(x+widths[1])-shift[1], 
+        ywidth*y-shift[2], 
+        zwidth*(z+widths[3])-shift[3], col);
+    // 1 1 1
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*(x+widths[1])-shift[1], 
+        ywidth*(y+widths[2])-shift[2], 
+        zwidth*(z+widths[3])-shift[3], col);
+    // 1 1 0
+    s cat:= Sprintf( "%o %o %o %o\n", 
+        xwidth*(x+widths[1])-shift[1], 
+        ywidth*(y+widths[2])-shift[2], 
+        zwidth*z-shift[3], col);
+    return s;
+end function;
+
+printBoxFace := function( num )
+    s := "";
+    // 4 verts: 0 1 2 3                  
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 0+8*num, 1+8*num, 2+8*num, 3+8*num );
+    // 4 verts: 7 6 5 4
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 7+8*num, 6+8*num, 5+8*num, 4+8*num );
+    // 4 verts: 0 4 5 1
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 0+8*num, 4+8*num, 5+8*num, 1+8*num );
+    // 4 verts: 1 5 6 2
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 1+8*num, 5+8*num, 6+8*num, 2+8*num );
+    // 4 verts: 2 6 7 3
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 2+8*num, 6+8*num, 7+8*num, 3+8*num );
+    // 4 verts: 3 7 4 0
+    s cat:= Sprintf( "%o %o %o %o %o\n", 4+8*num, 3+8*num, 7+8*num, 4+8*num, 0+8*num );
+
+    return s;
+end function;
+
+intrinsic Print3D( t::TenSpcElt ) -> MonStrElt
+{ Prints 3D rendering of bilinear tensor in PLY (Polygon) format. }
+    require Valence(t) eq 3 : "Tensor must be bilinear.";
+
+    elts := Eltseq(t);
+    dims := [ Dimension(Domain(t)[1]), Dimension(Domain(t)[2]), Dimension(Codomain(t))];
+    dims cat:= [1];
+    t := Tensor(dims, elts);
+    X := Domain(t)[1];
+    Y := Domain(t)[2];
+    Z := Domain(t)[3];
+
+    real := ISA(Type(elts[1]),FldReElt);
+    if real then 
+        norm := Maximum( [Abs(x) : x in elts ]);
+    else 
+        norm := -1;
+    end if;
+
+    verts := "";
+    faces := "";
+    count := 0;
+    for i in [1..Dimension(X)]  do
+        for j in [1..Dimension(Y)] do
+            for k in [1..Dimension(Z)] do
+                w := <X.i,Y.j,Z.k> @ t;
+                if not (w eq 0) then
+                    count +:= 1;
+                    val := (<X.i, Y.j, Z.k> @ t)[1];
+                    verts cat:= printBoxCorner(i,j,k, val, real, norm);
+                    faces cat:= printBoxFace(count-1);
+                end if;
+            end for;
+        end for;
+    end for;
+
+       s := "ply\n";
+    s cat:= "comment made by Magma  { Tensor rendered by Magma System }\n";
+    s cat:= "format ascii 1.0\n";
+    s cat:= Sprintf("element vertex %o\n", 8*count);
+    s cat:= "property float x\n";
+    s cat:= "property float y\n";
+    s cat:= "property float z\n";
+    s cat:= "property uchar red                   { start of vertex color }\n";
+    s cat:= "property uchar green\n";
+    s cat:= "property uchar blue\n";
+    s cat:= Sprintf("element face %o\n", 6*count);
+    s cat:= "property list uint8 int32 vertex_index\n";
+    s cat:= "end_header\n";
+
+    s cat:= verts;
+    s cat:= faces;
+    return s;
+end intrinsic;
+
+intrinsic Write3D(io::IO, t::TenSpcElt) 
+{ Writes tensor in 3D PLY (Polygon) format to the given IO. }
+    s := Print3D(t);
+    Write(io, s);
+end intrinsic;
+
+intrinsic Save3D(name::MonStgElt, t::TenSpcElt) 
+{ Writes tensor in 3D PLY (Polygon) format to the given IO. }
+    file := Open(name, "w");
+    s := Print3D(t);
+    Write(file, s);
+    delete file;
+end intrinsic;

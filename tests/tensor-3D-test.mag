@@ -1,0 +1,17 @@
+
+t := Tensor(RealField(2), [2,2,2], [1,0,0,1,0,1,1,0]);
+Save3D("tests/mytensor3d.ply", t);
+
+t := Tensor(RealField(2), [3,3,3], [1,0,0, 0,0,1, 0,1,0, 0,1,0, 1,0,0, 0,0,1, 0,0,1, 0,1,0, 1,0,0]);
+Save3D("tests/myothertensor3d.ply", t);
+
+mart := MartiniT(10,10,10,1);
+sig1 := PermutationMatrix(RealField(4),Random(SymmetricGroup(10)));
+sig2 := PermutationMatrix(RealField(4),Random(SymmetricGroup(10)));
+sig3 := Random(SymmetricGroup(10));
+x1 := IdentityMatrix(RealField(2),10);
+x1[4][5] := 1;x1[8][7] := -1;
+
+sys := SystemOfForms(mart);
+sys := [x1*sig1*sys[i^sig3]*sig2 : i in [1..10]];
+t2 := Tensor(sys,2,1);
