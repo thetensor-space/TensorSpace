@@ -105,10 +105,9 @@ intrinsic Print3D( t::TenSpcElt ) -> MonStrElt
     for i in [1..Dimension(X)]  do
         for j in [1..Dimension(Y)] do
             for k in [1..Dimension(Z)] do
-                w := <X.i,Y.j,Z.k> @ t;
-                if not (w eq 0) then
+                val := elts[k+Dimension(Z)*(j-1+Dimension(Y)*(i-1))];// <X.i,Y.j,Z.k> @ t;
+                if not (val eq 0) then
                     count +:= 1;
-                    val := (<X.i, Y.j, Z.k> @ t)[1];
                     verts cat:= printBoxCorner(i,j,k, val, real, norm);
                     faces cat:= printBoxFace(count-1);
                 end if;
