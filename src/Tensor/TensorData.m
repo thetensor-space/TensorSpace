@@ -90,8 +90,9 @@ intrinsic StructureConstants( t::TenSpcElt ) -> SeqEnum
   if (assigned t`CoordImages) and (t`Permutation eq Parent(t`Permutation)!1) then // no work to do
     return t`CoordImages;
   elif assigned t`CoordImages then // came from shuffle but do not have to compute coord images from scratch
-    g := t`Permutation^-1;
-    dims := [Dimension(Frame(t)[(i^g)+1]) : i in [0..Valence(t)-1]];
+    g := t`Permutation;
+    new_dims := [Dimension(X) : X in Frame(t)];
+    dims := Reverse(new_dims[[Valence(t) - i : i in Eltseq(g^-1)]]);
     t`CoordImages := __GetShuffle(t`CoordImages, dims, g);
     t`Permutation := Parent(t`Permutation)!1;
     if not assigned t`Element then
