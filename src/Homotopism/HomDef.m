@@ -63,17 +63,23 @@ end intrinsic;
 // ------------------------------------------------------------------------------
 intrinsic '*'( H1::Hmtp, H2::Hmtp ) -> Hmtp
 {H1 * H2}
-  dom := H1`Domain;
-  cod := H2`Codomain;
+  if assigned H1`Domain and assigned H2`Codomain then 
+    dom := H1`Domain;
+    cod := H2`Codomain;
+  else 
+    dom := 0;
+    cod := 0;
+  end if;
+  v :=H1`Cat`Valence;
   require H1`Cat eq H2`Cat: "Categories are incompatible.";
   M := [* *];
-  for i in Reverse([0..dom`Valence-1]) do
+  for i in Reverse([0..v-1]) do
     if i @ H1`Cat`Arrows eq -1 then
-      f := H2`Maps[dom`Valence-i];
-      g := H1`Maps[dom`Valence-i];
+      f := H2`Maps[v-i];
+      g := H1`Maps[v-i];
     else
-      f := H1`Maps[dom`Valence-i];
-      g := H2`Maps[dom`Valence-i];
+      f := H1`Maps[v-i];
+      g := H2`Maps[v-i];
     end if;
     try
       Append(~M,f*g);
