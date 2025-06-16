@@ -1,11 +1,11 @@
 /* 
-    Copyright 2016--2020 Joshua Maglione, James B. Wilson.
+    Copyright 2016--2025 Joshua Maglione, James B. Wilson.
     Distributed under MIT License.
 */
 
 
 /*  Global variables  */
-__VERSION := "2.3";
+__VERSION := "2.4";
 __SANITY_CHECK := false;
 __LIST := {ModTupFld, ModFld, ModMatFld}; // suitable types we can do most computations with.
 __FRAME := function( T ) // returns the 'domain' and the 'codomain'.

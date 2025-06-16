@@ -25,7 +25,7 @@ So why not abstract the differences into _Tensor Spaces_. Now all it means to be
 The Experimental Multilinear Algebra Group's distribution of software for 
 integration in the computer algebra system MAGMA, V2.22 and beyond.
 
-This software was created by Joshua Maglione and James B. Wilson, Copyright 2016--2020. Distributed under MIT License.
+This software was created by Joshua Maglione and James B. Wilson, Copyright 2016--2025. Distributed under MIT License.
 
 If you want a copy of the software under a different license, please contact the authors. 
 
