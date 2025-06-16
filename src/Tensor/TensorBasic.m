@@ -1,5 +1,5 @@
 /* 
-    Copyright 2016, 2017, Joshua Maglione, James B. Wilson.
+    Copyright 2016--2025 Joshua Maglione, James B. Wilson.
     Distributed under MIT License.
 */
 
@@ -179,7 +179,7 @@ intrinsic NondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
   if assigned t`Coerce then
     s`Coerce := [* t`Coerce[i] * proj[i] : i in [1..#proj] *];
   end if;
-  H := Homotopism( t, s, proj, HomotopismCategory(Valence(t)) );
+  H := Homotopism( t, s, proj, HomotopismCategory(Valence(t)) : Check := false);
   if assigned H2 then
     H := H2*H;
   end if;
@@ -214,7 +214,7 @@ intrinsic FullyNondegenerateTensor( t::TenSpcElt ) -> TenSpcElt, Hmtp
     return x @ s;
   end function;
   full_s := __GetTensor( s`Domain, I, F : Cat := t`Cat );
-  H := Homotopism(t, full_s, H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *], CohomotopismCategory(Valence(t)));
+  H := Homotopism(t, full_s, H`Maps[1..#H`Maps-1] cat [* H`Maps[#H`Maps] * inc *], CohomotopismCategory(Valence(t)) : Check := false);
   t`FullyNondeg := <full_s, H>;
   return full_s, H;
 end intrinsic;
